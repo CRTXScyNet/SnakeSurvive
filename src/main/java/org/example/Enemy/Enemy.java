@@ -105,7 +105,7 @@ public class Enemy {
 
     private int reverseCount = 100;
     private int reverse = reverseCount;
-    private BufferedImage image;
+
     public static ArrayList<Boolean> snakeIsReady = new ArrayList<>();
 
     public static boolean allEnemyIsReady() {
@@ -133,11 +133,14 @@ public class Enemy {
     public static int snakeLength = 10;
 
     public boolean isActive = false;
-    public Enemy(BufferedImage image,boolean isActive) {
+    static int width = 0;
+    static int height = 0;
+    public Enemy(boolean isActive) {
 //        xy.add(new int[]{(int)(Math.random()*imahe.getWidth()*playGround[0])+(int)(imahe.getWidth()*playGround[1]),(int)(Math.random()*imahe.getHeight()*playGround[0])+(int)(imahe.getHeight()*playGround[1])});
-        this.image = image;
-        Point co = getRandomPoint();
 
+        Point co = getRandomPoint();
+        width = Picture.width;
+        height = Picture.height;
         xy.add(new double[]{co.x, co.y});
         setPhantomXY();
         enemies.add(this);
@@ -188,8 +191,8 @@ if(!isActive) {
     }
 
     public Point getRandomPoint() {
-        int x = (int) (Math.random() * (image.getWidth() * playGround[0] / (int) (size * stepOfSize))) * (int) (size * stepOfSize) + (int) (image.getWidth() * playGround[1]);
-        int y = (int) (Math.random() * (image.getHeight() * playGround[0] / (int) (size * stepOfSize))) * (int) (size * stepOfSize) + (int) (image.getHeight() * Enemy.playGround[1]);
+        int x = (int) (Math.random() * (width * playGround[0] / (int) (size * stepOfSize))) * (int) (size * stepOfSize) + (int) (width * playGround[1]);
+        int y = (int) (Math.random() * (height* playGround[0] / (int) (size * stepOfSize))) * (int) (size * stepOfSize) + (int) (height * Enemy.playGround[1]);
         if(Process.lifeArea.contains(x,y)){
 return getRandomPoint();
         }

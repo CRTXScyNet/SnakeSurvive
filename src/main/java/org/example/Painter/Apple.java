@@ -36,10 +36,10 @@ public class Apple {
         xy = new double[]{xy[0]-direct[0],xy[1]-direct[1]};
 
     }
-    public void setXy(BufferedImage image) {
+    public void setXy() {
         try{
-            int x = (int) (Math.random() * (image.getWidth() * playGround[0])) + (int) (image.getWidth() * playGround[1]);
-            int y = (int) (Math.random() * (image.getHeight() * playGround[0])) + (int) (image.getHeight() * playGround[1]);
+            int x = (int) (Math.random() * (Picture.width * playGround[0])) + (int) (Picture.width * playGround[1]);
+            int y = (int) (Math.random() * (Picture.height * playGround[0])) + (int) (Picture.height * playGround[1]);
             xy = new double[]{x, y};
         }catch (Exception e){
             e.printStackTrace();
@@ -49,8 +49,8 @@ public class Apple {
     public static void reset(){
         size = sizeStat;
     }
-    Apple(BufferedImage image){
-        xy = new double[]{(Math.random()*image.getWidth()*playGround[0])+(image.getWidth()*playGround[1]),(Math.random()*image.getHeight()*playGround[0])+(image.getHeight()*playGround[1])};
+    Apple(){
+        xy = new double[]{(Math.random()*Picture.width*playGround[0])+(Picture.width*playGround[1]),(Math.random()*Picture.height*playGround[0])+(Picture.height*playGround[1])};
     }
     public static void plusRegion() {
         if(innerPlace<0.9){

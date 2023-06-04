@@ -18,7 +18,7 @@ public class Process {
 //    static int appleIsEatenForSnake = appleIsEatenForSnakeStat;
 
     static ArrayList<Point> points = new ArrayList<>();
-    static public Rectangle lifeArea = new Rectangle(Picture.image.getWidth() / 2 - 100, Picture.image.getHeight() / 2 - 100, 200, 200);
+    static public Rectangle lifeArea = new Rectangle(Picture.width / 2 - 100, Picture.height / 2 - 100, 200, 200);
     static ArrayList<Point> pointsOfRect = new ArrayList<>();
     static ArrayList<Point> pointsToErase = new ArrayList<>();
     //    static ArrayList<Point> pointsToErase = new ArrayList<>();
@@ -53,27 +53,27 @@ public class Process {
     }
 
     static double[] direction = new double[2];
-    private int outLeft = (int) (Picture.image.getWidth() * 0.1 * -1)/Enemy.step*Enemy.step;
-    private int fromLeft = (int) (Picture.image.getWidth() * 1.2 * -1)/Enemy.step*Enemy.step;
+    private int outLeft = (int) (Picture.width * 0.1 * -1)/Enemy.step*Enemy.step;
+    private int fromLeft = (int) (Picture.width * 1.2 * -1)/Enemy.step*Enemy.step;
 
-    private int outRight = (int) (Picture.image.getWidth() + Picture.image.getWidth() * 0.1)/Enemy.step*Enemy.step;
-    private int fromRight = (int) (Picture.image.getWidth() * 1.2)/Enemy.step*Enemy.step;
+    private int outRight = (int) (Picture.width + Picture.width * 0.1)/Enemy.step*Enemy.step;
+    private int fromRight = (int) (Picture.width * 1.2)/Enemy.step*Enemy.step;
 
-    private int outUp = (int) (Picture.image.getHeight() * 0.2 * -1)/Enemy.step*Enemy.step;
-    private int fromUp = (int) (Picture.image.getHeight() * 1.3 * -1)/Enemy.step*Enemy.step;
+    private int outUp = (int) (Picture.height * 0.2 * -1)/Enemy.step*Enemy.step;
+    private int fromUp = (int) (Picture.height * 1.3 * -1)/Enemy.step*Enemy.step;
 
-    private int outDown = (int) (Picture.image.getHeight() + Picture.image.getHeight() * 0.2)/Enemy.step*Enemy.step;
-    private int fromDown = (int) (Picture.image.getHeight() * 1.3)/Enemy.step*Enemy.step;
+    private int outDown = (int) (Picture.height + Picture.height * 0.2)/Enemy.step*Enemy.step;
+    private int fromDown = (int) (Picture.height * 1.3)/Enemy.step*Enemy.step;
     private  int agressiveMode = 300;
     Process() {
 
-        Apple apple = new Apple(Picture.image);
-        Player player = new Player(Picture.image);
+        Apple apple = new Apple();
+        Player player = new Player();
         for (int i = 0; i < 100; i++) {
-            new Enemy(Picture.image, false);
+            new Enemy( false);
         }
         for (int i = 0; i < 20; i++) {
-            new Enemy(Picture.image, true);
+            new Enemy( true);
         }
 
 
@@ -115,8 +115,8 @@ public class Process {
 //                }
 //            }
 //        }
-        int halfWidth = Picture.image.getWidth() / 2;
-        int halfHeight = Picture.image.getHeight() / 2;
+        int halfWidth = Picture.width / 2;
+        int halfHeight = Picture.height / 2;
         for (int x = -agressiveMode; x <= agressiveMode; x++) {
             for (int y = -agressiveMode; y <= +agressiveMode; y++) {
                 if ((Math.pow(x, 2)) + (Math.pow(y, 2)) >= Math.pow(agressiveMode - 1, 2) &&
@@ -290,16 +290,16 @@ public class Process {
                 }
                 if (eaten && eatenDelay >= eatenDelayStat) {
 
-                    apple.setXy(Picture.image);
+                    apple.setXy();
                     p = apple.getXy();
 
 
                     eaten = false;
                 }
                 if (eatenDelay >= eatenDelayStat) {
-                    for (Point point : pointAppleArrayList) {
-                        pointsOfApple.add(new Point(point.x + (int) p[0], point.y + (int) p[1]));
-                    }
+
+                        pointsOfApple.add(new Point((int) p[0],(int) p[1]));
+
                     appleSpawned = true;
                 }
 
@@ -374,10 +374,10 @@ public class Process {
 //                    }
                     for (double[] i : enemy.getPhantomXY()) {
 
-                        for (Point point : pointEnemyArrayList) {
-                            points.add(new Point(point.x + (int) i[0], point.y + (int) i[1]));
+
+                            points.add(new Point((int) i[0],  (int) i[1]));
                             colors.add(enemy.getColor());
-                        }
+
                     }
                 }
 //                for (Point point : pointsOfRect) {
@@ -449,10 +449,10 @@ public class Process {
             if (i >= player.getPhantomXY().size() - 2) {
                 continue;
             }
-            for (Point point : pointArrayList) {
-                points.add(new Point(point.x + (int) player.getPhantomXY().get(i)[0], point.y + (int) player.getPhantomXY().get(i)[1]));
+
+                points.add(new Point((int) player.getPhantomXY().get(i)[0], (int) player.getPhantomXY().get(i)[1]));
                 colors.add(player.getColor());
-            }
+
         }
 
 

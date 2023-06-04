@@ -1,5 +1,6 @@
 package org.example.Player;
 
+import org.example.Enemy.Enemy;
 import org.example.Painter.Picture;
 
 import java.awt.*;
@@ -75,7 +76,6 @@ public class Player {
     public double[] taillessPhantomCopy = new double[2];
     private int reverseCount = 100;
     private int reverse = reverseCount;
-    private BufferedImage image;
     private boolean isMove = false;
     public static int snakeLength = 10;
     DecimalFormat myFormat = new DecimalFormat("#.###");
@@ -88,16 +88,21 @@ public class Player {
         }
 
     }
+    static int width = 0;
+    static int height = 0;
     static Date startDate;
-  public Player(BufferedImage image) {
+    public static ArrayList<Player> players = new ArrayList<>();
+  public Player() {
 
 //        xy.add(new int[]{(int)(Math.random()*imahe.getWidth()*playGround[0])+(int)(imahe.getWidth()*playGround[1]),(int)(Math.random()*imahe.getHeight()*playGround[0])+(int)(imahe.getHeight()*playGround[1])});
-        this.image = image;
+
         Point co = getRandomPoint();
 //        xy.add(new double[]{co.x,co.y});
-      xy.add(new double[]{image.getWidth()/2,image.getHeight()/2});
+      width = Picture.width;
+      height = Picture.height;
+      xy.add(new double[]{width/2,height/2});
         setPhantomXY();
-//        snakes.add(this);
+        players.add(this);
       startDate = new Date();
 
         color = new Color((int) (Math.random() * 254 + 1), (int) (Math.random() * 254 + 1), (int) (Math.random() * 254 + 1) /*Color.cyan.getRGB()*/);
@@ -139,8 +144,8 @@ public class Player {
     }
 
     public Point getRandomPoint() {
-        int x = (int) (Math.random() * (image.getWidth() * playGround[0])) + (int) (image.getWidth() * playGround[1]);
-        int y = (int) (Math.random() * (image.getHeight() * playGround[0]))+ (int) (image.getHeight() * Player.playGround[1]);
+        int x = (int) (Math.random() * (width * playGround[0])) + (int) (width * playGround[1]);
+        int y = (int) (Math.random() * (height * playGround[0]))+ (int) (height * Player.playGround[1]);
         return new Point(x, y);
     }
 
@@ -163,7 +168,7 @@ public class Player {
     private boolean reset = false;
     private double tMouse = 1;
     static double stepRad = 0.1;
-    private double[] pointWatch = new double[]{Picture.image.getWidth() / 2, Picture.image.getHeight() / 2};
+    private double[] pointWatch = new double[]{Picture.width / 2, Picture.height / 2};
 
     void setRadian(Point Target) {
 
@@ -309,8 +314,8 @@ static boolean isGrow = false;
                     xTarget = Picture.xMouse;
                     yTarget = Picture.yMouse;
                 } else {
-                    xTarget = image.getWidth() / 2;
-                    yTarget = image.getHeight() / 2;
+                    xTarget = width / 2;
+                    yTarget = height / 2;
                 }
 
                 double x = getXy().get(0)[0];
