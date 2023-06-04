@@ -3,23 +3,19 @@ package org.example.Painter;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class Picture {
-    static int xPosition = 500;
+public class Picture extends JFrame{
 
-    static int yPosition = 500;
-    static JFrame frame = new JFrame();
+
+
+
 
     static JLabel label = new JLabel();
 
@@ -29,44 +25,50 @@ public class Picture {
 
     static boolean isAdd = false;
     static boolean isDelete = false;
-   public static int xMouse = 0;
-   public static int yMouse = 0;
-    static boolean mouseControl = false;
+    public static int xMouse = 0;
+    public static int yMouse = 0;
+    public static boolean mouseControl = true;
     static int[] mouseShelf = new int[2];
-    static Color color = new Color(Color.black.getRGB());
+
     static int snakeAmount = 400;
 
-
-    static ArrayList<Point> targets1 = new ArrayList<>();
-    static int radius1 = 51;
-
-    static HashMap<Point, Point> toTargets = new HashMap<>();
 
     static int width = 0;
     static int height = 0;
     static boolean draw = false;
     static boolean reset = false;
-    static int countX = 0;
-    static int countY = 0;
+    private double[] direction = new double[2];
 
-//    static public double getProgress() {
+
+    //    static public double getProgress() {
 //
 //        double i = ((double) toTargets.size() / ((countX * countY))) * 100;
 //        return i;
 //    }
+    ArrayList<Point> mouseCursor = new ArrayList<>();
+    ArrayList<Color> mouseCursorColor = new ArrayList<>();
 
     public Picture() {
+        for (int x = -10; x < 10; x++) {
+            for (int y = -10; y < 10; y++) {
+                if (x == 0 || y == 0) {
+                    mouseCursor.add(new Point(x, y));
+                }
 
+            }
+        }
         label.setIcon(new ImageIcon(image));
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         BufferedImage image1 = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-        frame.setCursor(frame.getToolkit().createCustomCursor(image1, new Point(), null));
-        frame.add(label);
-        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        frame.setLocationByPlatform(false);
+        setCursor(this.getToolkit().createCustomCursor(image1, new Point(), null));
+        add(label);
 
 
-        frame.addMouseMotionListener(new MouseMotionListener() {
+//        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setSize(image.getWidth(), image.getHeight());
+        setLocationByPlatform(false);
+
+        addMouseMotionListener(new MouseMotionListener() {
             @Override
             public void mouseDragged(MouseEvent e) {
 
@@ -80,7 +82,36 @@ public class Picture {
 //                snake.move(e.getX(),e.getY());
             }
         });
-        frame.addKeyListener(new KeyListener() {
+        addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+
+//                System.out.println(e.getButton());
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.getButton() == 1) {
+                    mouseControl = !mouseControl;
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
+        this.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
 
@@ -91,9 +122,9 @@ public class Picture {
                 if (e.getKeyCode() == 16) {
                     draw = !draw;
                 }
-                if (e.getKeyCode() == 32) {
-                    mouseControl = !mouseControl;
-                }
+//                if (e.getKeyCode() == 32) {
+//                    mouseControl = !mouseControl;
+//                }
 //                if (e.getKeyCode() == 17) {
 //                    Snake.isTeleport = !Snake.isTeleport;
 //                }
@@ -231,7 +262,7 @@ public class Picture {
 //            }
 //        }
 //        System.out.println("Регионы поиска готовы");
-        frame.setVisible(true);
+        this.setVisible(true);
 
 
         executorService.submit(() -> {
@@ -252,24 +283,34 @@ public class Picture {
 //xMouse = point.x;
 //yMouse = point.y;
                 if (Process.ready) {
+
                     pointsOfApple = Process.getPointsOfApple();
                     pointsToErase = Process.getPointsToErase();
                     points = Process.getPoints();
                     colors = Process.getColors();
+//                    direction = Process.getDirection();
+                    image = new BufferedImage(1858, 1080, 1);
+                    if (Process.screenMove) {
+//                        image = new BufferedImage(1858, 1080, 1);
+//                        pointsOfApple = moveSceen(pointsOfApple);
+//                        pointsToErase = moveSceen(pointsToErase);
+//                        points = moveSceen(points);
 
-                    for (int i = 0; i < pointsToErase.size(); i++) {
-                        try {
-//                            if (pointsToErase.get(i).x < image.getWidth() && pointsToErase.get(i).x >= 0 && pointsToErase.get(i).y < image.getHeight() && pointsToErase.get(i).y >= 0) {
-                            try {
-                                image.setRGB(pointsToErase.get(i).x, pointsToErase.get(i).y, Color.black.getRGB());
-                            } catch (Exception e) {
-                            }
-//                            }
-                        } catch (Exception e) {
-//                            e.printStackTrace();
 
-                        }
                     }
+//                    for (int i = 0; i < pointsToErase.size(); i++) {
+//                        try {
+////                            if (pointsToErase.get(i).x < image.getWidth() && pointsToErase.get(i).x >= 0 && pointsToErase.get(i).y < image.getHeight() && pointsToErase.get(i).y >= 0) {
+//                            try {
+//                                image.setRGB(pointsToErase.get(i).x, pointsToErase.get(i).y, Color.black.getRGB());
+//                            } catch (Exception e) {
+//                            }
+////                            }
+//                        } catch (Exception e) {
+////                            e.printStackTrace();
+//
+//                        }
+//                    }
                     for (int i = 0; i < pointsOfApple.size(); i++) {
                         try {
                             if (pointsOfApple.get(i).x < image.getWidth() && pointsOfApple.get(i).x >= 0 && pointsOfApple.get(i).y < image.getHeight() && pointsOfApple.get(i).y >= 0) {
@@ -318,17 +359,32 @@ public class Picture {
 //                    }
                 }
 
-                if (xMouse > 0 && xMouse < image.getWidth() && yMouse > 0 && yMouse < image.getHeight()) {
-                    image.setRGB(mouseShelf[0], mouseShelf[1], color.getRGB()/*Color.black.getRGB()*/);
+                if (xMouse > 10 && xMouse < image.getWidth() - 10 && yMouse > 10 && yMouse < image.getHeight() - 10) {
+                    for (int i = 0; i < mouseCursor.size(); i++) {
+                        try {
+                            image.setRGB(mouseCursor.get(i).x + mouseShelf[0], mouseCursor.get(i).y + mouseShelf[1], Color.black.getRGB());
+                        } catch (Exception e) {
+
+                        }
+                    }
                     mouseShelf = new int[]{xMouse, yMouse};                                                                  //оставить
-                    color = new Color(image.getRGB(mouseShelf[0], mouseShelf[1]));
-                    image.setRGB(mouseShelf[0], mouseShelf[1], Color.WHITE.getRGB());
+                    mouseCursorColor.clear();
+                    for (int i = 0; i < mouseCursor.size(); i++) {
+                        try {
+//                            mouseCursorColor.add(new Color(image.getRGB(mouseCursor.get(i).x + mouseShelf[0], mouseCursor.get(i).y + mouseShelf[1])));
+                            image.setRGB(mouseCursor.get(i).x + mouseShelf[0], mouseCursor.get(i).y + mouseShelf[1], Color.WHITE.getRGB());
+                        } catch (Exception e) {
+
+                        }
+                    }
+
+
                 }
 
 
                 label.setIcon(new ImageIcon(image));                                                                 //оставить
 
-                frame.revalidate();
+                this.repaint();
                 try {
                     TimeUnit.MICROSECONDS.sleep(1);
                 } catch (Exception e) {
@@ -342,5 +398,15 @@ public class Picture {
             System.out.println(e);
         }
 
+    }
+
+    private ArrayList<Point> moveSceen(ArrayList<Point> list) {
+
+        ArrayList<Point> newlistist = new ArrayList<>();
+
+        for (int i = 0; i < list.size(); i++) {
+            newlistist.add(new Point((int)(list.get(i).x +direction[0]),(int)(list.get(i).y +direction[1])));
+        }
+        return newlistist;
     }
 }
