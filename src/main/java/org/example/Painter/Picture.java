@@ -1,7 +1,11 @@
 package org.example.Painter;
 
+import org.example.Enemy.Enemy;
+import org.example.Player.Player;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.plaf.BorderUIResource;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -11,20 +15,25 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class Picture extends JFrame{
+public class Picture extends JFrame {
 
-
-
-
-
+static Toolkit toolkit = Toolkit.getDefaultToolkit();
+static Dimension dimension = toolkit.getScreenSize();
     static JLabel label = new JLabel();
+    public static int countOfApples = 0;
+    static JLabel coutnOfApplesLabel = new JLabel(String.valueOf(countOfApples));
+
+    static JLayeredPane pane = new JLayeredPane();
+    static JPanel panel = new JPanel();
 
     public static ExecutorService executorService = Executors.newSingleThreadExecutor();
-    public static BufferedImage image = new BufferedImage(1858, 1080, 1);
+    public static BufferedImage image = new BufferedImage((int)(dimension.width*0.9), (int)(dimension.height*0.9), 1);
 
 
     static boolean isAdd = false;
     static boolean isDelete = false;
+    static boolean isPaused = false;
+    public static boolean isEnd = false;
     public static int xMouse = 0;
     public static int yMouse = 0;
     public static boolean mouseControl = true;
@@ -38,6 +47,14 @@ public class Picture extends JFrame{
     static boolean draw = false;
     static boolean reset = false;
     private double[] direction = new double[2];
+    static Font secondaryFont = new Font("ns", Font.ITALIC, 25);
+    static Font mainFont = new Font("ns", Font.ITALIC, 50);
+    static JPanel losePanel = new JPanel();
+    static JLabel lose = new JLabel("Вы проNграли!");
+    static JLabel res = new JLabel("Начать заново?");
+    static JPanel pausePanel = new JPanel();
+    static JLabel pauseLabel = new JLabel("Пауза");
+    static JLabel cont = new JLabel("Продолжить?");
 
 
     //    static public double getProgress() {
@@ -57,31 +74,158 @@ public class Picture extends JFrame{
 
             }
         }
-        label.setIcon(new ImageIcon(image));
+        setSize(image.getWidth(), image.getHeight());
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        width = image.getWidth();
+        height = image.getHeight();
+        pane.setBounds(0, 0, getWidth(), getHeight());
+
+        label.setIcon(new ImageIcon(image));
+        label.setBounds(0, 0, width, height);
+
+
         BufferedImage image1 = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
         setCursor(this.getToolkit().createCustomCursor(image1, new Point(), null));
-        add(label);
+
+        add(pane);
 
 
-//        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setSize(image.getWidth(), image.getHeight());
-        setLocationByPlatform(false);
+        coutnOfApplesLabel.setFont(mainFont);
+        coutnOfApplesLabel.setForeground(Color.WHITE);
+        panel.setOpaque(false);
+        panel.setBounds(width / 2 - 150, 150, 300, 150);
+        coutnOfApplesLabel.setBounds(panel.getWidth() / 2 - 50, 0, 100, 100);
 
-        addMouseMotionListener(new MouseMotionListener() {
+        panel.add(coutnOfApplesLabel);
+        pane.add(panel, 3);
+        pane.add(label, JLayeredPane.FRAME_CONTENT_LAYER);
+
+
+        losePanel.setLayout(null);
+        losePanel.setBounds(width / 2 - width / 4, 0/*height / 2 - height / 4*/, width / 2, height);
+        lose.setBounds(losePanel.getWidth() / 2 - 250, 0, 500, 100);
+        lose.setBackground(Color.BLACK);
+        lose.setFont(mainFont);
+        lose.setForeground(Color.WHITE);
+        lose.setOpaque(true);
+        lose.setHorizontalAlignment(JLabel.CENTER);
+        losePanel.add(lose, BorderLayout.NORTH);
+        res.setFont(secondaryFont);
+        res.setBorder(new BorderUIResource.LineBorderUIResource(Color.WHITE));
+        res.setForeground(Color.WHITE);
+        res.setBackground(Color.BLACK);
+        res.setOpaque(true);
+        res.setBounds(losePanel.getWidth() / 2 - losePanel.getWidth() / 4, losePanel.getHeight() - losePanel.getHeight() / 3, losePanel.getWidth() / 2, losePanel.getHeight() / 6);
+        res.setHorizontalAlignment(JLabel.CENTER);
+        res.setCursor(Cursor.getDefaultCursor());
+        losePanel.add(res, BorderLayout.CENTER);
+        losePanel.setOpaque(false);
+        res.addMouseListener(new MouseListener() {
             @Override
-            public void mouseDragged(MouseEvent e) {
+            public void mouseClicked(MouseEvent e) {
 
             }
 
             @Override
-            public void mouseMoved(MouseEvent e) {
-//                System.out.println(e.getX());
-                xMouse = e.getX();
-                yMouse = e.getY();
-//                snake.move(e.getX(),e.getY());
+            public void mousePressed(MouseEvent e) {
+                if (e.getButton() == 1) {
+                    if (isEnd) {
+                        reset = true;
+
+                    }
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                res.setBorder(new BorderUIResource.LineBorderUIResource(Color.cyan));
+                res.setForeground(Color.cyan);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                res.setBorder(new BorderUIResource.LineBorderUIResource(Color.WHITE));
+                res.setForeground(Color.WHITE);
             }
         });
+
+
+        pausePanel.setLayout(null);
+        pausePanel.setBounds(width / 2 - width / 4, 0/*height / 2 - height / 4*/, width / 2, height);
+        pauseLabel.setBounds(pausePanel.getWidth() / 2 - 250, 0, 500, 100);
+        pauseLabel.setBackground(Color.BLACK);
+        pauseLabel.setFont(mainFont);
+        pauseLabel.setForeground(Color.WHITE);
+        pauseLabel.setOpaque(true);
+        pauseLabel.setHorizontalAlignment(JLabel.CENTER);
+        pausePanel.add(pauseLabel, BorderLayout.NORTH);
+        cont.setFont(secondaryFont);
+        cont.setBorder(new BorderUIResource.LineBorderUIResource(Color.WHITE));
+        cont.setForeground(Color.WHITE);
+        cont.setBackground(Color.BLACK);
+        cont.setOpaque(true);
+        cont.setBounds(losePanel.getWidth() / 2 - pausePanel.getWidth() / 4, pausePanel.getHeight() - pausePanel.getHeight() / 3, pausePanel.getWidth() / 2, pausePanel.getHeight() / 6);
+        cont.setHorizontalAlignment(JLabel.CENTER);
+        cont.setCursor(Cursor.getDefaultCursor());
+        pausePanel.add(cont, BorderLayout.CENTER);
+        pausePanel.setOpaque(false);
+        cont.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.getButton() == 1) {
+                    if (isPaused) {
+                        isPaused = false;
+                        pane.remove(pausePanel);
+                        cont.setBorder(new BorderUIResource.LineBorderUIResource(Color.WHITE));
+                        cont.setForeground(Color.WHITE);
+                    }
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                cont.setBorder(new BorderUIResource.LineBorderUIResource(Color.cyan));
+                cont.setForeground(Color.cyan);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                cont.setBorder(new BorderUIResource.LineBorderUIResource(Color.WHITE));
+                cont.setForeground(Color.WHITE);
+            }
+        });
+
+
+//        addMouseMotionListener(new MouseMotionListener() {
+//            @Override
+//            public void mouseDragged(MouseEvent e) {
+//
+//            }
+//
+//            @Override
+//            public void mouseMoved(MouseEvent e) {
+////                System.out.println(e.getX());
+////                xMouse = e.getX();
+////                yMouse = e.getY();
+////                snake.move(e.getX(),e.getY());
+//            }
+//        });
         addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -91,8 +235,15 @@ public class Picture extends JFrame{
 
             @Override
             public void mousePressed(MouseEvent e) {
-                if (e.getButton() == 1) {
-                    mouseControl = !mouseControl;
+                try {
+                    if (!isPaused && !isEnd) {
+                        if (e.getButton() == 1) {
+                            mouseControl = !mouseControl;
+                        }
+
+                    }
+                }catch (Exception km){
+                    km.printStackTrace();
                 }
             }
 
@@ -128,9 +279,9 @@ public class Picture extends JFrame{
 //                if (e.getKeyCode() == 17) {
 //                    Snake.isTeleport = !Snake.isTeleport;
 //                }
-//                if (e.getKeyCode() == 82) {
-//                    reset();
-//                }
+                if (e.getKeyCode() == 82) {
+
+                }
                 if (e.getKeyCode() == 61) {
                     isAdd = true;
                 }
@@ -145,7 +296,16 @@ public class Picture extends JFrame{
 //                    Apple.minusRegion();
 //                }
                 if (e.getKeyCode() == 27) {
-                    System.exit(0);
+                    if (!isEnd) {
+                        isPaused = !isPaused;
+                        if (isPaused) {
+                            pane.add(pausePanel, 5);
+                        } else {
+                            pane.remove(pausePanel);
+                        }
+                    } else {
+                        System.exit(0);
+                    }
                 }
                 System.out.println(e.getKeyCode());
 
@@ -162,130 +322,29 @@ public class Picture extends JFrame{
             e.printStackTrace();
             System.exit(0);
         }
-        width = image.getWidth();
-        height = image.getHeight();
-//        for (int x = 0; x < width; x++) {
-//            for (int y = 0; y < height; y++) {
-//                for (int i = 0; i < 5; i++) {
-//                    if ((Math.pow((x - (double) width / 2), 2)) + (Math.pow((y - (double) height / 2), 2)) >= Math.pow(radius1 + 200 * i - 1, 2) &&
-//                            (Math.pow((x - (double) width / 2), 2)) + (Math.pow((y - (double) height / 2), 2)) <= Math.pow(radius1 + 200 * i, 2)) {
-//                        targets1.add(new Point(x, y));
-//                    }
-//                }
-//            }
-//        }
 
-//C:\Users\CRTXScyNet\Documents\ShareX\Screenshots\2023-05\Telegram_LGB2e5bUqm.png
-        // https://png.pngtree.com/png-vector/20190830/ourlarge/pngtree-black-cannabis-leaf-logo-inspiration-isolated-on-white-backgroun-png-image_1715899.jpg
-//        try{
-//            BufferedImage picture = ImageIO.read(new File("C:\\Users\\CRTXScyNet\\Documents\\ShareX\\Screenshots\\2023-05\\Telegram_LGB2e5bUqm.png"));
-//            int zeroX = image.getWidth()/2-picture.getWidth()/2;
-//            int zeroY = image.getHeight()/2-picture.getHeight()/2;
-//            for(int i = 0;i<picture.getWidth();i+=2){
-//                for (int y = 0;y<picture.getHeight();y+=2){
-//                    Color color = new Color(picture.getRGB(i,y));
-//                    if(color.getRed() < 150&&color.getBlue() <150&&color.getGreen() <150){
-//                        targets1.add(new Point(zeroX+i,zeroY+y));
-////                        targets1.add(new Point(zeroX+i*2,zeroY+y*2));
-////                        targets1.add(new Point(zeroX+i*2,zeroY+y*2+1));
-////                        targets1.add(new Point(zeroX+i*2+1,zeroY+y*2));
-////                        targets1.add(new Point(zeroX+i*2+1,zeroY+y*2+1));
-//                    }
-//                }
-//            }
-//
-//        }catch (Exception e){
-//            e.printStackTrace();
-//            System.exit(0);
-//        }
-//        int zeroX = image.getWidth()/4;
-//        int zeroY = image.getHeight()/4;
-//        for(int i = zeroX;i<image.getWidth()-zeroX;i+=2){
-//            targets.add(new Point(i,image.getHeight()/2));
-//        }
-//        for(int i = zeroY;i<image.getHeight()-zeroY;i+=2){
-//            targets.add(new Point(image.getWidth()/2,i));
-//        }
-//        targets.add(new Point(image.getWidth()/2,image.getHeight()/2));
-//        countX = (int) ((width - ((width * Snake.playGround[1]) * 2)) / (int) (Snake.size * Snake.stepOfSize));
-//        countY = (int) ((height - ((height * Snake.playGround[1]) * 2)) / (int) (Snake.size * Snake.stepOfSize));
-
-
-//        Executors.newSingleThreadExecutor().submit(() -> {
-//            new CheckProgress();
-//        });
-//        System.out.println("Кольуо готово");
-//        boolean closer;
-//        for (int x = (int) (image.getWidth() * Snake.playGround[1]); x < width - (int) (image.getWidth() * Snake.playGround[1]); x += (int) (Snake.size * Snake.stepOfSize)) {
-//            for (int y = (int) (image.getHeight() * Snake.playGround[1]); y < height - (int) (image.getHeight() * Snake.playGround[1]); y += (int) (Snake.size * Snake.stepOfSize)) {
-//                Point nearest = targets1.get(0);
-//                if (Math.random() > 0.5) {
-//                    closer = true;
-//                } else {
-//                    closer = false;
-//                }
-//                for (Point p : targets1) {
-//                    long firstDistance = (long) Math.sqrt(Math.pow(Math.abs(p.x - x), 2) + Math.pow(Math.abs(p.y - y), 2));
-//                    long lastDistance = (long) Math.sqrt(Math.pow(Math.abs(x - nearest.x), 2) + Math.pow(Math.abs(y - nearest.y), 2));
-//                    if (closer) {
-//                        if (firstDistance < lastDistance) {
-//                            nearest.setLocation(p.x, p.y);
-//                        }
-//                    } else {
-//                        if (firstDistance <= lastDistance) {
-//                            nearest.setLocation(p.x, p.y);
-//                        }
-//                    }
-//
-//                }
-//                toTargets.put(new Point(x, y), new Point(nearest.x, nearest.y));
-//
-//
-//            }
-//        }
-
-//        System.out.println("Путь к кольцу готов");
-//        System.out.println(toTargets.size());
-
-
-//        int lenth = Snake.step * Snake.maxSize;
-//        if (lenth > 500) {
-//            lenth = 500;
-//        }
-//        for (int i = 0; i < Picture.image.getWidth() + lenth; i += lenth) {
-//            for (int y = 0; y < Picture.image.getHeight() + lenth; y += lenth) {       //Отрисовка регионов поиска
-//                try {
-//                    image.setRGB(i, y, Color.white.getRGB());
-//                } catch (Exception e) {
-//
-//                }
-//            }
-//        }
-//        System.out.println("Регионы поиска готовы");
         this.setVisible(true);
 
 
         executorService.submit(() -> {
-//            for (int i = 0; i < snakeAmount; i++) {                                    //Добавление змей
-//                new Snake(image);
-//            }
+
             Process process = new Process();
         });
         ArrayList<Point> pointsOfApple = new ArrayList<>();
-        ArrayList<Point> pointsToErase = new ArrayList<>();
+        ArrayList<Point> pointsOfArrow = new ArrayList<>();
         ArrayList<Point> points = new ArrayList<>();
         ArrayList<Color> colors = new ArrayList<>();
         while (Process.ready) {
         }
         try {
             while (true) {
-//                Point point = MouseInfo.getPointerInfo().getLocation();
-//xMouse = point.x;
-//yMouse = point.y;
+                Point point = MouseInfo.getPointerInfo().getLocation();
+                xMouse = point.x - getX();
+                yMouse = point.y - getY();
                 if (Process.ready) {
 
                     pointsOfApple = Process.getPointsOfApple();
-                    pointsToErase = Process.getPointsToErase();
+                    pointsOfArrow = Process.getPointsOfArrow();
                     points = Process.getPoints();
                     colors = Process.getColors();
 //                    direction = Process.getDirection();
@@ -337,27 +396,57 @@ public class Picture extends JFrame{
 
                         }
                     }
+                    try {
+                        for (int i = 0; i < pointsOfArrow.size(); i++) {
+                            try {
+                                if (pointsOfArrow.get(i).x < image.getWidth() && pointsOfArrow.get(i).x >= 0 && pointsOfArrow.get(i).y < image.getHeight() && pointsOfArrow.get(i).y >= 0) {
+//                                try {
+                                    image.setRGB(pointsOfArrow.get(i).x, pointsOfArrow.get(i).y, Apple.color.getRGB());
+//                                }catch (Exception e){
+//                                }
+                                }
+                            } catch (Exception e) {
+//                            e.printStackTrace();
+
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
 
 //                for (Point p : targets){
 //                    image.setRGB(p.x,p.y,Color.white.getRGB());
 //                }
+                    boolean snakesAreOnReset = false;
 
-                    Process.ready = false;
-                }
-                boolean snakesAreOnReset = false;
-                if (reset) {
+                    if (reset) {
 
-//                    for (Snake snake : Snake.snakes) {
-//                        if (snake.isReset()) {
-//                            snakesAreOnReset = true;
-//                        }
+
+                        reset();
+                        pane.remove(losePanel);
+                        Picture.countOfApples = 0;
+                        mouseControl = true;
+                        res.setBorder(new BorderUIResource.LineBorderUIResource(Color.WHITE));
+                        res.setForeground(Color.WHITE);
+                        reset = false;
+                        isEnd = false;
+//                        try {
+//                    TimeUnit.MILLISECONDS.sleep(500);
+//                        } catch (Exception e) {
 //
-//                    }
-//                    if (!snakesAreOnReset) {
-//                        image = new BufferedImage(1858, 1080, 1);
-//                        reset = false;
-//                    }
+//                        }
+                    } else if (isPaused) {
+
+                    } /*else if (isEnd) {
+
+
+
+                    }*/ else {
+                        Process.ready = false;
+                    }
+
                 }
+
 
                 if (xMouse > 10 && xMouse < image.getWidth() - 10 && yMouse > 10 && yMouse < image.getHeight() - 10) {
                     for (int i = 0; i < mouseCursor.size(); i++) {
@@ -380,16 +469,16 @@ public class Picture extends JFrame{
 
 
                 }
-
-
+//                coutnOfApplesLabel.setLocation(0,(int)(height*0.9));
                 label.setIcon(new ImageIcon(image));                                                                 //оставить
+                coutnOfApplesLabel.setText(String.valueOf(countOfApples));
 
                 this.repaint();
-                try {
-                    TimeUnit.MICROSECONDS.sleep(1);
-                } catch (Exception e) {
-
-                }
+//                try {
+//                    TimeUnit.MICROSECONDS.sleep(1);
+//                } catch (Exception e) {
+//
+//                }
             }
 
 
@@ -405,8 +494,27 @@ public class Picture extends JFrame{
         ArrayList<Point> newlistist = new ArrayList<>();
 
         for (int i = 0; i < list.size(); i++) {
-            newlistist.add(new Point((int)(list.get(i).x +direction[0]),(int)(list.get(i).y +direction[1])));
+            newlistist.add(new Point((int) (list.get(i).x + direction[0]), (int) (list.get(i).y + direction[1])));
         }
         return newlistist;
+    }
+
+    public static void pauseMenuON() {
+        isEnd = true;
+        mouseControl = false;
+        pane.add(losePanel, 5);
+    }
+
+    public static void reset() {
+
+
+        reset = true;
+        for (Enemy enemy : Enemy.enemies) {
+            enemy.reset();
+        }
+        for (Player player : Player.players) {
+            player.reset();
+        }
+
     }
 }

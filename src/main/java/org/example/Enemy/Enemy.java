@@ -7,6 +7,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 
 public class Enemy {
     private static final double innerPlace = 1;
@@ -58,15 +59,26 @@ public class Enemy {
     }
 
     public static int step = (int) (Enemy.getSize() * stepOfSize);
-    static double delayStat = 40;
+    static double delayStat = 80;
+    static double delayStatActive = 30;
     private double delayDouble = delayStat;
     private int delay = (int) delayDouble;
     private int delayCount = 0;
-    private Point selfTarget = new Point();
-    private Point selfTargetBuffer = new Point();
-    private int targetDelay = (int) (Math.random() * 100);
-    private int targetDelayCount = targetDelay;
+    private double timerStat = 1000;
+    private double timer = timerStat;
 
+
+
+
+    public void setEatAndAngry(boolean eatAndAngry) {
+        this.eatAndAngry = eatAndAngry;
+    }
+
+    public boolean isEatAndAngry() {
+        return eatAndAngry;
+    }
+
+    private boolean eatAndAngry = false;
 //    public void setRegion(SearchRegion region) {
 //        this.region = region;
 //    }
@@ -81,7 +93,11 @@ public class Enemy {
     public double getDelay() {
         return delay;
     }
+public void setCurrentDelay(double delay){
+    delayDouble = delay;
+    this.delay = (int) delayDouble;
 
+    }
     public void setDelay() {
         if (delay < 100) {
             if (!isActive){
@@ -133,11 +149,14 @@ public class Enemy {
     public static int snakeLength = 10;
 
     public boolean isActive = false;
+    private int width;
+    private int height;
     public Enemy(BufferedImage image,boolean isActive) {
 //        xy.add(new int[]{(int)(Math.random()*imahe.getWidth()*playGround[0])+(int)(imahe.getWidth()*playGround[1]),(int)(Math.random()*imahe.getHeight()*playGround[0])+(int)(imahe.getHeight()*playGround[1])});
         this.image = image;
         Point co = getRandomPoint();
-
+        width = Picture.image.getWidth();
+        width = Picture.image.getHeight();
         xy.add(new double[]{co.x, co.y});
         setPhantomXY();
         enemies.add(this);
@@ -145,8 +164,8 @@ public class Enemy {
 if(!isActive) {
     color = new Color((int) (Math.random() * 50 + 200), (int) (Math.random() * 50 + 200), (int) (Math.random() * 50 + 200));
 }else {
-    delay = 15;
-    delayDouble = 15;
+    delay =(int)delayStatActive;
+    delayDouble = delayStatActive;
     activeEnemies.add(this);
     color = new Color(150,150,255);
 }
@@ -177,7 +196,15 @@ if(!isActive) {
 
     public void reset() {
         Point co = getRandomPoint();
-        delayDouble = delayStat;
+        eatAndAngry = false;
+        if(isActive){
+            delayDouble = delayStatActive;
+            delay = (int) delayStatActive;
+        }else {
+            delayDouble = delayStat;
+            delay = (int) delayStat;
+        }
+
         xy.clear();
         xy.add(new double[]{co.x, co.y});
         move(co.x, co.y);
@@ -190,7 +217,8 @@ if(!isActive) {
     public Point getRandomPoint() {
         int x = (int) (Math.random() * (image.getWidth() * playGround[0] / (int) (size * stepOfSize))) * (int) (size * stepOfSize) + (int) (image.getWidth() * playGround[1]);
         int y = (int) (Math.random() * (image.getHeight() * playGround[0] / (int) (size * stepOfSize))) * (int) (size * stepOfSize) + (int) (image.getHeight() * Enemy.playGround[1]);
-        if(Process.lifeArea.contains(x,y)){
+
+        if(Math.pow(Math.abs(image.getWidth()/2 - x), 2) + Math.pow(Math.abs(image.getHeight()/2 - y), 2) <= Math.pow(300, 2)){
 return getRandomPoint();
         }
         return new Point(x, y);
@@ -218,7 +246,15 @@ return getRandomPoint();
     public void moveCheck(double[] point,double[] apple, boolean isNearby) {
         try{
 
-            perviyNah = false;
+
+            if (eatAndAngry) {
+
+
+                timer -= 1;
+
+
+            }
+
             if (delayCount < delay) {                    //проверка прошло ли достаточно времени, чтобы делать новый шаг
                 delayCount++;
                 movePhantom();
@@ -227,9 +263,17 @@ return getRandomPoint();
                 }
                 return;
             }
+            if(eatAndAngry&&timer<=0){
+                timer = timerStat;
+                eatAndAngry = false;
+                setCurrentDelay(getDelay()*2);
+                setDelay();
+            }
+
             if (reverse < reverseCount) {                                       //проверка прошло ли достаточно времени с прошлого разворота
                 reverse++;
             }
+
             delayCount = 0;
             double xTarget;
             double yTarget;
@@ -257,8 +301,14 @@ return getRandomPoint();
                     }
                 }
             } else {
-                xTarget = apple[0];
-                yTarget = apple[1];
+                if (eatAndAngry||Picture.isEnd) {
+                    xTarget = point[0];
+                    yTarget = point[1];
+                }else {
+
+                    xTarget = apple[0];
+                    yTarget = apple[1];
+                }
             }
             double x = getXy().get(0)[0];
             double y = getXy().get(0)[1];
