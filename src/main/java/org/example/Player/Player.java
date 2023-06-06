@@ -80,7 +80,8 @@ public class Player {
     private BufferedImage image;
     private boolean isMove = false;
     public static int snakeLength = 10;
-    DecimalFormat myFormat = new DecimalFormat("#.###");
+
+
 
     public double[] getDirection(){
         if (directionOfPhantomXY.size()>0){
@@ -182,18 +183,11 @@ public class Player {
         double xTarget = Target.x - xy.get(0)[0];
         double TargetRadian = 0;
         // 1143 372 900 600
-        double a = Math.pow((yTarget), 2) + Math.pow((xTarget), 2);
-        if (xTarget > 0) {
-            TargetRadian = Math.acos((yTarget) / Math.sqrt(a));
-//            System.out.println(1);
-        } else if (xTarget < 0 && yTarget < 0) {
-            TargetRadian = (Math.acos((xTarget) / Math.sqrt(a))) + 1.57;
-//            System.out.println(2);
-        } else {
-            TargetRadian = (Math.asin((xTarget) / Math.sqrt(a))) + 6.28;
-//            System.out.println(3);
-        }
+        TargetRadian = Math.atan2(xTarget,yTarget);
+        if(TargetRadian<0){
+            TargetRadian += 6.28;
 
+        }
         double halfNear = (tMouse + 3.14) % 6.28;
 
         pointWatch[0] = (step * Math.sin(tMouse) + xy.get(0)[0]);

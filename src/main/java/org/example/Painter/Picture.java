@@ -17,8 +17,8 @@ import java.util.concurrent.TimeUnit;
 
 public class Picture extends JFrame {
 
-static Toolkit toolkit = Toolkit.getDefaultToolkit();
-static Dimension dimension = toolkit.getScreenSize();
+    static Toolkit toolkit = Toolkit.getDefaultToolkit();
+    static Dimension dimension = toolkit.getScreenSize();
     static JLabel label = new JLabel();
     public static int countOfApples = 0;
     static JLabel coutnOfApplesLabel = new JLabel(String.valueOf(countOfApples));
@@ -27,7 +27,7 @@ static Dimension dimension = toolkit.getScreenSize();
     static JPanel panel = new JPanel();
 
     public static ExecutorService executorService = Executors.newSingleThreadExecutor();
-    public static BufferedImage image = new BufferedImage((int)(dimension.width*0.9), (int)(dimension.height*0.9), 1);
+    public static BufferedImage image = new BufferedImage((int) (dimension.width * 0.9), (int) (dimension.height * 0.9), 1);
 
 
     static boolean isAdd = false;
@@ -242,7 +242,7 @@ static Dimension dimension = toolkit.getScreenSize();
                         }
 
                     }
-                }catch (Exception km){
+                } catch (Exception km) {
                     km.printStackTrace();
                 }
             }
@@ -349,14 +349,14 @@ static Dimension dimension = toolkit.getScreenSize();
                     colors = Process.getColors();
 //                    direction = Process.getDirection();
                     image = new BufferedImage(1858, 1080, 1);
-                    if (Process.screenMove) {
-//                        image = new BufferedImage(1858, 1080, 1);
-//                        pointsOfApple = moveSceen(pointsOfApple);
-//                        pointsToErase = moveSceen(pointsToErase);
-//                        points = moveSceen(points);
-
-
-                    }
+//                    if (Process.screenMove) {
+////                        image = new BufferedImage(1858, 1080, 1);
+////                        pointsOfApple = moveSceen(pointsOfApple);
+////                        pointsToErase = moveSceen(pointsToErase);
+////                        points = moveSceen(points);
+//
+//
+//                    }
 //                    for (int i = 0; i < pointsToErase.size(); i++) {
 //                        try {
 ////                            if (pointsToErase.get(i).x < image.getWidth() && pointsToErase.get(i).x >= 0 && pointsToErase.get(i).y < image.getHeight() && pointsToErase.get(i).y >= 0) {
@@ -370,11 +370,67 @@ static Dimension dimension = toolkit.getScreenSize();
 //
 //                        }
 //                    }
-                    for (int i = 0; i < pointsOfApple.size(); i++) {
+                    ArrayList<double[]> doubles = new ArrayList<>();
+                    for (int p = 0; p < points.size(); p++) {
                         try {
-                            if (pointsOfApple.get(i).x < image.getWidth() && pointsOfApple.get(i).x >= 0 && pointsOfApple.get(i).y < image.getHeight() && pointsOfApple.get(i).y >= 0) {
+//                            if (points.get(i).x < image.getWidth() && points.get(i).x >= 0 && points.get(i).y < image.getHeight() && points.get(i).y >= 0) {
+                            if (Math.pow(points.get(p).x - (double) (width / 2), 2) + Math.pow(points.get(p).y - (double) height / 2, 2) < Math.pow(300, 2)) {
 //                                try {
-                                image.setRGB(pointsOfApple.get(i).x, pointsOfApple.get(i).y, Apple.color.getRGB());
+//                                for (int i = 1; i < image.getHeight() / 2; i += 20) {
+//                                    for (int x = -i; x <= i; x++) {
+//                                        for (int y = -i; y <= i; y++) {
+//                                            boolean inShadow = false;
+//                                            if (Math.pow(x, 2) + Math.pow(y, 2) < Math.pow(i - 1, 2)) {
+//                                                y = y * -1;
+//                                                continue;
+//                                            }
+//                                            if (Math.pow(x, 2) + Math.pow(y, 2) < Math.pow(i, 2) && Math.pow(x, 2) + Math.pow(y, 2) > Math.pow(i - 1, 2)) {
+//
+//                                                int drawX = x + image.getWidth() / 2;
+//                                                int drawY = y + image.getHeight() / 2;
+//                                                double xTarget = x;
+//                                                double yTarget = y;
+//                                                double TargetRadian = 0;
+//                                                TargetRadian = Math.atan2(xTarget, yTarget);
+//                                                TargetRadian = TargetRadian - TargetRadian % 0.025;
+//
+//                                                if (doubles.size() > 0) {
+//                                                    for (double d : doubles) {
+//                                                        try {
+//
+//                                                            if (d == TargetRadian) {
+//                                                                inShadow = true;
+//                                                                break;
+//                                                            }
+//                                                        } catch (Exception e) {
+//                                                            e.printStackTrace();
+//                                                        }
+//                                                    }
+//                                                }
+//                                                if (inShadow) {
+//                                                    continue;
+//                                                } else
+////                                for(Rectangle rectangle : rectangles) {
+//                                                    if (rectanglUI.contains(new Point(drawX, drawY))) {
+//                                                        try {
+//                                                            doubles.add(TargetRadian);
+//                                                            continue;
+//                                                        } catch (Exception e) {
+//                                                            e.printStackTrace();
+//                                                        }
+//                                                    }
+////                                }
+//                                                image.setRGB((int) x + image.getWidth() / 2, (int) y + image.getHeight() / 2, Color.white.getRGB());
+//
+//                                            }
+//
+//                                        }
+//                                    }
+//
+//
+////
+//                                }
+                                image.setRGB(points.get(p).x, points.get(p).y, colors.get(p).getRGB());
 //                                }catch (Exception e){
 //                                }
                             }
@@ -383,11 +439,13 @@ static Dimension dimension = toolkit.getScreenSize();
 
                         }
                     }
-                    for (int i = 0; i < points.size(); i++) {
+                    for (int i = 0; i < pointsOfApple.size(); i++) {
                         try {
-                            if (points.get(i).x < image.getWidth() && points.get(i).x >= 0 && points.get(i).y < image.getHeight() && points.get(i).y >= 0) {
+//                            if (pointsOfApple.get(i).x < image.getWidth() && pointsOfApple.get(i).x >= 0 && pointsOfApple.get(i).y < image.getHeight() && pointsOfApple.get(i).y >= 0) {
+                            if (Math.pow(pointsOfApple.get(i).x - (double) (width / 2), 2) + Math.pow(pointsOfApple.get(i).y - (double) height / 2, 2) < Math.pow(300, 2)) {
+//
 //                                try {
-                                image.setRGB(points.get(i).x, points.get(i).y, colors.get(i).getRGB());
+                                image.setRGB(pointsOfApple.get(i).x, pointsOfApple.get(i).y, Apple.color.getRGB());
 //                                }catch (Exception e){
 //                                }
                             }
@@ -451,6 +509,7 @@ static Dimension dimension = toolkit.getScreenSize();
                 if (xMouse > 10 && xMouse < image.getWidth() - 10 && yMouse > 10 && yMouse < image.getHeight() - 10) {
                     for (int i = 0; i < mouseCursor.size(); i++) {
                         try {
+
                             image.setRGB(mouseCursor.get(i).x + mouseShelf[0], mouseCursor.get(i).y + mouseShelf[1], Color.black.getRGB());
                         } catch (Exception e) {
 
@@ -473,7 +532,7 @@ static Dimension dimension = toolkit.getScreenSize();
                 label.setIcon(new ImageIcon(image));                                                                 //оставить
                 coutnOfApplesLabel.setText(String.valueOf(countOfApples));
 
-                this.repaint();
+//                this.repaint();
 //                try {
 //                    TimeUnit.MICROSECONDS.sleep(1);
 //                } catch (Exception e) {

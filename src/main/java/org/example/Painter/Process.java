@@ -6,6 +6,7 @@ import org.example.Player.Player;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 public class Process {
@@ -191,13 +192,13 @@ static ArrayList<Point> pointsOfArrow = new ArrayList<>();
                 colors.clear();
                 pointsOfArrow.clear();
                 for (Point point : pointsOfRect) {
-                    points.add(new Point(point));
+                    pointsOfArrow.add(new Point(point));
 
 //                        if (Math.pow(player.getXy().get(0)[0] - halfWidth, 2) + Math.pow(player.getXy().get(0)[1] - halfHeight, 2) <= Math.pow(1, 2)) {
 //
 ////                    }
 ////                    if (lifeArea.contains(player.getXy().get(0)[0], player.getXy().get(0)[1])) {
-                    colors.add(Color.green);
+//                    colors.add(Color.green);
 //                            screenMove = false;
 //                        } else {
 //                            colors.add(Color.red);
@@ -337,16 +338,10 @@ static ArrayList<Point> pointsOfArrow = new ArrayList<>();
                         double yTarget = Apple.getXy()[1] - Picture.height/2;
                         double TargetRadian = 0;
                         // 1143 372 900 600
-                        double a = Math.pow((yTarget), 2) + Math.pow((xTarget), 2);
-                        if (xTarget > 0) {
-                            TargetRadian = Math.acos((yTarget) / Math.sqrt(a));
-//                            System.out.println(TargetRadian);
-                        } else if (xTarget < 0 && yTarget < 0) {
-                            TargetRadian = (Math.acos((xTarget) / Math.sqrt(a))) + 1.57;
-//                            System.out.println(TargetRadian);
-                        } else {
-                            TargetRadian = (Math.asin((xTarget) / Math.sqrt(a))) + 6.28;
-//                            System.out.println(TargetRadian);
+                        TargetRadian = Math.atan2(xTarget,yTarget);
+                        if(TargetRadian<0){
+                            TargetRadian += 6.28;
+
                         }
                         double pointWatchX = (100 * Math.sin(TargetRadian) + Picture.width/2);
                         double pointWatchY = (100 * Math.cos(TargetRadian) + Picture.height/2);
@@ -373,7 +368,7 @@ static ArrayList<Point> pointsOfArrow = new ArrayList<>();
 //                    }
                     double length = 0;
                     nearPoint = new double[2];
-                    for (double[] ePoint : enemy.getPhantomXY()) {
+                    double[] ePoint = enemy.getPhantomXY().get(0);
 
 
                         for (double[] point : player.getPhantomXY()) {
@@ -401,7 +396,7 @@ static ArrayList<Point> pointsOfArrow = new ArrayList<>();
 
                         ;
                         ;
-                    }
+
 //if(Picture.isEnd){
 //    enemy.moveCheck(new double[]{Picture.xMouse,Picture.yMouse}, p, true);
 //}else
@@ -474,11 +469,11 @@ static ArrayList<Point> pointsOfArrow = new ArrayList<>();
 
                 ready = true;
                 while (ready) {
-//                    try {
-//                        TimeUnit.MICROSECONDS.sleep(1);
-//                    } catch (Exception e) {
-//
-//                    }
+                    try {
+                        TimeUnit.MICROSECONDS.sleep(1);
+                    } catch (Exception e) {
+
+                    }
                 }
 
             }

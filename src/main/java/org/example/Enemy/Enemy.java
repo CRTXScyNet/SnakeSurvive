@@ -119,7 +119,7 @@ public void setCurrentDelay(double delay){
     public double[] taillessPhantomCopy = new double[2];
 
 
-    private int reverseCount = 100;
+    private int reverseCount = 10;
     private int reverse = reverseCount;
     private BufferedImage image;
     public static ArrayList<Boolean> snakeIsReady = new ArrayList<>();
@@ -162,6 +162,7 @@ public void setCurrentDelay(double delay){
         enemies.add(this);
         this.isActive = isActive;
 if(!isActive) {
+    delay = (int)(delayStat-Math.random()*(delayStat/4));
     color = new Color((int) (Math.random() * 50 + 200), (int) (Math.random() * 50 + 200), (int) (Math.random() * 50 + 200));
 }else {
     delay =(int)delayStatActive;
