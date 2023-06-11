@@ -122,7 +122,7 @@ yMouse = e.getY();
 rectanglUI.setLocation(xMouse-rectanglUI.width/2,yMouse-rectanglUI.height/2);
             image = new BufferedImage(1000, 1000, 1);
             doubles.clear();
-            for (int i = 1; i < image.getHeight() / 2; i += 20) {
+            for (int i = 1; i < image.getHeight() / 2; i += 1) {
                 for (int x = -i; x <= i; x ++) {
                     for (int y = -i; y <= i; y ++) {
                         boolean inShadow = false;
@@ -130,7 +130,7 @@ rectanglUI.setLocation(xMouse-rectanglUI.width/2,yMouse-rectanglUI.height/2);
                             y=y*-1;
                             continue;
                         }
-                        if (Math.pow(x, 2) + Math.pow(y, 2) < Math.pow(i, 2) && Math.pow(x, 2) + Math.pow(y, 2) > Math.pow(i - 1, 2)) {
+                        if (Math.pow(x, 2) + Math.pow(y, 2) <= Math.pow(i, 2) && Math.pow(x, 2) + Math.pow(y, 2) > Math.pow(i - 1, 2)) {
 
                             int drawX = x + image.getWidth() / 2;
                             int drawY = y + image.getHeight() / 2;
@@ -138,7 +138,7 @@ rectanglUI.setLocation(xMouse-rectanglUI.width/2,yMouse-rectanglUI.height/2);
                             double yTarget = y;
                             double TargetRadian = 0;
                             TargetRadian = Math.atan2(xTarget,yTarget);
-                            TargetRadian = TargetRadian - TargetRadian % 0.025;
+                            TargetRadian = TargetRadian - TargetRadian % 0.01;
 
                             if (doubles.size() > 0) {
                                 for (double d : doubles) {
@@ -146,6 +146,7 @@ rectanglUI.setLocation(xMouse-rectanglUI.width/2,yMouse-rectanglUI.height/2);
 
                                         if (d == TargetRadian) {
                                             inShadow = true;
+                                            image.setRGB((int) x + image.getWidth() / 2, (int) y + image.getHeight() / 2, Color.white.getRGB());
                                             break;
                                         }
                                     } catch (Exception e) {
@@ -160,13 +161,12 @@ rectanglUI.setLocation(xMouse-rectanglUI.width/2,yMouse-rectanglUI.height/2);
                                     if (rectanglUI.contains(new Point(drawX, drawY))) {
                                         try {
                                             doubles.add(TargetRadian);
-                                            continue;
                                         } catch (Exception e) {
                                             e.printStackTrace();
                                         }
                                     }
 //                                }
-                            image.setRGB((int) x + image.getWidth() / 2, (int) y + image.getHeight() / 2, Color.white.getRGB());
+
 
                         }
 

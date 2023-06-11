@@ -1,15 +1,18 @@
 package org.example;
 
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.Date;
 
 
 public class test2{
+    File file = new File("C:\\Projects\\SnakeSurvive\\src\\back.jpg");
     static BufferedImage image = new BufferedImage(500,500,1);
     static JLabel label = new JLabel(new ImageIcon(image));
     static Point pointTarg = new Point(100, 100);
@@ -17,9 +20,11 @@ public class test2{
     static JFrame frame = new JFrame();
 
     test2(){
+        try{
+            image = ImageIO.read(file);
+        }catch (Exception e){
 
-
-
+        }
         frame.setSize(image.getWidth(),image.getHeight());
         frame.setLocationRelativeTo(null);
 
@@ -58,7 +63,11 @@ public class test2{
     }
 
 public void setTarg(int x,int y){
-        image = new BufferedImage(500,500,1);
+    try{
+        image = ImageIO.read(file);
+    }catch (Exception e){
+
+    }
         pointTarg.setLocation(x,y);
     image.setRGB(x,y,Color.white.getRGB());
     image.setRGB(pointCent.x,pointCent.y,Color.white.getRGB());

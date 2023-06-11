@@ -27,9 +27,12 @@ public class Picture extends JFrame {
     static JPanel panel = new JPanel();
 
     public static ExecutorService executorService = Executors.newSingleThreadExecutor();
-    public static BufferedImage image = new BufferedImage((int) (dimension.width * 0.9), (int) (dimension.height * 0.9), 1);
+    File file = new File("C:\\Projects\\SnakeSurvive\\src\\back.jpg");
+    public static BufferedImage image = new BufferedImage((int) (dimension.width * 0.5), (int) (dimension.height * 0.9), 1);
+    public static Rectangle rect = new Rectangle((int)(image.getWidth()/2-300),(int)(image.getHeight()/2-300),600,600);
 
-
+    //54, 107, 71
+    Color ground = new Color(54, 107, 71);
     static boolean isAdd = false;
     static boolean isDelete = false;
     static boolean isPaused = false;
@@ -55,6 +58,7 @@ public class Picture extends JFrame {
     static JPanel pausePanel = new JPanel();
     static JLabel pauseLabel = new JLabel("Пауза");
     static JLabel cont = new JLabel("Продолжить?");
+    static ArrayList<float[]> background = new ArrayList<>();
 
 
     //    static public double getProgress() {
@@ -74,6 +78,7 @@ public class Picture extends JFrame {
 
             }
         }
+
         setSize(image.getWidth(), image.getHeight());
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -324,20 +329,31 @@ public class Picture extends JFrame {
         }
 
         this.setVisible(true);
+        for (int x = rect.x; x < rect.x+rect.width; x+=10) {
+            for (int y = rect.y; y < rect.y+rect.height; y+=10) {
+//                if (Math.pow(x - (double) (Picture.width / 2), 2) + Math.pow(y - (double) Picture.height / 2, 2) < Math.pow(300, 2)) {
 
+                    background.add(new float[]{x,y});
+
+
+//                }
+            }
+        }
 
         executorService.submit(() -> {
 
-            Process process = new Process();
+            Process process = new Process(image.getWidth(), image.getHeight());
         });
         ArrayList<Point> pointsOfApple = new ArrayList<>();
         ArrayList<Point> pointsOfArrow = new ArrayList<>();
         ArrayList<Point> points = new ArrayList<>();
         ArrayList<Color> colors = new ArrayList<>();
+        Polygon polygon = new Polygon();
         while (Process.ready) {
         }
         try {
             while (true) {
+
                 Point point = MouseInfo.getPointerInfo().getLocation();
                 xMouse = point.x - getX();
                 yMouse = point.y - getY();
@@ -347,16 +363,23 @@ public class Picture extends JFrame {
                     pointsOfArrow = Process.getPointsOfArrow();
                     points = Process.getPoints();
                     colors = Process.getColors();
-//                    direction = Process.getDirection();
-                    image = new BufferedImage(1858, 1080, 1);
-//                    if (Process.screenMove) {
+                    polygon = Process.getPolygon();
+                    direction = Process.getDirection();
+//                    try{
+//                        image = ImageIO.read(file);
+//                    }catch (Exception e){
+//
+//                    }
+                    image = new BufferedImage((int) (dimension.width * 0.5), (int) (dimension.height * 0.9), 1);
+                    if (Process.screenMove && !isEnd && mouseControl&&!isPaused) {
+                        background = moveSceen(background);
 ////                        image = new BufferedImage(1858, 1080, 1);
 ////                        pointsOfApple = moveSceen(pointsOfApple);
 ////                        pointsToErase = moveSceen(pointsToErase);
 ////                        points = moveSceen(points);
 //
 //
-//                    }
+                    }
 //                    for (int i = 0; i < pointsToErase.size(); i++) {
 //                        try {
 ////                            if (pointsToErase.get(i).x < image.getWidth() && pointsToErase.get(i).x >= 0 && pointsToErase.get(i).y < image.getHeight() && pointsToErase.get(i).y >= 0) {
@@ -365,111 +388,73 @@ public class Picture extends JFrame {
 //                            } catch (Exception e) {
 //                            }
 ////                            }
-//                        } catch (Exception e) {
+//                        } catch (Exception e) t
 ////                            e.printStackTrace();
 //
 //                        }
 //                    }
-                    ArrayList<double[]> doubles = new ArrayList<>();
-                    for (int p = 0; p < points.size(); p++) {
-                        try {
-//                            if (points.get(i).x < image.getWidth() && points.get(i).x >= 0 && points.get(i).y < image.getHeight() && points.get(i).y >= 0) {
-                            if (Math.pow(points.get(p).x - (double) (width / 2), 2) + Math.pow(points.get(p).y - (double) height / 2, 2) < Math.pow(300, 2)) {
-//                                try {
-//                                for (int i = 1; i < image.getHeight() / 2; i += 20) {
-//                                    for (int x = -i; x <= i; x++) {
-//                                        for (int y = -i; y <= i; y++) {
-//                                            boolean inShadow = false;
-//                                            if (Math.pow(x, 2) + Math.pow(y, 2) < Math.pow(i - 1, 2)) {
-//                                                y = y * -1;
-//                                                continue;
-//                                            }
-//                                            if (Math.pow(x, 2) + Math.pow(y, 2) < Math.pow(i, 2) && Math.pow(x, 2) + Math.pow(y, 2) > Math.pow(i - 1, 2)) {
-//
-//                                                int drawX = x + image.getWidth() / 2;
-//                                                int drawY = y + image.getHeight() / 2;
-//                                                double xTarget = x;
-//                                                double yTarget = y;
-//                                                double TargetRadian = 0;
-//                                                TargetRadian = Math.atan2(xTarget, yTarget);
-//                                                TargetRadian = TargetRadian - TargetRadian % 0.025;
-//
-//                                                if (doubles.size() > 0) {
-//                                                    for (double d : doubles) {
-//                                                        try {
-//
-//                                                            if (d == TargetRadian) {
-//                                                                inShadow = true;
-//                                                                break;
-//                                                            }
-//                                                        } catch (Exception e) {
-//                                                            e.printStackTrace();
-//                                                        }
-//                                                    }
-//                                                }
-//                                                if (inShadow) {
-//                                                    continue;
-//                                                } else
-////                                for(Rectangle rectangle : rectangles) {
-//                                                    if (rectanglUI.contains(new Point(drawX, drawY))) {
-//                                                        try {
-//                                                            doubles.add(TargetRadian);
-//                                                            continue;
-//                                                        } catch (Exception e) {
-//                                                            e.printStackTrace();
-//                                                        }
-//                                                    }
-////                                }
-//                                                image.setRGB((int) x + image.getWidth() / 2, (int) y + image.getHeight() / 2, Color.white.getRGB());
-//
-//                                            }
-//
-//                                        }
-//                                    }
-//
-//
-////
-//                                }
-                                image.setRGB(points.get(p).x, points.get(p).y, colors.get(p).getRGB());
-//                                }catch (Exception e){
-//                                }
-                            }
-                        } catch (Exception e) {
-//                            e.printStackTrace();
+                    if (polygon != null) {
+
+                        for (float[] point1 : background) {
+               if (Math.pow(point1[0] - (double) (Picture.width / 2), 2) + Math.pow(point1[1] - (double) Picture.height / 2, 2) < Math.pow(300, 2)) {
+                   if (polygon.contains(new Point((int) point1[0], (int) point1[1]))) {
+                       image.setRGB((int) point1[0], (int) point1[1], ground.getRGB());
+                   }
+               }
+
+
 
                         }
-                    }
-                    for (int i = 0; i < pointsOfApple.size(); i++) {
-                        try {
-//                            if (pointsOfApple.get(i).x < image.getWidth() && pointsOfApple.get(i).x >= 0 && pointsOfApple.get(i).y < image.getHeight() && pointsOfApple.get(i).y >= 0) {
-                            if (Math.pow(pointsOfApple.get(i).x - (double) (width / 2), 2) + Math.pow(pointsOfApple.get(i).y - (double) height / 2, 2) < Math.pow(300, 2)) {
-//
-//                                try {
-                                image.setRGB(pointsOfApple.get(i).x, pointsOfApple.get(i).y, Apple.color.getRGB());
-//                                }catch (Exception e){
-//                                }
-                            }
-                        } catch (Exception e) {
-//                            e.printStackTrace();
-
-                        }
-                    }
-                    try {
-                        for (int i = 0; i < pointsOfArrow.size(); i++) {
+//public static Rectangle rect = new Rectangle((int)(image.getWidth()*0.25),(int)(image.getHeight()*0.25),(int)(image.getWidth()*0.5),(int)(image.getHeight()*0.5));
+                        for (int i = 0; i < points.size(); i++) {
                             try {
-                                if (pointsOfArrow.get(i).x < image.getWidth() && pointsOfArrow.get(i).x >= 0 && pointsOfArrow.get(i).y < image.getHeight() && pointsOfArrow.get(i).y >= 0) {
+                                if (polygon.contains(points.get(i))) {
+                                    if (points.get(i).x < width && points.get(i).x >= 0 && points.get(i).y < height && points.get(i).y >= 0) {
 //                                try {
-                                    image.setRGB(pointsOfArrow.get(i).x, pointsOfArrow.get(i).y, Apple.color.getRGB());
+                                        image.setRGB(points.get(i).x, points.get(i).y, colors.get(i).getRGB());
 //                                }catch (Exception e){
 //                                }
+                                    }
                                 }
                             } catch (Exception e) {
 //                            e.printStackTrace();
 
                             }
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                        for (int i = 0; i < pointsOfApple.size(); i++) {
+                            try {
+//                            if (pointsOfApple.get(i).x < image.getWidth() && pointsOfApple.get(i).x >= 0 && pointsOfApple.get(i).y < image.getHeight() && pointsOfApple.get(i).y >= 0) {
+                                if (polygon.contains(pointsOfApple.get(i))) {
+                                    if (Math.pow(pointsOfApple.get(i).x - (double) (width / 2), 2) + Math.pow(pointsOfApple.get(i).y - (double) height / 2, 2) < Math.pow(300, 2)) {
+//
+//                                try {
+                                        image.setRGB(pointsOfApple.get(i).x, pointsOfApple.get(i).y, Apple.color.getRGB());
+//                                }catch (Exception e){
+//                                }
+                                    }
+                                }
+                            } catch (Exception e) {
+//                            e.printStackTrace();
+
+                            }
+                        }
+                        try {
+                            for (int i = 0; i < pointsOfArrow.size(); i++) {
+                                try {
+                                    if (pointsOfArrow.get(i).x < image.getWidth() && pointsOfArrow.get(i).x >= 0 && pointsOfArrow.get(i).y < image.getHeight() && pointsOfArrow.get(i).y >= 0) {
+//                                try {
+                                        image.setRGB(pointsOfArrow.get(i).x, pointsOfArrow.get(i).y, Apple.color.getRGB());
+//                                }catch (Exception e){
+//                                }
+                                    }
+                                } catch (Exception e) {
+//                            e.printStackTrace();
+
+                                }
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
 
 //                for (Point p : targets){
@@ -548,12 +533,24 @@ public class Picture extends JFrame {
 
     }
 
-    private ArrayList<Point> moveSceen(ArrayList<Point> list) {
+    private ArrayList<float[]> moveSceen(ArrayList<float[]> list) {
 
-        ArrayList<Point> newlistist = new ArrayList<>();
+        ArrayList<float[]> newlistist = new ArrayList<>();
 
         for (int i = 0; i < list.size(); i++) {
-            newlistist.add(new Point((int) (list.get(i).x + direction[0]), (int) (list.get(i).y + direction[1])));
+            float newX = (float) (list.get(i)[0]- direction[0]);
+            float newY = (float) (list.get(i)[1]- direction[1]);
+            if (newX < rect.x) {
+                newX += rect.width;
+            } else if (newX > rect.x+rect.width) {
+                newX -= rect.width;
+            }
+            if (newY < rect.y) {
+                newY += rect.height;
+            } else if (newY > rect.y+rect.height) {
+                newY -= rect.height;
+            }
+            newlistist.add(new float[]{newX, newY});
         }
         return newlistist;
     }

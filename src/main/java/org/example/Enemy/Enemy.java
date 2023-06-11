@@ -4,7 +4,7 @@ import org.example.Painter.Picture;
 import org.example.Painter.Process;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -13,16 +13,18 @@ public class Enemy {
     private static final double innerPlace = 1;
     private static final double exteriorBorder = (1 - innerPlace) / 2;
     static final double[] playGround = new double[]{innerPlace, exteriorBorder};
+
     public void moveXy(double[] direct) {
-        for(int i = 0;i< xy.size();i++){
-            xy.set(i,new double[]{xy.get(i)[0]-direct[0],xy.get(i)[1]-direct[1]});
+        for (int i = 0; i < xy.size(); i++) {
+            xy.set(i, new double[]{xy.get(i)[0] - direct[0], xy.get(i)[1] - direct[1]});
         }
-        for(int i = 0;i< phantomXY.size();i++){
-            phantomXY.set(i,new double[]{phantomXY.get(i)[0]-direct[0],phantomXY.get(i)[1]-direct[1]});
+        for (int i = 0; i < phantomXY.size(); i++) {
+            phantomXY.set(i, new double[]{phantomXY.get(i)[0] - direct[0], phantomXY.get(i)[1] - direct[1]});
         }
 
 
     }
+
     private ArrayList<double[]> xy = new ArrayList<>();
     private ArrayList<double[]> directionOfPhantomXY = new ArrayList<>();
     private ArrayList<double[]> phantomXY = new ArrayList<>();
@@ -34,40 +36,23 @@ public class Enemy {
         }
     }
 
-    private double smoothStep;
+
     public static ArrayList<Enemy> enemies = new ArrayList<>();
     public static ArrayList<Enemy> activeEnemies = new ArrayList<>();
     private Color color = new Color(Color.white.getRGB());
 
-    boolean perviyNah = false;
-
-    public void setPerviyNah(boolean perviyNah) {
-        this.perviyNah = perviyNah;
-    }
-
-    public double getChance() {
-        return chance;
-    }
-
-    private double chance = Math.random() * 0.8 + 0.2;
-
     static double size = 5;
     static double stepOfSize = 2;
 
-    public static void setStep() {
-        Enemy.step = (int) (Enemy.getSize() * stepOfSize);
-    }
 
     public static int step = (int) (Enemy.getSize() * stepOfSize);
-    static double delayStat = 80;
-    static double delayStatActive = 30;
+    static double delayStat = 40;
+    static double delayStatActive = 15;
     private double delayDouble = delayStat;
     private int delay = (int) delayDouble;
     private int delayCount = 0;
     private double timerStat = 1000;
     private double timer = timerStat;
-
-
 
 
     public void setEatAndAngry(boolean eatAndAngry) {
@@ -93,18 +78,20 @@ public class Enemy {
     public double getDelay() {
         return delay;
     }
-public void setCurrentDelay(double delay){
-    delayDouble = delay;
-    this.delay = (int) delayDouble;
+
+    public void setCurrentDelay(double delay) {
+        delayDouble = delay;
+        this.delay = (int) delayDouble;
 
     }
+
     public void setDelay() {
         if (delay < 100) {
-            if (!isActive){
+            if (!isActive) {
                 delayDouble += 1;
                 this.delay = (int) delayDouble;
-            }else{
-                if(delay>3) {
+            } else {
+                if (delay > 3) {
                     delayDouble -= 1;
                     this.delay = (int) delayDouble;
                 }
@@ -113,63 +100,44 @@ public void setCurrentDelay(double delay){
         }
     }
 
-
-    double[] tailless = new double[2];
-    public double[] taillessCopy = new double[2];
-    public double[] taillessPhantomCopy = new double[2];
-
-
     private int reverseCount = 10;
     private int reverse = reverseCount;
-    private BufferedImage image;
+
     public static ArrayList<Boolean> snakeIsReady = new ArrayList<>();
 
-    public static boolean allEnemyIsReady() {
 
-        if (snakeIsReady.size() != enemies.size()) {
-            return false;
-        }
-        return true;
-    }
-
-    ;
     static boolean isTeleport = false;
 
 
     private boolean isMove = false;
 
-    public boolean isMove() {
-        return isMove;
-    }
-
-    public void setMove(boolean move) {
-        isMove = move;
-    }
 
     public static int snakeLength = 10;
 
     public boolean isActive = false;
     private int width;
     private int height;
-    public Enemy(BufferedImage image,boolean isActive) {
+
+    public Enemy(int width, int height, boolean isActive) {
 //        xy.add(new int[]{(int)(Math.random()*imahe.getWidth()*playGround[0])+(int)(imahe.getWidth()*playGround[1]),(int)(Math.random()*imahe.getHeight()*playGround[0])+(int)(imahe.getHeight()*playGround[1])});
-        this.image = image;
+
+
+        this.width = width;
+        this.height = height;
         Point co = getRandomPoint();
-        width = Picture.image.getWidth();
-        width = Picture.image.getHeight();
         xy.add(new double[]{co.x, co.y});
         setPhantomXY();
         enemies.add(this);
         this.isActive = isActive;
-if(!isActive) {
-    delay = (int)(delayStat-Math.random()*(delayStat/4));
-    color = new Color((int) (Math.random() * 50 + 200), (int) (Math.random() * 50 + 200), (int) (Math.random() * 50 + 200));
-}else {
-    delay =(int)delayStatActive;
-    delayDouble = delayStatActive;
-    activeEnemies.add(this);
-    color = new Color(150,150,255);
-}
+        if (!isActive) {
+            delay = (int) (delayStat - Math.random() * (delayStat / 4));
+            color = new Color((int) (Math.random() * 50 + 200), (int) (Math.random() * 50 + 200), (int) (Math.random() * 50 + 200));
+        } else {
+            delay = (int) delayStatActive;
+            delayDouble = delayStatActive;
+            activeEnemies.add(this);
+            color = new Color(150, 150, 255);
+        }
         for (int i = 0; i < snakeLength + 2; i++) {
             addCircle();
         }
@@ -198,10 +166,10 @@ if(!isActive) {
     public void reset() {
         Point co = getRandomPoint();
         eatAndAngry = false;
-        if(isActive){
+        if (isActive) {
             delayDouble = delayStatActive;
             delay = (int) delayStatActive;
-        }else {
+        } else {
             delayDouble = delayStat;
             delay = (int) delayStat;
         }
@@ -216,11 +184,11 @@ if(!isActive) {
     }
 
     public Point getRandomPoint() {
-        int x = (int) (Math.random() * (image.getWidth() * playGround[0] / (int) (size * stepOfSize))) * (int) (size * stepOfSize) + (int) (image.getWidth() * playGround[1]);
-        int y = (int) (Math.random() * (image.getHeight() * playGround[0] / (int) (size * stepOfSize))) * (int) (size * stepOfSize) + (int) (image.getHeight() * Enemy.playGround[1]);
+        int x = (int) (Math.random() * (width * playGround[0] / (int) (size * stepOfSize))) * (int) (size * stepOfSize) + (int) (width * playGround[1]);
+        int y = (int) (Math.random() * (height * playGround[0] / (int) (size * stepOfSize))) * (int) (size * stepOfSize) + (int) (height * Enemy.playGround[1]);
 
-        if(Math.pow(Math.abs(image.getWidth()/2 - x), 2) + Math.pow(Math.abs(image.getHeight()/2 - y), 2) <= Math.pow(300, 2)){
-return getRandomPoint();
+        if (Math.pow(Math.abs(width / 2 - x), 2) + Math.pow(Math.abs(height / 2 - y), 2) <= Math.pow(300, 2)) {
+            return getRandomPoint();
         }
         return new Point(x, y);
     }
@@ -244,8 +212,8 @@ return getRandomPoint();
     private boolean reset = false;
 
 
-    public void moveCheck(double[] point,double[] apple, boolean isNearby) {
-        try{
+    public void moveCheck(double[] point, double[] apple, boolean isNearby) {
+        try {
 
 
             if (eatAndAngry) {
@@ -259,15 +227,16 @@ return getRandomPoint();
             if (delayCount < delay) {                    //проверка прошло ли достаточно времени, чтобы делать новый шаг
                 delayCount++;
                 movePhantom();
+                setLines();
                 if (reverse < reverseCount) {                    //проверка прошло ли достаточно времени с прошлого разворота
                     reverse++;
                 }
                 return;
             }
-            if(eatAndAngry&&timer<=0){
+            if (eatAndAngry && timer <= 0) {
                 timer = timerStat;
                 eatAndAngry = false;
-                setCurrentDelay(getDelay()*2);
+                setCurrentDelay(getDelay() * 2);
                 setDelay();
             }
 
@@ -302,14 +271,18 @@ return getRandomPoint();
                     }
                 }
             } else {
-                if (eatAndAngry||Picture.isEnd) {
+                if (eatAndAngry || Picture.isEnd) {
                     xTarget = point[0];
                     yTarget = point[1];
-                }else {
+                } else {
 
                     xTarget = apple[0];
                     yTarget = apple[1];
                 }
+            }
+            if(Picture.isEnd){
+                xTarget = Picture.xMouse;
+                yTarget = Picture.yMouse;
             }
             double x = getXy().get(0)[0];
             double y = getXy().get(0)[1];
@@ -360,9 +333,36 @@ return getRandomPoint();
             } else {
                 lastWay(x, y, upNotSelf, downNotSelf, rightNotSelf, leftNotSelf);
             }
+            setLines();
 
 
-        }catch (Exception e){
+        } catch (Exception e) {
+
+        }
+    }
+    public void setLines(){
+        points.clear();
+        lines.clear();
+        if (Picture.rect.contains(new Point((int) phantomXY.get(0)[0], (int) phantomXY.get(0)[1]))) {
+            points.add(new Point((int) phantomXY.get(0)[0], (int) phantomXY.get(0)[1]));
+            for (int i = 1; i < phantomXY.size()-1; i++) {
+                if ((int) phantomXY.get(i-1)[0] != (int) phantomXY.get(i+1)[0] && (int) phantomXY.get(i-1)[1] != (int) phantomXY.get(i+1)[1]) {
+                    points.add(new Point((int) phantomXY.get(i)[0], (int) phantomXY.get(i)[1]));
+                }
+
+
+            }
+            points.add(new Point((int) phantomXY.get(phantomXY.size() - 1)[0], (int) phantomXY.get(phantomXY.size() - 1)[1]));
+            Point t = null;
+
+            for (int i = 0; i < points.size(); i++) {
+                if (t == null) {
+                    t = points.get(i);
+                } else {
+                    lines.add(new Line(t, points.get(i)));
+                    t = new Point(points.get(i));
+                }
+            }
 
         }
     }
@@ -393,7 +393,7 @@ return getRandomPoint();
                 for (double[] v : variants) {
                     boolean isClear = false;
                     for (double[] i : xy) {
-                        if (i[0]== v[0] && i[1] == v[1]) {
+                        if (i[0] == v[0] && i[1] == v[1]) {
                             isClear = false;
                             break;
                         } else {
@@ -402,7 +402,7 @@ return getRandomPoint();
 
                     }
                     if (isClear) {
-
+//TODO
 
                         for (Enemy snake1 : Enemy.enemies) {
                             if (!this.equals(snake1)) {
@@ -446,37 +446,26 @@ return getRandomPoint();
     private void notSelf(double x, double y) {
 
         for (double[] i : getXy()) {
-            if ((int)i[0] == (int)x + step && (int)i[1] == (int)y) {
+            if ((int) i[0] == (int) x + step && (int) i[1] == (int) y) {
                 rightNotSelf = false;
-            } else if ((int)i[0] == (int)x && (int)i[1] ==(int) y + step) {
+            } else if ((int) i[0] == (int) x && (int) i[1] == (int) y + step) {
                 downNotSelf = false;
-            } else if ((int)i[0] == (int)x - step && (int)i[1] == (int)y) {
+            } else if ((int) i[0] == (int) x - step && (int) i[1] == (int) y) {
                 leftNotSelf = false;
-            } else if ((int)i[0] == (int)x && (int)i[1] == (int)y - step) {
-                upNotSelf = false;
-            }
-        }
-        for (double[] i : getXy()) {
-            if ((int)i[0] == (int)x + step && (int)i[1] == (int)y) {
-                rightNotSelf = false;
-            } else if ((int)i[0] == (int)x && (int)i[1] ==(int) y + step) {
-                downNotSelf = false;
-            } else if ((int)i[0] == (int)x - step && (int)i[1] == (int)y) {
-                leftNotSelf = false;
-            } else if ((int)i[0] == (int)x && (int)i[1] == (int)y - step) {
+            } else if ((int) i[0] == (int) x && (int) i[1] == (int) y - step) {
                 upNotSelf = false;
             }
         }
         for (Enemy snake1 : Enemy.enemies) {
             if (!this.equals(snake1)) {
                 for (double[] i : snake1.getXy()) {
-                    if ((int)i[0] == (int)x + step && (int)i[1] == (int)y) {
+                    if ((int) i[0] == (int) x + step && (int) i[1] == (int) y) {
                         rightNotSelf = false;
-                    } else if ((int)i[0] == (int)x && (int)i[1] ==(int) y + step) {
+                    } else if ((int) i[0] == (int) x && (int) i[1] == (int) y + step) {
                         downNotSelf = false;
-                    } else if ((int)i[0] == (int)x - step && (int)i[1] == (int)y) {
+                    } else if ((int) i[0] == (int) x - step && (int) i[1] == (int) y) {
                         leftNotSelf = false;
-                    } else if ((int)i[0] == (int)x && (int)i[1] == (int)y - step) {
+                    } else if ((int) i[0] == (int) x && (int) i[1] == (int) y - step) {
                         upNotSelf = false;
                     }
                 }
@@ -497,26 +486,13 @@ return getRandomPoint();
 
                 }
             }
-//            if (directionOfPhantomXY.size() > 1) {
-//                try {
-//                    taillessCopy[0] += directionOfPhantomXY.get(directionOfPhantomXY.size() - 2)[0];
-//                    taillessCopy[1] += directionOfPhantomXY.get(directionOfPhantomXY.size() - 2)[1];
-//                } catch (Exception e) {
-//                    taillessCopy[0] += directionOfPhantomXY.get(directionOfPhantomXY.size() - 1)[0];
-//                    taillessCopy[1] += directionOfPhantomXY.get(directionOfPhantomXY.size() - 1)[1];
-//                }
-//            }
-//            if (directionOfPhantomXY.size() > 1) {
-//                taillessPhantomCopy[0] += directionOfPhantomXY.get(directionOfPhantomXY.size() - 1)[0];
-//                taillessPhantomCopy[1] += directionOfPhantomXY.get(directionOfPhantomXY.size() - 1)[1];
-//            }
+
 
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(e);
         }
-//xy.add(0,new int[]{x,y});
-//xy.remove(xy.size()-1);
+
     }
 
     public void move(double x, double y) {
@@ -524,37 +500,22 @@ return getRandomPoint();
         setPhantomXY();
         try {
 
-//
-//            if (tailless[0] != 0 && xy.size()<2) {
-//            if (Math.abs((xy.get(xy.size() - 1)[0]) - tailless[0]) > step || Math.abs((xy.get(xy.size() - 1)[1] - tailless[1])) > step) {
-//
-//                directionOfPhantomXY.add(new double[]{0, 0});
-//
-//            } else {
-//
-//                directionOfPhantomXY.add(new double[]{((xy.get(xy.size() - 1)[0]) - tailless[0]) / (delay + 1), (xy.get(xy.size() - 1)[1] - tailless[1]) / (delay + 1)});
-//            }
-//            taillessPhantomCopy = new double[]{tailless[0], tailless[1]};
-//            }
-
-//            tailless = new double[]{(xy.get(xy.size() - 1)[0]), xy.get(xy.size() - 1)[1]};
             for (int i = xy.size() - 1; i >= 0; i--) {
                 try {
                     if (i == xy.size() - 1) {
-                        if (Math.abs(((double) xy.get(i)[0]- phantomXY.get(i)[0])) > step || Math.abs(((double) xy.get(i)[1] - phantomXY.get(i)[1])) > step) {
+                        if (Math.abs(((double) xy.get(i)[0] - phantomXY.get(i)[0])) > step || Math.abs(((double) xy.get(i)[1] - phantomXY.get(i)[1])) > step) {
 //                            directionOfPhantomXY.add(0, new double[]{0, 0});
 //                            phantomXY.get(i)[0] = xy.get(i).x;
 //                            phantomXY.get(i)[1] = xy.get(i).y;
                         } else {
 
-                        phantomXY.get(i)[0] = xy.get(i)[0];
-                        phantomXY.get(i)[1] = xy.get(i)[1];
+                            phantomXY.get(i)[0] = xy.get(i)[0];
+                            phantomXY.get(i)[1] = xy.get(i)[1];
                         }
                     }
                     xy.get(i)[0] = xy.get(i - 1)[0];
                     xy.get(i)[1] = xy.get(i - 1)[1];
                     directionOfPhantomXY.add(0, new double[]{((double) xy.get(i)[0] - phantomXY.get(i)[0]) / (delay + 1), ((double) xy.get(i)[1] - phantomXY.get(i)[1]) / (delay + 1)});
-
 
                 } catch (IndexOutOfBoundsException e) {
 
@@ -564,25 +525,8 @@ return getRandomPoint();
             phantomXY.get(0)[1] = xy.get(0)[1];
             xy.get(0)[0] = x;
             xy.get(0)[1] = y;
-//            if (Math.abs(((double) xy.get(0).x - phantomXY.get(0)[0])) > step || Math.abs(((double) xy.get(0).y - phantomXY.get(0)[1])) > step) {
-//                directionOfPhantomXY.add(0, new double[]{0, 0});
-//
-////                tailless[0] = phantomXY.get(phantomXY.size() - 1)[0];
-////                tailless[1] = phantomXY.get(phantomXY.size() - 1)[1];
-////                directionOfPhantomXY.add(new double[]{0,directionOfPhantomXY.get(directionOfPhantomXY.size()-1)[1]});
-//            } else {
+
             directionOfPhantomXY.add(0, new double[]{((double) xy.get(0)[0] - phantomXY.get(0)[0]) / (delay + 1), ((double) xy.get(0)[1] - phantomXY.get(0)[1]) / (delay + 1)});
-
-//                taillessCopy[0] = phantomXY.get(phantomXY.size() - 1)[0] - xy.get(xy.size() - 1).x+phantomXY.get(phantomXY.size() - 1)[0];
-//                taillessCopy[1] = phantomXY.get(phantomXY.size() - 1)[1] - xy.get(xy.size() - 1).y+ phantomXY.get(phantomXY.size() - 1)[1];
-//                directionOfPhantomXY.add(new double[]{directionOfPhantomXY.get(directionOfPhantomXY.size()-1)[0],directionOfPhantomXY.get(directionOfPhantomXY.size()-1)[1]});
-
-//            }
-//            if(xy.size()>1){
-//
-//            taillessCopy = new double[]{phantomXY.get(phantomXY.size() - 1)[0], phantomXY.get(phantomXY.size() - 1)[1]};
-//            }
-
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -591,6 +535,9 @@ return getRandomPoint();
 //xy.add(0,new int[]{x,y});
 //xy.remove(xy.size()-1);
     }
+
+    ArrayList<Point> points = new ArrayList<>();
+    public ArrayList<Line> lines = new ArrayList<>();
 
     public boolean reverse() {
         try {

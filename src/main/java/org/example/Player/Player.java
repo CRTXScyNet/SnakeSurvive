@@ -4,7 +4,7 @@ import org.example.Enemy.Enemy;
 import org.example.Painter.Picture;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
+
 import java.sql.Time;
 import java.text.DecimalFormat;
 import java.time.LocalTime;
@@ -57,7 +57,7 @@ public class Player {
     }
 
     public static int step = (int) (Player.getSize() * stepOfSize);
-    static double delayStat = 6;
+    static double delayStat = 1;
     private double delayDouble = delayStat;
     private int delay = (int) delayDouble;
     private int delayCount = 0;
@@ -68,7 +68,7 @@ public class Player {
 
     public void setDelay() {
         if (delay < 100) {
-            delay+= 1;
+//            delay+= 1;
 //            this.delay = (int) delayDouble;
         }
     }
@@ -77,7 +77,7 @@ public class Player {
     public double[] taillessPhantomCopy = new double[2];
     private int reverseCount = 100;
     private int reverse = reverseCount;
-    private BufferedImage image;
+
     private boolean isMove = false;
     public static int snakeLength = 10;
 
@@ -93,17 +93,17 @@ public class Player {
     }
 
     public static ArrayList<Player> players = new ArrayList<>();
-   static int width;
-   static int height;
-  public Player(BufferedImage image) {
+   private int width;
+   private int height;
+  public Player(int width,int height) {
 
 //        xy.add(new int[]{(int)(Math.random()*imahe.getWidth()*playGround[0])+(int)(imahe.getWidth()*playGround[1]),(int)(Math.random()*imahe.getHeight()*playGround[0])+(int)(imahe.getHeight()*playGround[1])});
-        this.image = image;
+
         Point co = getRandomPoint();
 //        xy.add(new double[]{co.x,co.y});
-      width = Picture.image.getWidth();
-      height = Picture.image.getHeight();
-      xy.add(new double[]{width/2,image.getHeight()/2});
+      this.width = width;
+      this.height = height;
+      xy.add(new double[]{width/2,height/2});
         setPhantomXY();
 
         players.add(this);
@@ -151,7 +151,7 @@ public class Player {
 
     public Point getRandomPoint() {
         int x = (int) (Math.random() * (width * playGround[0])) + (int) (width * playGround[1]);
-        int y = (int) (Math.random() * (image.getHeight() * playGround[0]))+ (int) (image.getHeight() * Player.playGround[1]);
+        int y = (int) (Math.random() * (height * playGround[0]))+ (int) (height * Player.playGround[1]);
         return new Point(x, y);
     }
 
@@ -174,11 +174,11 @@ public class Player {
     private boolean reset = false;
     private double tMouse = 1;
     static double stepRad = 0.1;
-    private double[] pointWatch = new double[]{width / 2, Picture.image.getHeight() / 2};
+    private double[] pointWatch = new double[]{width / 2, height / 2};
 
     void setRadian(Point Target) {
 
-//        stepRad = (1 - Math.sqrt(Math.pow(Math.abs(Target.x - xy.get(0)[0]), 2) + Math.pow(Math.abs(Target.y - xy.get(0)[1]), 2)) / Math.sqrt(Math.pow(width, 2) + Math.pow(image.getHeight(), 2)))/2;
+
         double yTarget = Target.y - xy.get(0)[1];
         double xTarget = Target.x - xy.get(0)[0];
         double TargetRadian = 0;
@@ -251,34 +251,12 @@ public class Player {
 static boolean isGrow = false;
     public void moveCheck(int targetX, int targetY, boolean mouseControl, boolean targetChanged) {
        try {
-
-//        SearchRegion once = SearchRegion.getRegion(xy.get(0).x, xy.get(0).y);
-//        try {
-//            if (!once.equals(region)) {
-//                once.addOrRemoveSnake(this);
-//                region.addOrRemoveSnake(this);
-////region = once;
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//            region.addOrRemoveSnake(this);
-//            for(SearchRegion region1 : region.getNearbyRegions()){
-//                region1.addOrRemoveSnake(this);
-//            }
-//        if(Math.abs(xy.get(0).x-Picture.width/2)>Picture.width*2 || Math.abs(xy.get(0).y-Picture.image.getHeight()/2)>Picture.image.getHeight()*2){
-//            Point co = getRandomPoint();
-//            move(co.x, co.y);
-//        }
-
-
             timer -= 1;
-
             if (timer <= 0) {
                 grow();
-                if (delay > 1) {
-                    delay -= 1;
-                }
+//                if (delay > 1) {
+//                    delay -= 1;
+//                }
                 timer = timerStat;
 
             }
@@ -305,7 +283,7 @@ static boolean isGrow = false;
                     yTarget = Picture.yMouse;
                 } else {
                     xTarget = width / 2;
-                    yTarget = image.getHeight() / 2;
+                    yTarget = height / 2;
                 }
 
                 double x = getXy().get(0)[0];
