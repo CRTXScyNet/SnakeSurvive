@@ -13,7 +13,8 @@ import java.util.Collections;
 import java.util.Date;
 
 public class Player {
-
+    private int width = Picture.width;
+    private int height =Picture.width;
     private static final double innerPlace = 0.9;
     private static final double exteriorBorder = (1 - innerPlace) / 2;
     static final double[] playGround = new double[]{innerPlace, exteriorBorder};
@@ -93,16 +94,15 @@ public class Player {
     }
 
     public static ArrayList<Player> players = new ArrayList<>();
-   private int width;
-   private int height;
-  public Player(int width,int height) {
+
+  public Player() {
+
 
 //        xy.add(new int[]{(int)(Math.random()*imahe.getWidth()*playGround[0])+(int)(imahe.getWidth()*playGround[1]),(int)(Math.random()*imahe.getHeight()*playGround[0])+(int)(imahe.getHeight()*playGround[1])});
 
         Point co = getRandomPoint();
 //        xy.add(new double[]{co.x,co.y});
-      this.width = width;
-      this.height = height;
+
       xy.add(new double[]{width/2,height/2});
         setPhantomXY();
 

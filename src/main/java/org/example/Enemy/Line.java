@@ -21,8 +21,8 @@ public     class Line {
     public Line(Point a, Point b) {
         f = a;
         s = b;
-//        if (a.equals(b))
-//            throw new IllegalArgumentException("Points are equal. There are endless number of lines through one point.");
+        if (a.equals(b))
+            throw new IllegalArgumentException("Points are equal. There are endless number of lines through one point.");
         double A = a.getY() - b.getY();
         double B = b.getX() - a.getX();
         if (B == 0) {
@@ -72,8 +72,11 @@ public     class Line {
 //        if(revert){
 //            System.out.println("dfgdfg");
 //        }
-        if (getK() == other.getK())
-            throw new IllegalArgumentException("Lines are parallel and do not intersect.");
+        if (getK() == other.getK()) {
+            this.k += 1;
+//            other.k -= 1;
+        }
+//            throw new IllegalArgumentException("Lines are parallel and do not intersect.");
         double x  = (other.getB() - getB()) / (getK() - other.getK());
         double y = getK() * x + getB();
         return new Point((int)x,(int)y);

@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 public class Process {
+    private int width = Picture.width;
+    private int height =Picture.height;
 
     static boolean ready = false;
     private boolean targetChanged = false;
@@ -65,17 +67,17 @@ public class Process {
     }
 
     static double[] direction = new double[2];
-    private int outLeft = (int) (Picture.image.getWidth() * 0.1 * -1) / Enemy.step * Enemy.step;
-    private int fromLeft = (int) (Picture.image.getWidth() * 1.2 * -1) / Enemy.step * Enemy.step;
+    private int outLeft = (int) (width* 0.1 * -1) / Enemy.step * Enemy.step;
+    private int fromLeft = (int) (width * 1.2 * -1) / Enemy.step * Enemy.step;
 
-    private int outRight = (int) (Picture.image.getWidth() + Picture.image.getWidth() * 0.1) / Enemy.step * Enemy.step;
-    private int fromRight = (int) (Picture.image.getWidth() * 1.2) / Enemy.step * Enemy.step;
+    private int outRight = (int) (width + width * 0.1) / Enemy.step * Enemy.step;
+    private int fromRight = (int) (width * 1.2) / Enemy.step * Enemy.step;
 
-    private int outUp = (int) (Picture.image.getHeight() * 0.2 * -1) / Enemy.step * Enemy.step;
-    private int fromUp = (int) (Picture.image.getHeight() * 1.3 * -1) / Enemy.step * Enemy.step;
+    private int outUp = (int) (height * 0.2 * -1) / Enemy.step * Enemy.step;
+    private int fromUp = (int) (height * 1.3 * -1) / Enemy.step * Enemy.step;
 
-    private int outDown = (int) (Picture.image.getHeight() + Picture.image.getHeight() * 0.2) / Enemy.step * Enemy.step;
-    private int fromDown = (int) (Picture.image.getHeight() * 1.3) / Enemy.step * Enemy.step;
+    private int outDown = (int) (height + height * 0.2) / Enemy.step * Enemy.step;
+    private int fromDown = (int) (height * 1.3) / Enemy.step * Enemy.step;
     private int agressiveMode = 300;
     ArrayList<Line> lines = new ArrayList<>();
     Walls walls;
@@ -89,22 +91,21 @@ public class Process {
         }
     });
 
-    private int width;
-    private int height;
+
 
     Process(int width, int height) {
-        this.width = width;
-        this.height = height;
+//        this.width = width;
+//        this.height = height;
 // width = Picture.image.getWidth();
 //        height = Picture.image.getHeight();
         walls = new Walls(width, height);
         Apple apple = new Apple(width, height);
-        Player player = new Player(width, height);
+        Player player = new Player();
         for (int i = 0; i < 20; i++) {
-            new Enemy(width, height, false);
+            new Enemy(false);
         }
         for (int i = 0; i < 10; i++) {
-            new Enemy(width, height, true);
+            new Enemy(true);
         }
 
 
@@ -145,8 +146,8 @@ public class Process {
 //                }
 //            }
 //        }
-        int halfWidth = Picture.image.getWidth() / 2;
-        int halfHeight = Picture.image.getHeight() / 2;
+        int halfWidth = width / 2;
+        int halfHeight = height/ 2;
         for (int x = -agressiveMode; x <= agressiveMode; x++) {
             for (int y = -agressiveMode; y <= +agressiveMode; y++) {
                 if ((Math.pow(x, 2)) + (Math.pow(y, 2)) >= Math.pow(agressiveMode - 1, 2) &&
@@ -719,9 +720,9 @@ Line lineL = null;
         double TargetRadian = getShadowRadian(curPoint, center);
 
 
-        double TargetRadian1 = TargetRadian + 0.06/*Math.toRadians(0.5)*/;
+        double TargetRadian1 = TargetRadian + 0.05/*Math.toRadians(0.5)*/;
         Point newPoint1 = new Point((int) (length * Math.sin(TargetRadian1)) + center.x, (int) (length * Math.cos(TargetRadian1)) + center.y);
-        double TargetRadian2 = TargetRadian - 0.06/*Math.toRadians(0.5)*/;
+        double TargetRadian2 = TargetRadian - 0.05/*Math.toRadians(0.5)*/;
         Point newPoint2 = new Point((int) (length * Math.sin(TargetRadian2)) + center.x, (int) (length * Math.cos(TargetRadian2)) + center.y);
         Point crossPoints1 = null;
         Point crossPoints2 = null;
@@ -803,6 +804,7 @@ Line lineL = null;
         if (crossedBranch && !radian1Useless) {
 //            Point sssuk = getNearPoint(crossPoints1, center);
             PolygonDots.add(crossPoints1,getShadowRadian(crossPoints1, center));
+
 //            pointsOfPoly.add(crossPoints1);
 //            pointsRad.add(getShadowRadian(crossPoints1, center));
 //                    g.drawLine(curPoint.x, curPoint.y, newPoint1.x, newPoint1.y);
@@ -915,7 +917,11 @@ Line lineL = null;
         int lenthY1 = Math.abs(crossPoint.y - pointOfLine1.y) + Math.abs(crossPoint.y - pointOfLine2.y) - Math.abs(pointOfLine1.y - pointOfLine2.y);
         int lenthX2 = Math.abs(crossPoint.x - center.x) + Math.abs(crossPoint.x - wall.x) - Math.abs(center.x - wall.x);
         int lenthY2 = Math.abs(crossPoint.y - center.y) + Math.abs(crossPoint.y - wall.y) - Math.abs(center.y - wall.y);
-        if (lenthX1 < 5 && lenthY1 < 5 && lenthX2 < 5 && lenthY2 < 5) {
+        if (lenthX1 < 5 && lenthY1 < 5 && lenthX2 < 5 && lenthY2 <5) {
+//            if(crossPoint.equals(wall)|crossPoint.equals(pointOfLine1)||crossPoint.equals(pointOfLine2)){
+//                return false;
+//            }
+
             return true;
         }
         return false;

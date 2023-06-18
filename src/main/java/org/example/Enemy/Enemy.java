@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.Date;
 
 public class Enemy {
+    private int width = Picture.width;
+    private int height =Picture.height;
     private static final double innerPlace = 1;
     private static final double exteriorBorder = (1 - innerPlace) / 2;
     static final double[] playGround = new double[]{innerPlace, exteriorBorder};
@@ -115,15 +117,9 @@ public class Enemy {
     public static int snakeLength = 10;
 
     public boolean isActive = false;
-    private int width;
-    private int height;
-
-    public Enemy(int width, int height, boolean isActive) {
-//        xy.add(new int[]{(int)(Math.random()*imahe.getWidth()*playGround[0])+(int)(imahe.getWidth()*playGround[1]),(int)(Math.random()*imahe.getHeight()*playGround[0])+(int)(imahe.getHeight()*playGround[1])});
 
 
-        this.width = width;
-        this.height = height;
+    public Enemy(boolean isActive) {
         Point co = getRandomPoint();
         xy.add(new double[]{co.x, co.y});
         setPhantomXY();

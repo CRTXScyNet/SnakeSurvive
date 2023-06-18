@@ -7,6 +7,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import java.awt.image.Kernel;
 import java.io.File;
 import java.util.Date;
 
@@ -19,7 +20,9 @@ public class test2{
     static Point pointCent = new Point(image.getWidth()/2,image.getHeight()/2);
     static JFrame frame = new JFrame();
 
+
     test2(){
+
         try{
             image = ImageIO.read(file);
         }catch (Exception e){

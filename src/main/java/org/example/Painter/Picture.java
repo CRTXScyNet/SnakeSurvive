@@ -28,8 +28,10 @@ public class Picture extends JFrame {
 
     public static ExecutorService executorService = Executors.newSingleThreadExecutor();
     File file = new File("C:\\Projects\\SnakeSurvive\\src\\back.jpg");
-    public static BufferedImage image = new BufferedImage((int) (dimension.width * 0.5), (int) (dimension.height * 0.9), 1);
-    public static Rectangle rect = new Rectangle((int)(image.getWidth()/2-300),(int)(image.getHeight()/2-300),600,600);
+    public static int width = (int) (dimension.width * 0.5);
+    public static int height = (int) (dimension.height * 0.9);
+    public static BufferedImage image = new BufferedImage(width, height, 1);
+    public static Rectangle rect = new Rectangle((int)(width/2-300),(int)(height/2-300),600,600);
 
     //54, 107, 71
     Color ground = new Color(54, 107, 71);
@@ -45,8 +47,7 @@ public class Picture extends JFrame {
     static int snakeAmount = 400;
 
 
-    static int width = 0;
-    static int height = 0;
+
     static boolean draw = false;
     static boolean reset = false;
     private double[] direction = new double[2];
@@ -79,11 +80,9 @@ public class Picture extends JFrame {
             }
         }
 
-        setSize(image.getWidth(), image.getHeight());
+        setSize(width, height);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        width = image.getWidth();
-        height = image.getHeight();
         pane.setBounds(0, 0, getWidth(), getHeight());
 
         label.setIcon(new ImageIcon(image));
@@ -342,7 +341,7 @@ public class Picture extends JFrame {
 
         executorService.submit(() -> {
 
-            Process process = new Process(image.getWidth(), image.getHeight());
+            Process process = new Process(width, height);
         });
         ArrayList<Point> pointsOfApple = new ArrayList<>();
         ArrayList<Point> pointsOfArrow = new ArrayList<>();
@@ -370,7 +369,7 @@ public class Picture extends JFrame {
 //                    }catch (Exception e){
 //
 //                    }
-                    image = new BufferedImage((int) (dimension.width * 0.5), (int) (dimension.height * 0.9), 1);
+                    image = new BufferedImage(width, height, 1);
                     if (Process.screenMove && !isEnd && mouseControl&&!isPaused) {
                         background = moveSceen(background);
 ////                        image = new BufferedImage(1858, 1080, 1);
@@ -382,7 +381,7 @@ public class Picture extends JFrame {
                     }
 //                    for (int i = 0; i < pointsToErase.size(); i++) {
 //                        try {
-////                            if (pointsToErase.get(i).x < image.getWidth() && pointsToErase.get(i).x >= 0 && pointsToErase.get(i).y < image.getHeight() && pointsToErase.get(i).y >= 0) {
+////                            if (pointsToErase.get(i).x < width && pointsToErase.get(i).x >= 0 && pointsToErase.get(i).y < height && pointsToErase.get(i).y >= 0) {
 //                            try {
 //                                image.setRGB(pointsToErase.get(i).x, pointsToErase.get(i).y, Color.black.getRGB());
 //                            } catch (Exception e) {
@@ -405,7 +404,7 @@ public class Picture extends JFrame {
 
 
                         }
-//public static Rectangle rect = new Rectangle((int)(image.getWidth()*0.25),(int)(image.getHeight()*0.25),(int)(image.getWidth()*0.5),(int)(image.getHeight()*0.5));
+//public static Rectangle rect = new Rectangle((int)(width*0.25),(int)(height*0.25),(int)(width*0.5),(int)(height*0.5));
                         for (int i = 0; i < points.size(); i++) {
                             try {
                                 if (polygon.contains(points.get(i))) {
@@ -423,7 +422,7 @@ public class Picture extends JFrame {
                         }
                         for (int i = 0; i < pointsOfApple.size(); i++) {
                             try {
-//                            if (pointsOfApple.get(i).x < image.getWidth() && pointsOfApple.get(i).x >= 0 && pointsOfApple.get(i).y < image.getHeight() && pointsOfApple.get(i).y >= 0) {
+//                            if (pointsOfApple.get(i).x < width && pointsOfApple.get(i).x >= 0 && pointsOfApple.get(i).y < height && pointsOfApple.get(i).y >= 0) {
                                 if (polygon.contains(pointsOfApple.get(i))) {
                                     if (Math.pow(pointsOfApple.get(i).x - (double) (width / 2), 2) + Math.pow(pointsOfApple.get(i).y - (double) height / 2, 2) < Math.pow(300, 2)) {
 //
@@ -441,7 +440,7 @@ public class Picture extends JFrame {
                         try {
                             for (int i = 0; i < pointsOfArrow.size(); i++) {
                                 try {
-                                    if (pointsOfArrow.get(i).x < image.getWidth() && pointsOfArrow.get(i).x >= 0 && pointsOfArrow.get(i).y < image.getHeight() && pointsOfArrow.get(i).y >= 0) {
+                                    if (pointsOfArrow.get(i).x < width && pointsOfArrow.get(i).x >= 0 && pointsOfArrow.get(i).y < height && pointsOfArrow.get(i).y >= 0) {
 //                                try {
                                         image.setRGB(pointsOfArrow.get(i).x, pointsOfArrow.get(i).y, Apple.color.getRGB());
 //                                }catch (Exception e){
@@ -491,7 +490,7 @@ public class Picture extends JFrame {
                 }
 
 
-                if (xMouse > 10 && xMouse < image.getWidth() - 10 && yMouse > 10 && yMouse < image.getHeight() - 10) {
+                if (xMouse > 10 && xMouse < width - 10 && yMouse > 10 && yMouse < height - 10) {
                     for (int i = 0; i < mouseCursor.size(); i++) {
                         try {
 
