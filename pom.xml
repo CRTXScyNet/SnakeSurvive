@@ -13,5 +13,28 @@
         <maven.compiler.target>18</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+<!--    <dependencies>-->
+<!--        <dependency>-->
+<!--            <groupId>org.lwjgl</groupId>-->
+<!--            <artifactId>lwjgl</artifactId>-->
+<!--            <version>3.2.2</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.lwjgl</groupId>-->
+<!--            <artifactId>lwjgl-glfw</artifactId>-->
+<!--            <version>3.2.2</version>-->
+<!--        </dependency>-->
+<!--        &lt;!&ndash; https://mvnrepository.com/artifact/org.lwjgl/lwjgl-opengl &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>org.lwjgl</groupId>-->
+<!--            <artifactId>lwjgl-opengl</artifactId>-->
+<!--            <version>3.2.2</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.joml</groupId>-->
+<!--            <artifactId>joml</artifactId>-->
+<!--            <version>1.10.5</version>-->
+<!--        </dependency>-->
+<!--    </dependencies>-->
 
 </project>

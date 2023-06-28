@@ -333,7 +333,6 @@ public class Player extends Entity {
                     isGrow = true;
 
                 }
-
                 movePhantom();
                 delayCount = 0;
                 int xTarget;

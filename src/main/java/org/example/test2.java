@@ -94,7 +94,7 @@ public void setTarg(int x,int y){
     frame.repaint();
 
 }
-    public static void main(String[] args) {
-        new test2();
-    }
+//    public static void main(String[] args) {
+//        new test2();
+//    }
 }

@@ -18,8 +18,8 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class trest {
     public static boolean mouseControl = false;
-    static int width = 1000;
-    static int height = 1000;
+    static int width = 500;
+    static int height = 500;
     public static int xMouse;
     public static int yMouse;
     public static ArrayList<ModelRendering> background = new ArrayList<>();
@@ -39,7 +39,8 @@ public class trest {
         assert vidMode != null;
         width = (int)(vidMode.width()*0.9);
         height = (int)(vidMode.height()*0.9);
-
+//        width = 500;
+//                height = 500;
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
 
@@ -58,19 +59,16 @@ public class trest {
             Color color = new Color((int) (Math.random() * 100), (int) (Math.random() * 255), (int) (Math.random() * 255));
             background.add(new ModelRendering(window, color, false, null));
             background.get(j).addModel(new Model(window, (int) (Math.random() * 30 + 20)));
-
         }
         for (int j = 0; j < 200; j++) {
             Color color = new Color((int) (Math.random() * 100), (int) (Math.random() * 255), (int) (Math.random() * 255));
             background2.add(new ModelRendering(window, color, false, null));
             background2.get(j).addModel(new Model(window, (int) (Math.random() * 40 + 30)));
-
         }
         for (int j = 0; j < 150; j++) {
             Color color = new Color((int) (Math.random() * 100), (int) (Math.random() * 255), (int) (Math.random() * 255));
             background3.add(new ModelRendering(window, color, false, null));
             background3.get(j).addModel(new Model(window, (int) (Math.random() * 60 + 40)));
-
         }
 
         for (int i = 0; i < ModelRendering.selfList.size(); i++) {

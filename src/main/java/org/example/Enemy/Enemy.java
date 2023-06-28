@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class Enemy extends Entity{
-    private int width = Picture.width;
-    private int height = Picture.height;
+    private int width;
+    private int height;
     private static final double innerPlace = 1;
     private static final double exteriorBorder = (1 - innerPlace) / 2;
     static final double[] playGround = new double[]{innerPlace, exteriorBorder};
@@ -205,6 +205,7 @@ public class Enemy extends Entity{
         Point co = getRandomPoint();
         hunt = false;
         eatAndAngry = false;
+        timer = timerStat;
         if (isActive) {
             delayDouble = delayStatActive;
             delay = (int) delayStatActive;
