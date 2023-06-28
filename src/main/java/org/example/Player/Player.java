@@ -1,47 +1,58 @@
 package org.example.Player;
 
-import org.example.Enemy.Enemy;
-import org.example.Painter.Picture;
+import org.example.Enemy.Entity;
+import org.example.gpu.Timer;
+import org.example.gpu.Window;
+import org.example.gpu.render.Model;
+import org.example.gpu.render.ModelRendering;
+import org.example.gpu.trest;
+import org.joml.Vector3f;
 
 import java.awt.*;
-
-import java.sql.Time;
-import java.text.DecimalFormat;
-import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
 
-public class Player {
-    private int width = Picture.width;
-    private int height =Picture.width;
+public class Player extends Entity {
+    private int width;
+    private int height;
     private static final double innerPlace = 0.9;
     private static final double exteriorBorder = (1 - innerPlace) / 2;
     static final double[] playGround = new double[]{innerPlace, exteriorBorder};
 
-    public void moveXy(double[] direct) {
-        for(int i = 0;i< xy.size();i++){
-            xy.set(i,new double[]{xy.get(i)[0]-direct[0],xy.get(i)[1]-direct[1]});
+    public void moveXy(float[] direct) {
+        for (int i = 0; i < xy.size(); i++) {
+            xy.set(i, new float[]{xy.get(i)[0] - direct[0], xy.get(i)[1] - direct[1]});
         }
-        for(int i = 0;i< phantomXY.size();i++){
-            phantomXY.set(i,new double[]{phantomXY.get(i)[0]-direct[0],phantomXY.get(i)[1]-direct[1]});
+        for (int i = 0; i < phantomXY.size(); i++) {
+            phantomXY.set(i, new float[]{phantomXY.get(i)[0] - direct[0], phantomXY.get(i)[1] - direct[1]});
+
+        }
+        for (int i = 0; i < rendering.getModels().size(); i++) {
+            rendering.getModels().get(i).getMovement().setPosition(new Vector3f((float) phantomXY.get(i)[0], (float) phantomXY.get(i)[1], 0));
         }
     }
 
-    private ArrayList<double[]> xy = new ArrayList<>();
-    private ArrayList<double[]> directionOfPhantomXY = new ArrayList<>();
-    private ArrayList<double[]> phantomXY = new ArrayList<>();
-    static double timerStat = 1000;
-    static double timer = timerStat;
+    private ArrayList<float[]> xy = new ArrayList<>();
+    private ArrayList<float[]> directionOfPhantomXY = new ArrayList<>();
+    private ArrayList<float[]> phantomXY = new ArrayList<>();
 
 
-    private void setPhantomXY() {
+    public void setPhantomXY() {
         phantomXY.clear();
-        for (double[] p : xy) {
-            phantomXY.add(new double[]{p[0], p[1]});
+        directionOfPhantomXY.clear();
+        for (float[] p : xy) {
+            directionOfPhantomXY.add(new float[]{0, 0});
+            phantomXY.add(new float[]{p[0], p[1]});
         }
+//        for (int i = 0; i < xy.size(); i++) {
+//            phantomXY.set
+//        }
+//        if(phantomXY.size() < xy.size()){
+//
+//        }
+//        if(phantomXY.size() < xy.size()){
+//
+//        }
     }
-
 
 
     private Color color = new Color(Color.white.getRGB());
@@ -58,21 +69,15 @@ public class Player {
     }
 
     public static int step = (int) (Player.getSize() * stepOfSize);
-    static double delayStat = 1;
-    private double delayDouble = delayStat;
-    private int delay = (int) delayDouble;
-    private int delayCount = 0;
-
-
-
 
 
     public void setDelay() {
         if (delay < 100) {
-//            delay+= 1;
+            delay += 1;
 //            this.delay = (int) delayDouble;
         }
     }
+
     double[] tailless = new double[2];
     public double[] taillessCopy = new double[2];
     public double[] taillessPhantomCopy = new double[2];
@@ -83,55 +88,85 @@ public class Player {
     public static int snakeLength = 10;
 
 
-
-    public double[] getDirection(){
-        if (directionOfPhantomXY.size()>0){
+    public float[] getDirection() {
+        if (directionOfPhantomXY.size() > 0) {
             return directionOfPhantomXY.get(0);
-        }else {
+        } else {
             return null;
         }
 
     }
 
     public static ArrayList<Player> players = new ArrayList<>();
+    public boolean isGrow = false;
+    public boolean isShorter = false;
+    public boolean reset = false;
+    private Window window;
+    private ModelRendering rendering;
 
-  public Player() {
+    public Player(Window window) {
 
 
 //        xy.add(new int[]{(int)(Math.random()*imahe.getWidth()*playGround[0])+(int)(imahe.getWidth()*playGround[1]),(int)(Math.random()*imahe.getHeight()*playGround[0])+(int)(imahe.getHeight()*playGround[1])});
 
-        Point co = getRandomPoint();
+//        Point co = getRandomPoint();
 //        xy.add(new double[]{co.x,co.y});
-
-      xy.add(new double[]{width/2,height/2});
+        this.window = window;
+        xy.add(new float[]{0, 0});
         setPhantomXY();
-
+        color = new Color((int) (Math.random() * 254 + 1), (int) (Math.random() * 254 + 1), (int) (Math.random() * 254 + 1) /*Color.cyan.getRGB()*/);
         players.add(this);
 
+        rendering = new ModelRendering(window, color, false, this);
+        rendering.addModel(new Model(window, (int) (size * 30)));
+        rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) 0, (float) 0, 0));
 
-        color = new Color((int) (Math.random() * 254 + 1), (int) (Math.random() * 254 + 1), (int) (Math.random() * 254 + 1) /*Color.cyan.getRGB()*/);
+
         for (int i = 0; i < snakeLength + 2; i++) {
             addCircle();
         }
     }
 
-    public ArrayList<double[]> getXy() {
+    //TODO проверить SetPhantom
+    public ArrayList<float[]> getXy() {
         return xy;
     }
 
-    public ArrayList<double[]> getPhantomXY() {
+    public ArrayList<float[]> getPhantomXY() {
         return phantomXY;
     }
 
     public void addCircle() {
         if (xy.size() < maxSize) {
-            xy.add(new double[]{xy.get(xy.size() - 1)[0], xy.get(xy.size() - 1)[1]});
+            float x = xy.get(xy.size() - 1)[0];
+            float y = xy.get(xy.size() - 1)[1];
+            xy.add(new float[]{x, y});
+            float xp = phantomXY.get(phantomXY.size() - 1)[0];
+            float yp = phantomXY.get(phantomXY.size() - 1)[1];
+            phantomXY.add(new float[]{xp, yp});
+            directionOfPhantomXY.add(new float[]{0,0});
+            rendering.addModel(new Model(window, (int) (size * 30)));
+            rendering.getModels().get(xy.size() - 1).getMovement().setPosition(new Vector3f((float) xp, (float) yp, 0));
         }
     }
+
 
     public void grow() {
         for (int i = 0; i < 1; i++) {
             addCircle();
+        }
+    }
+
+    public void minusCell() {
+        try {
+            if (getXy().size() > 3) {
+                rendering.getModels().remove(getXy().size() - 1);
+                getXy().remove(getXy().size() - 1);
+                phantomXY.remove(phantomXY.size() - 1);
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -141,7 +176,10 @@ public class Player {
         delay = (int) delayStat;
         delayCount = 0;
         xy.clear();
-        xy.add(new double[]{width/2,height/2});
+        xy.add(new float[]{0, 0});
+        rendering.clear();
+        rendering.addModel(new Model(window, (int) (size * 30)));
+        rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) 0, (float) 0, 0));
 //        move(width/2,height/2);
         for (int i = 0; i < snakeLength; i++) {
             addCircle();
@@ -151,7 +189,7 @@ public class Player {
 
     public Point getRandomPoint() {
         int x = (int) (Math.random() * (width * playGround[0])) + (int) (width * playGround[1]);
-        int y = (int) (Math.random() * (height * playGround[0]))+ (int) (height * Player.playGround[1]);
+        int y = (int) (Math.random() * (height * playGround[0])) + (int) (height * Player.playGround[1]);
         return new Point(x, y);
     }
 
@@ -171,27 +209,26 @@ public class Player {
         return reset;
     }
 
-    private boolean reset = false;
-    private double tMouse = 1;
-    static double stepRad = 0.1;
-    private double[] pointWatch = new double[]{width / 2, height / 2};
+    private float tMouse = 1;
+    static float stepRad = 0.1f;
+    private float[] pointWatch = new float[]{0, 0};
 
     void setRadian(Point Target) {
 
+        float xTarget = Target.x - xy.get(0)[0];
+        float yTarget = Target.y - xy.get(0)[1];
 
-        double yTarget = Target.y - xy.get(0)[1];
-        double xTarget = Target.x - xy.get(0)[0];
-        double TargetRadian = 0;
+        float TargetRadian = 0;
         // 1143 372 900 600
-        TargetRadian = Math.atan2(xTarget,yTarget);
-        if(TargetRadian<0){
+        TargetRadian = (float) Math.atan2(xTarget, yTarget);
+        if (TargetRadian < 0) {
             TargetRadian += 6.28;
 
         }
-        double halfNear = (tMouse + 3.14) % 6.28;
+        float halfNear = (tMouse + 3.14f) % 6.28f;
 
-        pointWatch[0] = (step * Math.sin(tMouse) + xy.get(0)[0]);
-        pointWatch[1] = (step * Math.cos(tMouse) + xy.get(0)[1]);
+        pointWatch[0] = (float) (step * Math.sin(tMouse) + xy.get(0)[0]);
+        pointWatch[1] = (float) (step * Math.cos(tMouse) + xy.get(0)[1]);
 
 //        System.out.println("pointWatch is " + pointWatch);
 //        System.out.println("halfNear is " + halfNear);
@@ -200,15 +237,15 @@ public class Player {
 //
 //        System.out.println("Enemy is " + Enemy + ", rad: " + EnemyRadian);
 
-        tMouse = (tMouse + 6.28) % 6.28;
-        double dif = Math.abs((TargetRadian- tMouse)%6.28);
-        if(dif<3.14){
+        tMouse = (float) ((tMouse + 6.28) % 6.28);
+        double dif = Math.abs((TargetRadian - tMouse) % 6.28);
+        if (dif < 3.14) {
 
-            stepRad = dif/2;
-        }else {
-            dif = Math.abs((Math.max(TargetRadian,tMouse)-3.14)-(Math.min(TargetRadian,tMouse)+3.14));
+            stepRad = (float) (dif / 2);
+        } else {
+            dif = Math.abs((Math.max(TargetRadian, tMouse) - 3.14) - (Math.min(TargetRadian, tMouse) + 3.14));
 
-            stepRad = dif/2;
+            stepRad = (float) (dif / 2);
         }
 
 
@@ -248,22 +285,29 @@ public class Player {
 
 
     }
-static boolean isGrow = false;
-    public void moveCheck(int targetX, int targetY, boolean mouseControl, boolean targetChanged) {
-       try {
-            timer -= 1;
-            if (timer <= 0) {
-                grow();
-//                if (delay > 1) {
-//                    delay -= 1;
-//                }
-                timer = timerStat;
 
-            }
-            if ((int) timer == timerStat/2) {
-                grow();
+    static double delayStat = 15;
+    private double delayDouble = delayStat;
+    private int delay = (int) delayDouble;
+    private int delayCount = 0;
 
-            }
+    static double timerStat = 500;
+    static double timer = timerStat;
+    double timeTo = Timer.getTime();
+
+    public void moveCheck() {
+        try {
+            double timeToGo = Timer.getTime();
+            double dif = timeToGo - timeTo;
+//           if(dif <0.01){
+//
+//               return;
+//           }else {
+//               System.out.println("OK");
+//               timeTo = timeToGo;
+//           }
+
+
             try {
                 if (reset) {
                     reset();
@@ -275,24 +319,38 @@ static boolean isGrow = false;
                     movePhantom();
                     return;
                 }
+
+                timer -= 1;
+                if (timer <= 0) {
+                    isGrow = true;
+                    if (delay > 1) {
+                        delay -= 1;
+                    }
+                    timer = timerStat;
+
+                }
+                if ((int) timer == timerStat / 2) {
+                    isGrow = true;
+
+                }
+
+                movePhantom();
                 delayCount = 0;
                 int xTarget;
                 int yTarget;
-                if (Picture.mouseControl) {
-                    xTarget = Picture.xMouse;
-                    yTarget = Picture.yMouse;
+                if (trest.mouseControl) {
+                    xTarget = trest.xMouse;
+                    yTarget = trest.yMouse;
                 } else {
-                    xTarget = width / 2;
-                    yTarget = height / 2;
+                    xTarget = 0;
+                    yTarget = 0;
                 }
 
-                double x = getXy().get(0)[0];
-                double y = getXy().get(0)[1];
                 setRadian(new Point(xTarget, yTarget));
 //            selfStep = Math.random()*(step+ Math.sqrt(Math.pow(Math.abs(xTarget - x), 2) + Math.pow(Math.abs(yTarget - y), 2)) / 50);
                 try {
-                    pointWatch[0] = (step * Math.sin(tMouse) + xy.get(0)[0]);
-                    pointWatch[1] = (step * Math.cos(tMouse) + xy.get(0)[1]);
+                    pointWatch[0] = (float) (step * Math.sin(tMouse) + xy.get(0)[0]);
+                    pointWatch[1] = (float) (step * Math.cos(tMouse) + xy.get(0)[1]);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -301,114 +359,69 @@ static boolean isGrow = false;
 
 
             } catch (Exception e) {
-//            e.printStackTrace();
-//            System.out.println(e);
+                e.printStackTrace();
+                System.out.println(e);
             }
-        }catch (Exception e){
-
-       }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
-
-
 
 
     public void movePhantom() {
         try {
-//            tailless = new int[]{phantomXY.get(phantomXY.size() - 1).x, phantomXY.get(phantomXY.size() - 1).y};
+
             for (int i = 0; i < phantomXY.size(); i++) {
                 try {
-                    phantomXY.get(i)[0] += directionOfPhantomXY.get(i)[0];
-                    phantomXY.get(i)[1] += directionOfPhantomXY.get(i)[1];
-                } catch (IndexOutOfBoundsException e) {
+                    phantomXY.get(i)[0] +=
+                            directionOfPhantomXY.get(i)[0];
+                    phantomXY.get(i)[1] +=
+                            directionOfPhantomXY.get(i)[1];
 
+                } catch (IndexOutOfBoundsException e) {
+                    e.printStackTrace();
                 }
             }
-//            if (directionOfPhantomXY.size() > 1) {
-//                try {
-//                    taillessCopy[0] += directionOfPhantomXY.get(directionOfPhantomXY.size() - 2)[0];
-//                    taillessCopy[1] += directionOfPhantomXY.get(directionOfPhantomXY.size() - 2)[1];
-//                } catch (Exception e) {
-//                    taillessCopy[0] += directionOfPhantomXY.get(directionOfPhantomXY.size() - 1)[0];
-//                    taillessCopy[1] += directionOfPhantomXY.get(directionOfPhantomXY.size() - 1)[1];
-//                }
-//            }
-//            if (directionOfPhantomXY.size() > 1) {
-//                taillessPhantomCopy[0] += directionOfPhantomXY.get(directionOfPhantomXY.size() - 1)[0];
-//                taillessPhantomCopy[1] += directionOfPhantomXY.get(directionOfPhantomXY.size() - 1)[1];
-//            }
+            for (int i = 0; i < rendering.getModels().size(); i++) {
+                rendering.getModels().get(i).getMovement().setPosition(new Vector3f((float) phantomXY.get(i)[0], (float) phantomXY.get(i)[1], 0));
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(e);
         }
-//xy.add(0,new int[]{x,y});
-//xy.remove(xy.size()-1);
     }
 
-    public void move(double x, double y) {
-        directionOfPhantomXY.clear();
+    public void move(float x, float y) {
+
         setPhantomXY();
+
         try {
 
-//
-//            if (tailless[0] != 0 && xy.size()<2) {
-//            if (Math.abs((xy.get(xy.size() - 1)[0]) - tailless[0]) > step || Math.abs((xy.get(xy.size() - 1)[1] - tailless[1])) > step) {
-//
-//                directionOfPhantomXY.add(new double[]{0, 0});
-//
-//            } else {
-//
-//                directionOfPhantomXY.add(new double[]{((xy.get(xy.size() - 1)[0]) - tailless[0]) / (delay + 1), (xy.get(xy.size() - 1)[1] - tailless[1]) / (delay + 1)});
-//            }
-//            taillessPhantomCopy = new double[]{tailless[0], tailless[1]};
-//            }
-
-//            tailless = new double[]{(xy.get(xy.size() - 1)[0]), xy.get(xy.size() - 1)[1]};
-            for (int i = xy.size() - 1; i >= 0; i--) {
+            for (int i = xy.size() - 1; i > 0; i--) {
                 try {
-                    if (i == xy.size() - 1) {
-//                        if (Math.abs(((double) xy.get(i).x - phantomXY.get(i)[0])) > step || Math.abs(((double) xy.get(i).y - phantomXY.get(i)[1])) > step) {
-////                            directionOfPhantomXY.add(0, new double[]{0, 0});
-////                            phantomXY.get(i)[0] = xy.get(i).x;
-////                            phantomXY.get(i)[1] = xy.get(i).y;
-//                        } else {
-
-                        phantomXY.get(i)[0] = xy.get(i)[0];
-                        phantomXY.get(i)[1] = xy.get(i)[1];
-//                        }
-                    }
-                    xy.get(i)[0] = xy.get(i - 1)[0];
-                    xy.get(i)[1] = xy.get(i - 1)[1];
-                    directionOfPhantomXY.add(0, new double[]{((double) xy.get(i)[0] - phantomXY.get(i)[0]) / (delay + 1), ((double) xy.get(i)[1] - phantomXY.get(i)[1]) / (delay + 1)});
-
+//                    if (i == xy.size() - 1) {
+//
+////                        phantomXY.get(i)[0] = xy.get(i)[0];
+////                        phantomXY.get(i)[1] = xy.get(i)[1];
+//
+//                    }else if(i!=0){
+                        xy.get(i)[0] = xy.get(i - 1)[0];
+                        xy.get(i)[1] = xy.get(i - 1)[1];
+                        directionOfPhantomXY.add(0, new float[]{((float) xy.get(i)[0] - phantomXY.get(i)[0]) / (delay + 1), ((float) xy.get(i)[1] - phantomXY.get(i)[1]) / (delay + 1)});
+//                    }
+//                    directionOfPhantomXY.add(0, new float[]{((float) xy.get(i)[0] - phantomXY.get(i)[0]) / (delay + 1), ((float) xy.get(i)[1] - phantomXY.get(i)[1]) / (delay + 1)});
 
                 } catch (IndexOutOfBoundsException e) {
-
+                    e.printStackTrace();
                 }
             }
-            phantomXY.get(0)[0] = xy.get(0)[0];
-            phantomXY.get(0)[1] = xy.get(0)[1];
+//            phantomXY.get(0)[0] = xy.get(0)[0];
+//            phantomXY.get(0)[1] = xy.get(0)[1];
             xy.get(0)[0] = x;
             xy.get(0)[1] = y;
-//            if (Math.abs(((double) xy.get(0).x - phantomXY.get(0)[0])) > step || Math.abs(((double) xy.get(0).y - phantomXY.get(0)[1])) > step) {
-//                directionOfPhantomXY.add(0, new double[]{0, 0});
-//
-////                tailless[0] = phantomXY.get(phantomXY.size() - 1)[0];
-////                tailless[1] = phantomXY.get(phantomXY.size() - 1)[1];
-////                directionOfPhantomXY.add(new double[]{0,directionOfPhantomXY.get(directionOfPhantomXY.size()-1)[1]});
-//            } else {
-            directionOfPhantomXY.add(0, new double[]{((double) xy.get(0)[0] - phantomXY.get(0)[0]) / (delay + 1), ((double) xy.get(0)[1] - phantomXY.get(0)[1]) / (delay + 1)});
 
-//                taillessCopy[0] = phantomXY.get(phantomXY.size() - 1)[0] - xy.get(xy.size() - 1).x+phantomXY.get(phantomXY.size() - 1)[0];
-//                taillessCopy[1] = phantomXY.get(phantomXY.size() - 1)[1] - xy.get(xy.size() - 1).y+ phantomXY.get(phantomXY.size() - 1)[1];
-//                directionOfPhantomXY.add(new double[]{directionOfPhantomXY.get(directionOfPhantomXY.size()-1)[0],directionOfPhantomXY.get(directionOfPhantomXY.size()-1)[1]});
-
-//            }
-//            if(xy.size()>1){
-//
-//            taillessCopy = new double[]{phantomXY.get(phantomXY.size() - 1)[0], phantomXY.get(phantomXY.size() - 1)[1]};
-//            }
-
+            directionOfPhantomXY.add(0, new float[]{((float) xy.get(0)[0] - phantomXY.get(0)[0]) / (delay + 1), ((float) xy.get(0)[1] - phantomXY.get(0)[1]) / (delay + 1)});
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -419,7 +432,6 @@ static boolean isGrow = false;
     }
 
 
-
-    static int maxSize = 150;
+    static int maxSize = 50;
 
 }

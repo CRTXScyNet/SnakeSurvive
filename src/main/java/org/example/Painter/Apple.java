@@ -1,10 +1,15 @@
 package org.example.Painter;
 
+import org.example.gpu.Window;
+import org.example.gpu.render.Model;
+import org.example.gpu.render.ModelRendering;
+import org.joml.Vector3f;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class Apple {
-    private static double[] xy = new double[]{};
+    private static float[] xy = new float[]{};
     static Color color = new Color(Color.RED.getRGB());
 
     private static int sizeStat = 10;
@@ -20,18 +25,22 @@ public class Apple {
     public static int getAppleSize() {
         return size;
     }
-    public static double[] getXy() {
+    public static float[] getXy() {
         return xy;
     }
-    public void moveXy(double[] direct) {
-        xy = new double[]{xy[0]-direct[0],xy[1]-direct[1]};
+    public void moveXy(float[] direct) {
+        float x = xy[0]-direct[0];
+        float y = xy[1]-direct[1];
+        xy = new float[]{x,y};
+        rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) x,(float)y,0));
 
     }
     public void setXy() {
         try{
-            int x = (int) (Math.random() * (width * playGround[0])) + (int) (width * playGround[1]);
-            int y = (int) (Math.random() * (height * playGround[0])) + (int) (height * playGround[1]);
-            xy = new double[]{x, y};
+            int x =(int)(Math.random()*window.width*3-(window.width/1.5));
+            int y = (int)(Math.random()*window.height*3-(window.height/1.5));
+            xy = new float[]{x, y};
+            rendering.getModels().get(0).getMovement().setPosition(new Vector3f(x,y,0));
         }catch (Exception e){
             e.printStackTrace();
             System.out.println(e);
@@ -39,10 +48,15 @@ public class Apple {
     }
     private int width;
     private int height;
-    Apple(int width,int height){
-        this.width=width;
-                this.height=height;
-        xy = new double[]{(Math.random()*width*playGround[0])+(width*playGround[1]),(Math.random()*height*playGround[0])+(height*playGround[1])};
+    private Window window;
+    private ModelRendering rendering;
+    Apple(Window window){
+        this.window = window;
+        xy = new float[]{(int)(Math.random()*window.width-(window.width/2)) ,  (int)(Math.random()*window.height-(window.height/2))};
+        System.out.printf("Apple x: %s, y: %s ", xy[0],xy[1]);
+        rendering = new ModelRendering(window,color,true,null);
+        rendering.addModel(new Model(window, (int)(size*50)));
+        rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy[0],(float)xy[1],0));
     }
 
 

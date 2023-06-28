@@ -1,10 +1,13 @@
 package org.example;
 
-import org.example.Painter.Picture;
+import org.example.gpu.trest;
 
 public class Main {
     public static void main(String[] args) {
-
-        new Picture();
+//        try {
+            new trest();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 }

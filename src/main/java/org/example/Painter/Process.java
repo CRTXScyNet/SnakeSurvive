@@ -4,24 +4,34 @@ import org.example.Enemy.Enemy;
 import org.example.Enemy.Line;
 import org.example.Enemy.PolygonDots;
 import org.example.Player.Player;
+import org.example.gpu.Timer;
+import org.example.gpu.Window;
+import org.example.gpu.render.Model;
+import org.example.gpu.render.ModelRendering;
+import org.example.gpu.trest;
+import org.joml.Vector3f;
 
-import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class Process {
-    private int width = Picture.width;
-    private int height =Picture.height;
+    private int width;
+    private int height;
+    public static boolean reset = false;
+    public static boolean isPaused = false;
+    public static boolean isEnd = false;
 
-    static boolean ready = false;
+    public static boolean ready = false;
     private boolean targetChanged = false;
     public static boolean eaten = false;
-    private int eatenDelayStat = 50;
+    public static float eatenTime = 0;
+    public static float eatenTimelast = 0;
+    public static float eatenPlayerTime = 0;
+    public static float eatenPlayerTimelast = 0;
+    private int eatenDelayStat = 500;
     private int eatenDelay = eatenDelayStat;
 
     public static ArrayList<Point> getPointsOfArrow() {
@@ -58,7 +68,7 @@ public class Process {
 
     static double collisionWithApple = Math.pow(Apple.getAppleSize() + Player.getSize(), 2);
 
-    double[] p = new double[2];
+    float[] a = new float[2];
     static boolean gameOver = false;
     static boolean screenMove = false;
 
@@ -66,484 +76,397 @@ public class Process {
         return new double[]{direction[0], direction[1]};
     }
 
-    static double[] direction = new double[2];
-    private int outLeft = (int) (width* 0.1 * -1) / Enemy.step * Enemy.step;
-    private int fromLeft = (int) (width * 1.2 * -1) / Enemy.step * Enemy.step;
+    static float[] direction = new float[2];
+    private int outLeft;
+    private int fromLeft;
 
-    private int outRight = (int) (width + width * 0.1) / Enemy.step * Enemy.step;
-    private int fromRight = (int) (width * 1.2) / Enemy.step * Enemy.step;
+    private int outRight;
+    private int fromRight;
 
-    private int outUp = (int) (height * 0.2 * -1) / Enemy.step * Enemy.step;
-    private int fromUp = (int) (height * 1.3 * -1) / Enemy.step * Enemy.step;
+    private int outUp;
+    private int fromUp;
 
-    private int outDown = (int) (height + height * 0.2) / Enemy.step * Enemy.step;
-    private int fromDown = (int) (height * 1.3) / Enemy.step * Enemy.step;
+    private int outDown;
+    private int fromDown;
     private int agressiveMode = 300;
     ArrayList<Line> lines = new ArrayList<>();
     Walls walls;
-    static boolean timeRunUp = false;
-    static Timer timer = new Timer(20, new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-//            System.out.println("start");
-            timeRunUp = true;
-            timer.stop();
+    static boolean isGo = false;
+
+
+    private ModelRendering renderingArrow;
+    static public Apple apple;
+    public static ArrayList<Point> targets1 = new ArrayList<>();
+    public static HashMap<Point, Point> toTargets = new HashMap<>();
+    public static boolean ringWayIsReady = false;
+    public static boolean ringIsReady = false;
+
+    public Process(Window window) {
+        this.width = window.width;
+        this.height = window.height;
+
+        outLeft = (int) (-width) / Enemy.step * Enemy.step;
+        fromLeft = (int) (-width * 2) / Enemy.step * Enemy.step;
+
+        outRight = (int) (width) / Enemy.step * Enemy.step;
+        fromRight = (int) (width * 2) / Enemy.step * Enemy.step;
+
+        outUp = (int) (-height) / Enemy.step * Enemy.step;
+        fromUp = (int) (-height * 2) / Enemy.step * Enemy.step;
+
+        outDown = (int) (height) / Enemy.step * Enemy.step;
+        fromDown = (int) (height * 2) / Enemy.step * Enemy.step;
+
+
+        renderingArrow = new ModelRendering(window, Color.red, true, null);
+        renderingArrow.addModel(new Model(window, 100));
+
+//        walls = new Walls(width, height);
+        apple = new Apple(window);
+        Player player = new Player(window);
+        for (int i = 0; i < 200; i++) {
+            new Enemy(window, false);
         }
-    });
-
-
-
-    Process(int width, int height) {
-//        this.width = width;
-//        this.height = height;
-// width = Picture.image.getWidth();
-//        height = Picture.image.getHeight();
-        walls = new Walls(width, height);
-        Apple apple = new Apple(width, height);
-        Player player = new Player();
-        for (int i = 0; i < 20; i++) {
-            new Enemy(false);
+        for (int i = 0; i < 30; i++) {
+            new Enemy(window, true);
         }
-        for (int i = 0; i < 10; i++) {
-            new Enemy(true);
-        }
-
-
-//        int lenth = Snake.step*Snake.maxSize;
-//        for (int i = 0;i<Picture.image.getWidth()+lenth;i+=lenth){
-//            for (int y = 0;y<Picture.image.getHeight()+lenth;y+=lenth){        //Добавление регионов поиска
-//                new SearchRegion(new Point(i,y),lenth,lenth);
-//            }
-//        }
-//        SearchRegion.addNearbyRegions();
-
-
-//        for(Snake snake : Snake.snakes){
-//            SearchRegion region = SearchRegion.getRegion(snake.getXy().get(0).x,snake.getXy().get(0).y);
-//            region.addOrRemoveSnake(snake);
-//            snake.setRegion(region);
-//        }
-//        Executors.newSingleThreadExecutor().submit(()->{
-//
-//            while (true){
-//                for (Snake snake : Snake.snakes){
-//                    for (SearchRegion region : SearchRegion.searchRegions){
-//                        region.addOrRemoveSnake(snake);
-//                    }
-//                }
-//                try {
-//                    TimeUnit.MICROSECONDS.sleep(1);
-//                }catch (Exception e){
-//
-//                }
-//            }
-//        });
-//        for (double x = lifeArea.getX(); x < lifeArea.getWidth() + lifeArea.getX(); x++) {
-//            for (double y = lifeArea.getY(); y < lifeArea.getHeight() + lifeArea.getY(); y++) {
-//                if (x == lifeArea.getX() || y == lifeArea.getY() || x == lifeArea.getWidth() + lifeArea.getX() - 1 || y == lifeArea.getHeight() + lifeArea.getY() - 1) {          //Макет региона обитания
-//                    pointsOfRect.add(new Point((int) x, (int) y));
-//
+        double radius1 = Math.pow(width / 5 - 2, 2);
+//        for (int x = -width / 4; x <= width / 4; x++) {
+//            for (int y = -width / 4; y <= width / 4; y++) {
+//                double dist = (Math.pow(x, 2)) + (Math.pow(y, 2));
+//                if (dist >= radius1 &&
+//                        dist <= Math.pow(radius1, 2)) {
+//                    targets1.add(new Point(x, y));
 //                }
 //            }
 //        }
-        int halfWidth = width / 2;
-        int halfHeight = height/ 2;
-        for (int x = -agressiveMode; x <= agressiveMode; x++) {
-            for (int y = -agressiveMode; y <= +agressiveMode; y++) {
-                if ((Math.pow(x, 2)) + (Math.pow(y, 2)) >= Math.pow(agressiveMode - 1, 2) &&
-                        (Math.pow(x, 2)) + (Math.pow(y, 2)) <= Math.pow(agressiveMode, 2)) {
-                    pointsOfRect.add(new Point(x + halfWidth, y + halfHeight));
-                }
-//                if ((Math.pow(x, 2)) + (Math.pow(y, 2)) >= Math.pow(200 - 1, 2) &&
-//                        (Math.pow(x, 2)) + (Math.pow(y, 2)) <= Math.pow(200, 2)) {
-//                    pointsOfRect.add(new Point(x + halfWidth, y + halfHeight));
-//                }
-
-            }
-        }
-        for (double x = -Player.getSize(); x <= Player.getSize(); x++) {
-            for (double y = -Player.getSize(); y <= Player.getSize(); y++) {
-                if ((int) ((Math.pow((x), 2)) + (Math.pow((y), 2))) < (int) Math.pow(Player.getSize(), 2)) {          //Макет круга змеи
-                    pointArrayList.add(new Point((int) x, (int) y));
-
-                }
-            }
-        }
-        for (double x = -Enemy.getSize(); x <= Enemy.getSize(); x++) {
-            for (double y = -Enemy.getSize(); y <= Enemy.getSize(); y++) {
-                if ((int) ((Math.pow((x), 2)) + (Math.pow((y), 2))) < (int) Math.pow(Enemy.getSize(), 2)) {          //Макет круга змеи
-                    pointEnemyArrayList.add(new Point((int) x, (int) y));
-
-                }
-            }
-        }
-        for (int x = -Apple.getAppleSize(); x < +Apple.getAppleSize(); x++) {
-            for (int y = -Apple.getAppleSize(); y < +Apple.getAppleSize(); y++) {
-                if ((Math.pow((x), 2)) + (Math.pow((y), 2)) <= Math.pow(Apple.getAppleSize(), 2) && (Math.pow((x), 2)) + (Math.pow((y), 2)) >= Math.pow(Apple.getAppleSize() * 0.7, 2)) {          //Макет apple
-                    pointAppleArrayList.add(new Point((int) x, (int) y));
-
-                }
-            }
-        }
-
-        for (double x = -(Player.getSize() * 1.5); x <= Player.getSize() * 1.5; x++) {
-            for (double y = -(Player.getSize() * 1.5); y <= Player.getSize() * 1.5; y++) {
-                if ((int) ((Math.pow((x), 2)) + (Math.pow((y), 2))) <= (int) Math.pow(Player.getSize() * 1.5, 2)) {          //Макет затирки вокруг круга змеи
-                    pointToEraseArrayList.add(new Point((int) x, (int) y));
-
-                }
-            }
-        }
-//        int in =/*(int) Snake.getSize()*/(int)(Math.abs(Player.step-Player.getSize())/2+Math.min(Player.getSize(),Player.step))/2;
-//        for (double x =- in; x <= in; x++) {
-//            for (double y = - in; y <=in ; y++) {
-//                //Макет затирки вокруг круга змеи
-//                pointToEraseSquareArrayList.add(new Point((int) x, (int) y));
-//
-//
-//            }
-//        }
-        try {
-            int I = 0;
-            while (true) {
-                timeRunUp = false;
-                timer.start();
-                Date date = new Date();
-
-                ready = false;
-                lines.clear();
-                pointsOfApple.clear();
-//                pointsToErase.clear();
-                points.clear();
-                colors.clear();
-                pointsOfArrow.clear();
-                for (Point point : pointsOfRect) {
-                    pointsOfArrow.add(new Point(point));
-
-//                        if (Math.pow(player.getXy().get(0)[0] - halfWidth, 2) + Math.pow(player.getXy().get(0)[1] - halfHeight, 2) <= Math.pow(1, 2)) {
-//
-////                    }
-////                    if (lifeArea.contains(player.getXy().get(0)[0], player.getXy().get(0)[1])) {
-//                    colors.add(Color.green);
-//                            screenMove = false;
-//                        } else {
-//                            colors.add(Color.red);
-
-//                        }
-                }
-                if (Picture.mouseControl) {
-
-                    if (player.getDirection() != null) {
-                        screenMove = true;
-                        direction = player.getDirection();
-                    }
-
-                    if (screenMove) {
-                        for (Enemy enemy : Enemy.enemies) {
-                            enemy.moveXy(direction);
-//                            if (enemy.getXy().get(0)[0] < (outLeft)) {
-//                                enemy.moveXy(new double[]{fromLeft, 0});
-//                            } else if (enemy.getXy().get(0)[0] > (outRight)) {
-//                                enemy.moveXy(new double[]{fromRight, 0});
-//                            }
-//                            if (enemy.getXy().get(0)[1] < (outUp)) {
-//                                enemy.moveXy(new double[]{0, fromUp});
-//                            } else if (enemy.getXy().get(0)[1] > (outDown)) {
-//                                enemy.moveXy(new double[]{0, fromDown});
-//                            }
-
-                        }
-
-                        screenMove = true;
-                        apple.moveXy(direction);
-                        player.moveXy(direction);
+//        ringIsReady = true;
 
 
-                    }
-                }
-                for (Enemy enemy : Enemy.enemies) {
+        Executors.newSingleThreadExecutor().submit(() -> {
+            boolean closer;
 
-                    if (enemy.getXy().get(0)[0] < (outLeft)) {
-                        enemy.moveXy(new double[]{fromLeft, 0});
-                        enemy.reverse();
-                    } else if (enemy.getXy().get(0)[0] > (outRight)) {
-                        enemy.moveXy(new double[]{fromRight, 0});
-                        enemy.reverse();
-                    }
-                    if (enemy.getXy().get(0)[1] < (outUp)) {
-                        enemy.moveXy(new double[]{0, fromUp});
-                        enemy.reverse();
-                    } else if (enemy.getXy().get(0)[1] > (outDown)) {
-                        enemy.moveXy(new double[]{0, fromDown});
-                        enemy.reverse();
-                    }
-
-
-                }
-                if (Apple.getXy()[0] < (outLeft)) {
-                    apple.moveXy(new double[]{fromLeft, 0});
-
-                } else if (Apple.getXy()[0] > (outRight)) {
-                    apple.moveXy(new double[]{fromRight, 0});
-
-                }
-                if (Apple.getXy()[1] < (outUp)) {
-                    apple.moveXy(new double[]{0, fromUp});
-
-                } else if (Apple.getXy()[1] > (outDown)) {
-                    apple.moveXy(new double[]{0, fromDown});
-
-                }
-                double[] s = player.getXy().get(0);
-                if (appleSpawned) {
-                    if (Math.pow(Math.abs(s[0] - p[0]), 2) + Math.pow(Math.abs(s[1] - p[1]), 2) <= collisionWithApple) {       //Проверка колизии змеи и яблока
-//                        try {
-//                            for (Point point : pointAppleArrayList) {
-//                                pointsToErase.add(new Point(point.x + (int) p[0], point.y + (int) p[1]));
-//                            }
-//                        } catch (Exception e) {
-//                            e.printStackTrace();
-//                        }
-                        appleSpawned = false;
-                        player.setDelay();
-                        if (player.getXy().size() > 3) {
-                            player.getXy().remove(player.getXy().size() - 1);
-                        }
-                        Picture.countOfApples += 1;
-                        eaten = true;
+            for (int x = -width / 4; x <= width / 4; x++) {
+                for (int y = -width / 4; y <= width / 4; y++) {
+                    Point nearest = new Point();
+                    double dist = (Math.pow(x, 2)) + (Math.pow(y, 2));
+                    if (dist < radius1) {
+                        nearest.setLocation(2 * x, 2 * y);
                     } else {
-                        for (Enemy enemy : Enemy.activeEnemies) {
-                            if (Math.pow(Math.abs(enemy.getXy().get(0)[0] - p[0]), 2) + Math.pow(Math.abs(enemy.getXy().get(0)[1] - p[1]), 2) <= collisionWithApple) {       //Проверка колизии змеи и яблока
-//                                try {
-//                                    for (Point point : pointAppleArrayList) {
-//                                        pointsToErase.add(new Point(point.x + (int) p[0], point.y + (int) p[1]));
-//                                    }
-//                                } catch (Exception e) {
-//                                    e.printStackTrace();
-//                                }
-                                appleSpawned = false;
-//                                enemy.setDelay();
-                                enemy.grow();
-                                enemy.setEatAndAngry(true);
-                                enemy.setCurrentDelay((int) (enemy.getDelay() / 2));
-                                eaten = true;
-                            }
-                        }
+                        nearest.setLocation(0, 0);
                     }
-
-                    if (eaten) {
-                        eatenDelay = 0;
-                        p = Apple.getXy();
-//                            player.grow();
-                    }
-
+//                    if (Math.random() > 0.5) {
+//                        closer = true;
+//                    } else {
+//                        closer = false;
+//                    }
+//
+//                    for (Point p : targets1) {
+//                        double firstDistance = Math.sqrt(Math.pow(Math.abs(p.x - x), 2) + Math.pow(Math.abs(p.y - y), 2));
+//                        double lastDistance = Math.sqrt(Math.pow(Math.abs(x - nearest.x), 2) + Math.pow(Math.abs(y - nearest.y), 2));
+//                        if (closer) {
+//                            if (firstDistance < lastDistance) {
+//                                nearest.setLocation(p.x, p.y);
+//                            }
+//                        } else {
+//                            if (firstDistance <= lastDistance) {
+//                                nearest.setLocation(p.x, p.y);
+//                            }
+//                        }
+//                    }
+                    toTargets.put(new Point(x, y), new Point(nearest.x, nearest.y));
                 }
-                p = apple.getXy();
-                if (eatenDelay < eatenDelayStat) {
-                    eatenDelay++;
-                }
-                if (eaten && eatenDelay >= eatenDelayStat) {
+            }
+            ringWayIsReady = true;
 
-                    apple.setXy();
-                    p = apple.getXy();
+        });
+
+        try {
 
 
-                    eaten = false;
-                }
-                if (eatenDelay >= eatenDelayStat) {
-                    for (Point point : pointAppleArrayList) {
-                        pointsOfApple.add(new Point(point.x + (int) p[0], point.y + (int) p[1]));
-                    }
-                    appleSpawned = true;
+            Executors.newSingleThreadExecutor().submit(() -> {
+                while (!ready) {
                     try {
-                        double xTarget = Apple.getXy()[0] - Picture.width / 2;
-                        double yTarget = Apple.getXy()[1] - Picture.height / 2;
-                        double TargetRadian = 0;
-                        // 1143 372 900 600
-                        TargetRadian = Math.atan2(xTarget, yTarget);
-                        if (TargetRadian < 0) {
-                            TargetRadian += 6.28;
+                        TimeUnit.MILLISECONDS.sleep(20);
+                    } catch (Exception e) {
 
-                        }
-                        double pointWatchX = (100 * Math.sin(TargetRadian) + Picture.width / 2);
-                        double pointWatchY = (100 * Math.cos(TargetRadian) + Picture.height / 2);
-                        for (Point point : pointArrayList) {
-                            pointsOfArrow.add(new Point(point.x + (int) pointWatchX, point.y + (int) pointWatchY));
+                    }
+                }
+                double cap = 1.0 / 500.0;
+                double time = org.example.gpu.Timer.getTime(); //TODO
+                double buf = 0;
+                while (true) {
+                    try {
+                        double time2 = org.example.gpu.Timer.getTime() - time;
+                        buf += time2;
+                        time = org.example.gpu.Timer.getTime();
+                        if (buf >= cap) {
+                            buf = 0;
+                            if (trest.reset) {
+                                reset = true;
+                                continue;
+//                    reset();
+//                        try {
+//                    TimeUnit.MILLISECONDS.sleep(500);
+//                        } catch (Exception e) {
+//
+//                        }
+                            } else if (reset) {
+                                reset = false;
+                                isPaused = false;
+                                isEnd = false;
+                                trest.mouseControl = false;
+                            }
+                            if (isPaused) {
+                                continue;
+                            }
+
+//                pointsToErase.clear();
+
+
+                            if (trest.mouseControl) {
+
+                                if (player.getDirection() != null) {
+                                    screenMove = true;
+                                    direction = player.getDirection();
+                                }
+
+                                if (screenMove) {
+                                    for (ModelRendering model : trest.background) {
+                                        model.getModels().get(0).getMovement().addPosition(new Vector3f(-direction[0] / 50, -direction[1] / 50, 0));
+
+                                    }
+                                    for (ModelRendering model : trest.background2) {
+                                        model.getModels().get(0).getMovement().addPosition(new Vector3f(-direction[0] / 10, -direction[1] / 10, 0));
+
+                                    }
+                                    for (ModelRendering model : trest.background3) {
+                                        model.getModels().get(0).getMovement().addPosition(new Vector3f(-direction[0] / 5, -direction[1] / 5, 0));
+                                    }
+                                    for (Enemy enemy : Enemy.enemies) {
+                                        enemy.moveXy(direction);
+                                    }
+                                    screenMove = true;
+                                    apple.moveXy(direction);
+                                    player.moveXy(direction);
+
+
+                                }
+                            }
+                            for (Enemy enemy : Enemy.enemies) {
+
+                                if (enemy.getXy().get(0)[0] < (outLeft)) {
+                                    enemy.moveXy(new float[]{fromLeft, 0});
+                                    enemy.reverse();
+                                } else if (enemy.getXy().get(0)[0] > (outRight)) {
+                                    enemy.moveXy(new float[]{fromRight, 0});
+                                    enemy.reverse();
+                                }
+                                if (enemy.getXy().get(0)[1] < (outUp)) {
+                                    enemy.moveXy(new float[]{0, fromUp});
+                                    enemy.reverse();
+                                } else if (enemy.getXy().get(0)[1] > (outDown)) {
+                                    enemy.moveXy(new float[]{0, fromDown});
+                                    enemy.reverse();
+                                }
+
+
+                            }
+                            if (Apple.getXy()[0] < (outLeft)) {
+                                apple.moveXy(new float[]{fromLeft, 0});
+
+                            } else if (Apple.getXy()[0] > (outRight)) {
+                                apple.moveXy(new float[]{fromRight, 0});
+
+                            }
+                            if (Apple.getXy()[1] < (outUp)) {
+                                apple.moveXy(new float[]{0, fromUp});
+
+                            } else if (Apple.getXy()[1] > (outDown)) {
+                                apple.moveXy(new float[]{0, fromDown});
+
+                            }
+                            float[] p = player.getXy().get(0);
+                            if (appleSpawned && !appleVisible) {
+                                if (eatenTimelast > 0) {
+                                    eatenTimelast -= (org.example.gpu.Timer.getFloatTime() - eatenTime);
+                                    eatenTime = org.example.gpu.Timer.getFloatTime();
+
+                                } else {
+                                    appleVisible = true;
+//                                    appleSpawned = false;
+                                }
+                            }
+                            if (appleVisible) {
+
+
+                                if (Math.pow(Math.abs(p[0] - a[0]), 2) + Math.pow(Math.abs(p[1] - a[1]), 2) <= collisionWithApple) {       //Проверка колизии змеи и яблока
+                                    appleSpawned = false;
+                                    appleVisible = false;
+                                    player.setDelay();
+                                    player.minusCell();
+//                                player.setPhantomXY();
+//                                Picture.countOfApples += 1;
+                                    eaten = true;
+                                } else {
+                                    for (Enemy enemy : Enemy.activeEnemies) {
+                                        if (Math.pow(Math.abs(enemy.getXy().get(0)[0] - a[0]), 2) + Math.pow(Math.abs(enemy.getXy().get(0)[1] - a[1]), 2) <= collisionWithApple) {       //Проверка колизии змеи и яблока
+
+                                            appleSpawned = false;
+                                            appleVisible = false;
+//                                enemy.setDelay();
+                                            enemy.isGrow = true;
+                                            enemy.setEatAndAngry(true);
+                                            enemy.setCurrentDelay((int) (enemy.getDelay() / 2));
+                                            eaten = true;
+                                        }
+                                    }
+                                }
+
+                                if (eaten) {
+                                    eatenTime = org.example.gpu.Timer.getFloatTime();
+                                    eatenDelay = 0;
+                                    a = Apple.getXy();
+//                            player.grow();
+                                }
+
+                            }
+                            a = apple.getXy();
+                            if (eatenDelay < eatenDelayStat) {
+                                eatenDelay++;
+                            }
+                            if (eaten) {
+                                if (eatenTimelast > 0) {
+                                    eatenTimelast += org.example.gpu.Timer.getFloatTime() - eatenTime;
+                                    eatenTime = org.example.gpu.Timer.getFloatTime();
+                                } else {
+                                    eatenTimelast = org.example.gpu.Timer.getFloatTime() - eatenTime;
+                                }
+                                if (eatenDelay >= eatenDelayStat) {
+                                    apple.setXy();
+
+                                    a = apple.getXy();
+
+
+                                    eaten = false;
+                                }
+                            }
+                            if (eatenDelay >= eatenDelayStat) {
+
+                                eatenTime = org.example.gpu.Timer.getFloatTime();
+                                appleSpawned = true;
+//                                appleVisible = true;
+                                try {
+                                    double xTarget = Apple.getXy()[0];
+                                    double yTarget = Apple.getXy()[1];
+                                    double TargetRadian = 0;
+                                    // 1143 372 900 600
+                                    TargetRadian = Math.atan2(xTarget, yTarget);
+                                    if (TargetRadian < 0) {
+                                        TargetRadian += 6.28;
+
+                                    }
+                                    double pointWatchX = (100 * Math.sin(TargetRadian));
+                                    double pointWatchY = (100 * Math.cos(TargetRadian));
+                                    renderingArrow.getModels().get(0).getMovement().setPosition(new Vector3f((float) pointWatchX, (float) pointWatchY, 0));
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+
+                            }
+
+
+                            for (Enemy enemy : Enemy.enemies) {
+
+                                boolean isNearby = false;
+                                float[] nearPoint = new float[2];
+                                int rad;
+                                rad = 300;
+                                float length = 0;
+                                nearPoint = new float[2];
+
+                                for (float[] ePoint : enemy.getPhantomXY()) {
+                                    for (int i = 0; i < player.getPhantomXY().size(); i++) {
+                                        float dest = (float) Math.sqrt(Math.pow(player.getPhantomXY().get(i)[0] - ePoint[0], 2) + Math.pow(player.getPhantomXY().get(i)[1] - ePoint[1], 2));
+                                        if (dest <= Enemy.getSize() + Player.getSize() - 1) {
+                                            if (!isEnd) {
+                                                eatenPlayerTime = Timer.getFloatTime();
+                                                isEnd = true;
+                                                trest.mouseControl = false;
+                                                for (Enemy enemy1 : Enemy.enemies) {
+                                                    enemy1.setCurrentDelay(0);
+                                                }
+                                            }
+                                        }
+                                        if (dest <= rad) {
+                                            if (length == 0) {
+                                                length = dest;
+                                                nearPoint = new float[]{player.getPhantomXY().get(i)[0], player.getPhantomXY().get(i)[1]};
+                                            } else if (length > dest) {
+                                                length = dest;
+                                                nearPoint = new float[]{player.getPhantomXY().get(i)[0], player.getPhantomXY().get(i)[1]};
+                                            }
+                                            isNearby = true;
+                                        }
+                                    }
+                                    if (isEnd) {
+                                        eatenPlayerTimelast = Timer.getFloatTime() - eatenPlayerTime;
+                                    }
+                                }
+
+                                if (enemy.isEatAndAngry() /*|| isEnd*/) {
+                                    enemy.moveCheck(player.getPhantomXY().get(0), a, true);
+                                } else if (isNearby) {
+                                    enemy.moveCheck(nearPoint, a, true);
+                                } else {
+                                    enemy.moveCheck(new float[2], a, false);
+                                }
+                                boolean notSelf = true;
+                            }
+                            playerProcess(player);
+                            isGo = false;
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-
                 }
-
-
-                for (Enemy enemy : Enemy.enemies) {
-
-                    boolean isNearby = false;
-                    double[] nearPoint = new double[2];
-                    int rad;
-//                    if(enemy.isActive){
-//                        rad=200;
-//                    }else {
-                    rad = 300;
-//                    }
-                    double length = 0;
-                    nearPoint = new double[2];
-                    double[] ePoint = enemy.getPhantomXY().get(0);
-
-
-                    for (double[] point : player.getPhantomXY()) {
-                        double dest = Math.sqrt(Math.pow(point[0] - ePoint[0], 2) + Math.pow(point[1] - ePoint[1], 2));
-                        if (dest <= Enemy.getSize() + Player.getSize() - 1) {
-                            if (!Picture.isEnd) {
-                                Picture.pauseMenuON();
-                                for (Enemy enemy1 : Enemy.enemies) {
-                                    enemy1.setCurrentDelay(0);
-                                }
-                            }
-
-                        }
-                        if (dest <= rad) {
-                            if (length == 0) {
-                                length = dest;
-                                nearPoint = new double[]{point[0], point[1]};
-                            } else if (length > dest) {
-                                length = dest;
-                                nearPoint = new double[]{point[0], point[1]};
-                            }
-                            isNearby = true;
-                        }
-                    }
-
-                    ;
-                    ;
-
-//if(Picture.isEnd){
-//    enemy.moveCheck(new double[]{Picture.xMouse,Picture.yMouse}, p, true);
-//}else
-                    if (enemy.isEatAndAngry() || Picture.isEnd) {
-                        enemy.moveCheck(player.getPhantomXY().get(0), p, true);
-                    } else if (isNearby) {
-                        enemy.moveCheck(nearPoint, p, true);
-                    } else {
-                        enemy.moveCheck(new double[2], p, false);
-                    }
-                    boolean notSelf = true;
-
-//                    for (Enemy enemy1 : Enemy.enemies) {
-////            if (snake.equals(snake1)) {
-////                continue;
-////            } else {
-//                        for (double[] i : enemy1.getXy()) {
-//                            if (i[0] == enemy.taillessCopy[0] && i[1] == enemy.taillessCopy[1]) {
-//                                notSelf = false;
-//                            }
-//                        }
-////            }
-//                    }
-//                    if (notSelf) {
-////                        if (enemy.taillessCopy[0] != 0) {                                                                           //Затирка последней ячейки змеи
-////                            for (Point point : pointEnemyArrayList) {
-////                                pointsToErase.add(new Point(point.x + (int) enemy.taillessCopy[0], point.y + (int) enemy.taillessCopy[1]));
-////
-////
-////                            }
-////                        }
-//                        if (enemy.taillessPhantomCopy[0] != 0) {                                                                           //Затирка последней ячейки змеи
-//                            for (Point point : pointEnemyArrayList) {
-//
-//                                pointsToErase.add(new Point(point.x + (int) enemy.taillessPhantomCopy[0], point.y + (int) enemy.taillessPhantomCopy[1]));
-//
-//                            }
-//                        }
-//                    }
-
-                    //TODO
-                    for (Line line : enemy.lines) {
-                        lines.add(line);
-                    }
-                }
-
-//                for (Point point : pointsOfRect) {
-//                    points.add(new Point(point));
-//                    if (lifeArea.contains(player.getXy().get(0)[0], player.getXy().get(0)[1])) {
-//                        colors.add(Color.green);
-//                        screenMove = false;
-//                    } else {
-//                        colors.add(Color.red);
-//                        screenMove = true;
-//                        direction = player.getDirection();
-//
-//                    }
-//                }
-//                if (!lifeArea.contains(player.getXy().get(0)[0], player.getXy().get(0)[1])) {
-//                    for (Enemy enemy : Enemy.enemies) {
-//                        enemy.moveXy(direction);
-//                    }
-//                    screenMove = true;
-//                    apple.moveXy(direction);
-//
-//
-//
-//                }
-                Date date1 = new Date();
-                polygon = getPoligon();
-                System.out.println(new Date().getTime() - date1.getTime());
-                playerProcess(player);
-                while (!timeRunUp) {
-                    try {
-                        TimeUnit.MICROSECONDS.sleep(1);
-                    } catch (Exception e) {
-
-                    }
-                }
-//                if ((timeRunUp)) {
-                    ready = true;
-//                }
-//                System.out.println(new Date().getTime() - date.getTime());
-                while (ready) {
-                    try {
-                        TimeUnit.MILLISECONDS.sleep(1);
-                    } catch (Exception e) {
-
-                    }
-                }
-
-            }
+            });
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println(e);
+
         }
 
     }
 
     public void playerProcess(Player player) {
-        player.moveCheck((int) Apple.getXy()[0], (int) Apple.getXy()[1], Picture.mouseControl, targetChanged);
-        for (int i = 0; i < player.getPhantomXY().size(); i++) {
-            for (Point point : pointArrayList) {
-                points.add(new Point(point.x + (int) player.getPhantomXY().get(i)[0], point.y + (int) player.getPhantomXY().get(i)[1]));
-                colors.add(player.getColor());
-            }
-        }
-        for (Enemy enemy : Enemy.enemies) {
-            for (double[] i : enemy.getPhantomXY()) {
-//        if(polygon.cont
-
-                for (Point point : pointEnemyArrayList) {
-
-                    if (Math.pow(i[0] - (double) (Picture.width / 2), 2) + Math.pow(i[1] - (double) Picture.height / 2, 2) >= Math.pow(300, 2)) {
-                        continue;
-                    }
-
-                    points.add(new Point(point.x + (int) i[0], point.y + (int) i[1]));
-                    colors.add(enemy.getColor());
-                }
-            }
-        }
+        player.moveCheck();
+//            for (int i = 0; i < player.getPhantomXY().size(); i++) {
+//                for (Point point : pointArrayList) {
+//                    points.add(new Point(point.x + (int) player.getPhantomXY().get(i)[0], point.y + (int) player.getPhantomXY().get(i)[1]));
+//                    colors.add(player.getColor());
+//                }
+//            }
+//            for (Enemy enemy : Enemy.enemies) {
+//                for (float[] i : enemy.getPhantomXY()) {
+////        if(polygon.cont
+//
+//                    for (Point point : pointEnemyArrayList) {
+//
+//                        if (Math.pow(i[0] - (double) (Picture.width / 2), 2) + Math.pow(i[1] - (double) Picture.height / 2, 2) >= Math.pow(300, 2)) {
+//                            continue;
+//                        }
+//
+//                        points.add(new Point(point.x + (int) i[0], point.y + (int) i[1]));
+//                        colors.add(enemy.getColor());
+//                    }
+//                }
+//            }
 
     }
 
+
     static boolean appleSpawned = false;
+    public static boolean appleVisible = false;
 
 
     private ArrayList<Point> pointArrayList = new ArrayList<>();
@@ -554,9 +477,9 @@ public class Process {
     ArrayList<Point> pointsOfPoly = new ArrayList<>();
     ArrayList<Double> pointsRad = new ArrayList<>();
 
-    public static Polygon getPolygon() {
-        return polygon;
-    }
+//    public static Polygon getPolygon() {
+//        return polygon;
+//    }
 
     static Polygon polygon;
     Point center;
@@ -584,19 +507,19 @@ public class Process {
 //                            g.drawLine(point.x, point.y, p.x, p.y);
                         }
                     } catch (Exception e) {
-//e.printStackTrace();
+                        e.printStackTrace();
                     }
                 }
             }
 
             if (!isCross) {
 //        g.drawLine(point.x, point.y, point1.x, point1.y);
-                PolygonDots.add(point1,getShadowRadian(point1, center));
+                PolygonDots.add(point1, getShadowRadian(point1, center));
 //                pointsOfPoly.add(point1);
 //                pointsRad.add(getShadowRadian(point1, center));
             }
         }
-Line lineL = null;
+        Line lineL = null;
         for (Enemy enemy : Enemy.enemies) {
             for (Line line : enemy.lines) {
                 boolean crossedBranch = false;
@@ -628,10 +551,10 @@ Line lineL = null;
 
                             Point p = getCross(sos, center, branchPoint3, branchPoint4);
                             if (belongLine(p, center, sos, branchPoint3, branchPoint4)) {
-                                if(crossPoints1 == null){
+                                if (crossPoints1 == null) {
                                     lineL = line;
                                     crossPoints1 = p;
-                                }else if (center.distance(crossPoints1) > center.distance(p)) {
+                                } else if (center.distance(crossPoints1) > center.distance(p)) {
 
                                     crossPoints1 = p;
                                 }
@@ -642,7 +565,7 @@ Line lineL = null;
 //                            cross = p;
                             }
                         } catch (Exception e) {
-
+                            e.printStackTrace();
                         }
                         try {
                             Point sos = new Point(branchPoint2.x, branchPoint2.y);
@@ -654,9 +577,9 @@ Line lineL = null;
                             }
                             Point p = getCross(sos, center, branchPoint3, branchPoint4);
                             if (belongLine(p, center, sos, branchPoint3, branchPoint4)) {
-                                if(crossPoints2 == null){
+                                if (crossPoints2 == null) {
                                     crossPoints2 = p;
-                                }else if (center.distance(crossPoints2) > center.distance(p)) {
+                                } else if (center.distance(crossPoints2) > center.distance(p)) {
                                     crossPoints2 = p;
                                 }
 //                                crossPoints2.add(p);
@@ -664,18 +587,18 @@ Line lineL = null;
 //                            cross2 = p;
                             }
                         } catch (Exception e) {
-
+                            e.printStackTrace();
                         }
                     }
                 }
                 if (crossedBranch) {
 //                    Point cross = getNearPoint(crossPoints1, center);
-                    PolygonDots.add(crossPoints1,getShadowRadian(crossPoints1, center));
+                    PolygonDots.add(crossPoints1, getShadowRadian(crossPoints1, center));
 //                    pointsOfPoly.add(crossPoints1);
 //                    pointsRad.add(getShadowRadian(crossPoints1, center));
                     getNextCross(line, center, crossPoints1);
                 } else {
-                    PolygonDots.add(branchPoint1,getShadowRadian(branchPoint1, center));
+                    PolygonDots.add(branchPoint1, getShadowRadian(branchPoint1, center));
 //                    pointsOfPoly.add(branchPoint1);
 //                    pointsRad.add(getShadowRadian(branchPoint1, center));
                     getNextCross(line, center, branchPoint1);
@@ -683,12 +606,12 @@ Line lineL = null;
                 }
                 if (crossedBranch2) {
 //                    Point cross = getNearPoint(crossPoints2, center);
-                    PolygonDots.add(crossPoints2,getShadowRadian(crossPoints2, center));
+                    PolygonDots.add(crossPoints2, getShadowRadian(crossPoints2, center));
 //                    pointsOfPoly.add(crossPoints2);
 //                    pointsRad.add(getShadowRadian(crossPoints2, center));
                     getNextCross(line, center, crossPoints2);
                 } else {
-                    PolygonDots.add(branchPoint2,getShadowRadian(branchPoint2, center));
+                    PolygonDots.add(branchPoint2, getShadowRadian(branchPoint2, center));
 //                    pointsOfPoly.add(branchPoint2);
 //                    pointsRad.add(getShadowRadian(branchPoint2, center));
                     getNextCross(line, center, branchPoint2);
@@ -699,7 +622,7 @@ Line lineL = null;
         }
 
 
-        int  c =PolygonDots.size();
+        int c = PolygonDots.size();
         int x[] = new int[c];
         int y[] = new int[c];
         pointsOfPoly = PolygonDots.getPoints();
@@ -752,9 +675,9 @@ Line lineL = null;
                                 radian1Useless = true;
 //                                crossPoints1.clear();
                             } else {
-                                if(crossPoints1 == null){
+                                if (crossPoints1 == null) {
                                     crossPoints1 = p;
-                                }else if (center.distance(crossPoints1) > center.distance(p)) {
+                                } else if (center.distance(crossPoints1) > center.distance(p)) {
                                     crossPoints1 = p;
                                 }
 //                                crossPoints1.add(p);
@@ -765,7 +688,7 @@ Line lineL = null;
 //                            cross = p;
                         }
                     } catch (Exception e) {
-
+                        e.printStackTrace();
                     }
                 }
                 if (!radian2Useless) {
@@ -782,9 +705,9 @@ Line lineL = null;
                                 radian2Useless = true;
 //                                crossPoints2.clear();
                             } else {
-                                if(crossPoints2 == null){
+                                if (crossPoints2 == null) {
                                     crossPoints2 = p;
-                                }else if (center.distance(crossPoints2) > center.distance(p)) {
+                                } else if (center.distance(crossPoints2) > center.distance(p)) {
                                     crossPoints2 = p;
                                 }
 //                                crossPoints2.add(p);
@@ -793,7 +716,7 @@ Line lineL = null;
 
                         }
                     } catch (Exception e) {
-
+                        e.printStackTrace();
                     }
                 }
             }
@@ -803,7 +726,7 @@ Line lineL = null;
         }
         if (crossedBranch && !radian1Useless) {
 //            Point sssuk = getNearPoint(crossPoints1, center);
-            PolygonDots.add(crossPoints1,getShadowRadian(crossPoints1, center));
+            PolygonDots.add(crossPoints1, getShadowRadian(crossPoints1, center));
 
 //            pointsOfPoly.add(crossPoints1);
 //            pointsRad.add(getShadowRadian(crossPoints1, center));
@@ -821,13 +744,13 @@ Line lineL = null;
                     }
                     Point p = getCross(newPoint1, center, wall1, wall2);
                     if (belongWall(p, center, newPoint1, wall1, wall2)) {
-                        PolygonDots.add(p,getShadowRadian(p, center));
+                        PolygonDots.add(p, getShadowRadian(p, center));
 //                        pointsOfPoly.add(p);
 //                        pointsRad.add(getShadowRadian(p, center));
 //                            g.drawLine(curPoint.x, curPoint.y, p.x, p.y);
                     }
                 } catch (Exception e) {
-//e.printStackTrace();
+                    e.printStackTrace();
                 }
 
             }
@@ -836,7 +759,7 @@ Line lineL = null;
         }
         if (crossedBranch2 && !radian2Useless) {
 //            Point sssuk = getNearPoint(crossPoints2, center);
-            PolygonDots.add(crossPoints2,getShadowRadian(crossPoints2, center));
+            PolygonDots.add(crossPoints2, getShadowRadian(crossPoints2, center));
 //            pointsOfPoly.add(crossPoints2);
 //            pointsRad.add(getShadowRadian(crossPoints2, center));
 //                    g.drawLine(curPoint.x, curPoint.y, newPoint2.x, newPoint2.y);
@@ -853,13 +776,13 @@ Line lineL = null;
                     }
                     Point p = getCross(newPoint2, center, wall1, wall2);
                     if (belongWall(p, center, newPoint2, wall1, wall2)) {
-                        PolygonDots.add(p,getShadowRadian(p, center));
+                        PolygonDots.add(p, getShadowRadian(p, center));
 //                        pointsOfPoly.add(p);
 //                        pointsRad.add(getShadowRadian(p, center));
 //                        g.drawLine(curPoint.x, curPoint.y, p.x, p.y);
                     }
                 } catch (Exception e) {
-
+                    e.printStackTrace();
                 }
 
 
@@ -917,7 +840,7 @@ Line lineL = null;
         int lenthY1 = Math.abs(crossPoint.y - pointOfLine1.y) + Math.abs(crossPoint.y - pointOfLine2.y) - Math.abs(pointOfLine1.y - pointOfLine2.y);
         int lenthX2 = Math.abs(crossPoint.x - center.x) + Math.abs(crossPoint.x - wall.x) - Math.abs(center.x - wall.x);
         int lenthY2 = Math.abs(crossPoint.y - center.y) + Math.abs(crossPoint.y - wall.y) - Math.abs(center.y - wall.y);
-        if (lenthX1 < 5 && lenthY1 < 5 && lenthX2 < 5 && lenthY2 <5) {
+        if (lenthX1 < 5 && lenthY1 < 5 && lenthX2 < 5 && lenthY2 < 5) {
 //            if(crossPoint.equals(wall)|crossPoint.equals(pointOfLine1)||crossPoint.equals(pointOfLine2)){
 //                return false;
 //            }
