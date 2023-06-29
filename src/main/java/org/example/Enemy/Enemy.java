@@ -1,6 +1,5 @@
 package org.example.Enemy;
 
-import org.example.Painter.Apple;
 import org.example.Painter.Picture;
 import org.example.Painter.Process;
 import org.example.gpu.Window;
@@ -256,8 +255,8 @@ public class Enemy extends Entity{
     public boolean hunt = false;
 
 
-    public void moveCheck(float[] point, boolean isNearby) {
-        float[] apple = Apple.getXy();
+    public void moveCheck(float[] point, float[] apple, boolean isNearby) {
+
 
         if (delayCount < delay) {                    //проверка прошло ли достаточно времени, чтобы делать новый шаг
             delayCount++;

@@ -56,7 +56,6 @@ windowPosY = (videoMode.height() - height) / 2;
     public void setSize(int width, int height) {
         this.width = width;
         this.height = height;
-
     }
     public void swapBuffer(){
         glfwSwapBuffers(window);

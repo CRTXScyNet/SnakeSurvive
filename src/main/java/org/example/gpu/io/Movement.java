@@ -23,7 +23,6 @@ public class Movement {
         this.projection = projection;
     }
 
-
     public Matrix4f projection() {
      Matrix4f target = new Matrix4f();
      Matrix4f pos = new Matrix4f().setTranslation(position);

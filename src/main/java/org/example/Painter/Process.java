@@ -105,17 +105,17 @@ public class Process {
         this.width = window.width;
         this.height = window.height;
 
-        outLeft =  (-width) / Enemy.step * Enemy.step;
-        fromLeft =  (-width * 2) / Enemy.step * Enemy.step;
+        outLeft = (int) (-width) / Enemy.step * Enemy.step;
+        fromLeft = (int) (-width * 2) / Enemy.step * Enemy.step;
 
-        outRight =  (width) / Enemy.step * Enemy.step;
-        fromRight =  (width * 2) / Enemy.step * Enemy.step;
+        outRight = (int) (width) / Enemy.step * Enemy.step;
+        fromRight = (int) (width * 2) / Enemy.step * Enemy.step;
 
-        outUp = (-height) / Enemy.step * Enemy.step;
-        fromUp =  (-height * 2) / Enemy.step * Enemy.step;
+        outUp = (int) (-height) / Enemy.step * Enemy.step;
+        fromUp = (int) (-height * 2) / Enemy.step * Enemy.step;
 
-        outDown =  (height) / Enemy.step * Enemy.step;
-        fromDown =  (height * 2) / Enemy.step * Enemy.step;
+        outDown = (int) (height) / Enemy.step * Enemy.step;
+        fromDown = (int) (height * 2) / Enemy.step * Enemy.step;
 
 
         renderingArrow = new ModelRendering(window, Color.red, true, null);
@@ -195,256 +195,240 @@ public class Process {
                 double cap = 1.0 / 500.0;
                 double time = org.example.gpu.Timer.getTime(); //TODO
                 double buf = 0;
-                double durat = 0;
-                ArrayList<Double> averageList = new ArrayList<>();
-
                 while (true) {
-                    double time2 = org.example.gpu.Timer.getTime() - time;
-                    buf += time2;
-                    durat += time2;
-                    time = org.example.gpu.Timer.getTime();
-                    double checkTime = Timer.getTime();
-                    if (buf >= cap) {
-
-                        buf = 0;
-                        if (reset && !trest.reset) {
-                            trest.reset = true;
-                            try {
-                                TimeUnit.MILLISECONDS.sleep(1);
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                    try {
+                        double time2 = org.example.gpu.Timer.getTime() - time;
+                        buf += time2;
+                        time = org.example.gpu.Timer.getTime();
+                        if (buf >= cap) {
+                            buf = 0;
+                            if (trest.reset) {
+                                reset = true;
+                                continue;
+//                    reset();
+//                        try {
+//                    TimeUnit.MILLISECONDS.sleep(500);
+//                        } catch (Exception e) {
+//
+//                        }
+                            } else if (reset) {
+                                reset = false;
+                                isPaused = false;
+                                isEnd = false;
+                                trest.mouseControl = false;
                             }
-                            continue;
-                        } else if (trest.reset) {
-                            try {
-                                TimeUnit.MILLISECONDS.sleep(1);
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                            if (isPaused) {
+                                continue;
                             }
-                            continue;
-                        }
-                        if (isPaused) {
-                            continue;
-                        }
 
 //                pointsToErase.clear();
 
 
-                        if (trest.mouseControl) {
+                            if (trest.mouseControl) {
 
-                            if (player.getDirection() != null) {
-                                screenMove = true;
-                                direction = player.getDirection();
-                            }
+                                if (player.getDirection() != null) {
+                                    screenMove = true;
+                                    direction = player.getDirection();
+                                }
 
-                            if (screenMove) {
-                                for (ModelRendering model : trest.background) {
-                                    model.getModels().get(0).getMovement().addPosition(new Vector3f(-direction[0] / 50, -direction[1] / 50, 0));
+                                if (screenMove) {
+                                    for (ModelRendering model : trest.background) {
+                                        model.getModels().get(0).getMovement().addPosition(new Vector3f(-direction[0] / 50, -direction[1] / 50, 0));
+
+                                    }
+                                    for (ModelRendering model : trest.background2) {
+                                        model.getModels().get(0).getMovement().addPosition(new Vector3f(-direction[0] / 10, -direction[1] / 10, 0));
+
+                                    }
+                                    for (ModelRendering model : trest.background3) {
+                                        model.getModels().get(0).getMovement().addPosition(new Vector3f(-direction[0] / 5, -direction[1] / 5, 0));
+                                    }
+                                    for (Enemy enemy : Enemy.enemies) {
+                                        enemy.moveXy(direction);
+                                    }
+                                    screenMove = true;
+                                    apple.moveXy(direction);
+                                    player.moveXy(direction);
+
 
                                 }
-                                for (ModelRendering model : trest.background2) {
-                                    model.getModels().get(0).getMovement().addPosition(new Vector3f(-direction[0] / 10, -direction[1] / 10, 0));
+                            }
+                            for (Enemy enemy : Enemy.enemies) {
 
+                                if (enemy.getXy().get(0)[0] < (outLeft)) {
+                                    enemy.moveXy(new float[]{fromLeft, 0});
+                                    enemy.reverse();
+                                } else if (enemy.getXy().get(0)[0] > (outRight)) {
+                                    enemy.moveXy(new float[]{fromRight, 0});
+                                    enemy.reverse();
                                 }
-                                for (ModelRendering model : trest.background3) {
-                                    model.getModels().get(0).getMovement().addPosition(new Vector3f(-direction[0] / 5, -direction[1] / 5, 0));
+                                if (enemy.getXy().get(0)[1] < (outUp)) {
+                                    enemy.moveXy(new float[]{0, fromUp});
+                                    enemy.reverse();
+                                } else if (enemy.getXy().get(0)[1] > (outDown)) {
+                                    enemy.moveXy(new float[]{0, fromDown});
+                                    enemy.reverse();
                                 }
-                                for (Enemy enemy : Enemy.enemies) {
-                                    enemy.moveXy(direction);
-                                }
-                                screenMove = true;
-                                apple.moveXy(direction);
-                                player.moveXy(direction);
 
 
                             }
-                        }
-                        for (Enemy enemy : Enemy.enemies) {
+                            if (Apple.getXy()[0] < (outLeft)) {
+                                apple.moveXy(new float[]{fromLeft, 0});
 
-                            if (enemy.getXy().get(0)[0] < (outLeft)) {
-                                enemy.moveXy(new float[]{fromLeft, 0});
-                                enemy.reverse();
-                            } else if (enemy.getXy().get(0)[0] > (outRight)) {
-                                enemy.moveXy(new float[]{fromRight, 0});
-                                enemy.reverse();
+                            } else if (Apple.getXy()[0] > (outRight)) {
+                                apple.moveXy(new float[]{fromRight, 0});
+
                             }
-                            if (enemy.getXy().get(0)[1] < (outUp)) {
-                                enemy.moveXy(new float[]{0, fromUp});
-                                enemy.reverse();
-                            } else if (enemy.getXy().get(0)[1] > (outDown)) {
-                                enemy.moveXy(new float[]{0, fromDown});
-                                enemy.reverse();
+                            if (Apple.getXy()[1] < (outUp)) {
+                                apple.moveXy(new float[]{0, fromUp});
+
+                            } else if (Apple.getXy()[1] > (outDown)) {
+                                apple.moveXy(new float[]{0, fromDown});
+
                             }
+                            float[] p = player.getXy().get(0);
+                            if (appleSpawned && !appleVisible) {
+                                if (eatenTimelast > 0) {
+                                    eatenTimelast -= (org.example.gpu.Timer.getFloatTime() - eatenTime);
+                                    eatenTime = org.example.gpu.Timer.getFloatTime();
 
-
-                        }
-                        if (Apple.getXy()[0] < (outLeft)) {
-                            apple.moveXy(new float[]{fromLeft, 0});
-
-                        } else if (Apple.getXy()[0] > (outRight)) {
-                            apple.moveXy(new float[]{fromRight, 0});
-
-                        }
-                        if (Apple.getXy()[1] < (outUp)) {
-                            apple.moveXy(new float[]{0, fromUp});
-
-                        } else if (Apple.getXy()[1] > (outDown)) {
-                            apple.moveXy(new float[]{0, fromDown});
-
-                        }
-                        float[] p = player.getXy().get(0);
-                        if (appleSpawned && !appleVisible) {
-                            if (eatenTimelast > 0) {
-                                eatenTimelast -= (org.example.gpu.Timer.getFloatTime() - eatenTime);
-                                eatenTime = org.example.gpu.Timer.getFloatTime();
-
-                            } else {
-                                appleVisible = true;
+                                } else {
+                                    appleVisible = true;
 //                                    appleSpawned = false;
-                            }
-                        }
-                        if (appleVisible) {
-                            if (Math.pow(Math.abs(p[0] - a[0]), 2) + Math.pow(Math.abs(p[1] - a[1]), 2) <= collisionWithApple) {       //Проверка колизии змеи и яблока
-                                appleSpawned = false;
-                                appleVisible = false;
-                                player.setDelay();
-                                player.minusCell();
-//                                player.setPhantomXY();
-//                                Picture.countOfApples += 1;
-                                eaten = true;
-                            }
-
-                            if (eaten) {
-                                eatenTime = org.example.gpu.Timer.getFloatTime();
-                                eatenDelay = 0;
-                                a = Apple.getXy();
-//                            player.grow();
-                            }
-
-                        }
-                        a = apple.getXy();
-                        if (eatenDelay < eatenDelayStat) {
-                            eatenDelay++;
-                        }
-                        if (eaten) {
-                            if (eatenTimelast > 0) {
-                                eatenTimelast += org.example.gpu.Timer.getFloatTime() - eatenTime;
-                                eatenTime = org.example.gpu.Timer.getFloatTime();
-                            } else {
-                                eatenTimelast = org.example.gpu.Timer.getFloatTime() - eatenTime;
-                            }
-                            if (eatenDelay >= eatenDelayStat) {
-                                apple.setXy();
-
-                                a = apple.getXy();
-
-
-                                eaten = false;
-                            }
-                        }
-                        if (eatenDelay >= eatenDelayStat) {
-
-                            eatenTime = org.example.gpu.Timer.getFloatTime();
-                            appleSpawned = true;
-//                                appleVisible = true;
-                            try {
-                                double xTarget = Apple.getXy()[0];
-                                double yTarget = Apple.getXy()[1];
-                                double TargetRadian = 0;
-                                // 1143 372 900 600
-                                TargetRadian = Math.atan2(xTarget, yTarget);
-                                if (TargetRadian < 0) {
-                                    TargetRadian += 6.28;
-
                                 }
-                                double pointWatchX = (100 * Math.sin(TargetRadian));
-                                double pointWatchY = (100 * Math.cos(TargetRadian));
-                                renderingArrow.getModels().get(0).getMovement().setPosition(new Vector3f((float) pointWatchX, (float) pointWatchY, 0));
-                            } catch (Exception e) {
-                                e.printStackTrace();
                             }
-
-                        }
-
-
-                        for (Enemy enemy : Enemy.enemies) {
                             if (appleVisible) {
-                                if (Math.pow(Math.abs(enemy.getXy().get(0)[0] - a[0]), 2) + Math.pow(Math.abs(enemy.getXy().get(0)[1] - a[1]), 2) <= collisionWithApple) {       //Проверка колизии змеи и яблока
 
+
+                                if (Math.pow(Math.abs(p[0] - a[0]), 2) + Math.pow(Math.abs(p[1] - a[1]), 2) <= collisionWithApple) {       //Проверка колизии змеи и яблока
                                     appleSpawned = false;
                                     appleVisible = false;
-//                                enemy.setDelay();
-                                    enemy.isGrow = true;
-                                    enemy.setEatAndAngry(true);
-                                    enemy.setCurrentDelay((int) (enemy.getDelay() / 2));
+                                    player.setDelay();
+                                    player.minusCell();
+//                                player.setPhantomXY();
+//                                Picture.countOfApples += 1;
                                     eaten = true;
-                                    break;
+                                } else {
+                                    for (Enemy enemy : Enemy.activeEnemies) {
+                                        if (Math.pow(Math.abs(enemy.getXy().get(0)[0] - a[0]), 2) + Math.pow(Math.abs(enemy.getXy().get(0)[1] - a[1]), 2) <= collisionWithApple) {       //Проверка колизии змеи и яблока
+
+                                            appleSpawned = false;
+                                            appleVisible = false;
+//                                enemy.setDelay();
+                                            enemy.isGrow = true;
+                                            enemy.setEatAndAngry(true);
+                                            enemy.setCurrentDelay((int) (enemy.getDelay() / 2));
+                                            eaten = true;
+                                        }
+                                    }
                                 }
+
                                 if (eaten) {
                                     eatenTime = org.example.gpu.Timer.getFloatTime();
                                     eatenDelay = 0;
                                     a = Apple.getXy();
+//                            player.grow();
+                                }
+
+                            }
+                            a = apple.getXy();
+                            if (eatenDelay < eatenDelayStat) {
+                                eatenDelay++;
+                            }
+                            if (eaten) {
+                                if (eatenTimelast > 0) {
+                                    eatenTimelast += org.example.gpu.Timer.getFloatTime() - eatenTime;
+                                    eatenTime = org.example.gpu.Timer.getFloatTime();
+                                } else {
+                                    eatenTimelast = org.example.gpu.Timer.getFloatTime() - eatenTime;
+                                }
+                                if (eatenDelay >= eatenDelayStat) {
+                                    apple.setXy();
+
+                                    a = apple.getXy();
+
+
+                                    eaten = false;
                                 }
                             }
-                            boolean isNearby = false;
-                            float[] nearPoint = new float[2];
-                            int rad;
-                            rad = 300;
-                            float length = 0;
-                            nearPoint = new float[2];
+                            if (eatenDelay >= eatenDelayStat) {
 
-                            for (float[] ePoint : enemy.getPhantomXY()) {
-                                for (int i = 0; i < player.getPhantomXY().size(); i++) {
-                                    float dest = (float) Math.sqrt(Math.pow(player.getPhantomXY().get(i)[0] - ePoint[0], 2) + Math.pow(player.getPhantomXY().get(i)[1] - ePoint[1], 2));
-                                    if (dest <= Enemy.getSize() + Player.getSize() - 1) {
-                                        if (!isEnd) {
-                                            eatenPlayerTime = Timer.getFloatTime();
-                                            isEnd = true;
-                                            trest.mouseControl = false;
-                                            for (Enemy enemy1 : Enemy.enemies) {
-                                                enemy1.setCurrentDelay(0);
+                                eatenTime = org.example.gpu.Timer.getFloatTime();
+                                appleSpawned = true;
+//                                appleVisible = true;
+                                try {
+                                    double xTarget = Apple.getXy()[0];
+                                    double yTarget = Apple.getXy()[1];
+                                    double TargetRadian = 0;
+                                    // 1143 372 900 600
+                                    TargetRadian = Math.atan2(xTarget, yTarget);
+                                    if (TargetRadian < 0) {
+                                        TargetRadian += 6.28;
+
+                                    }
+                                    double pointWatchX = (100 * Math.sin(TargetRadian));
+                                    double pointWatchY = (100 * Math.cos(TargetRadian));
+                                    renderingArrow.getModels().get(0).getMovement().setPosition(new Vector3f((float) pointWatchX, (float) pointWatchY, 0));
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+
+                            }
+
+
+                            for (Enemy enemy : Enemy.enemies) {
+
+                                boolean isNearby = false;
+                                float[] nearPoint = new float[2];
+                                int rad;
+                                rad = 300;
+                                float length = 0;
+                                nearPoint = new float[2];
+
+                                for (float[] ePoint : enemy.getPhantomXY()) {
+                                    for (int i = 0; i < player.getPhantomXY().size(); i++) {
+                                        float dest = (float) Math.sqrt(Math.pow(player.getPhantomXY().get(i)[0] - ePoint[0], 2) + Math.pow(player.getPhantomXY().get(i)[1] - ePoint[1], 2));
+                                        if (dest <= Enemy.getSize() + Player.getSize() - 1) {
+                                            if (!isEnd) {
+                                                eatenPlayerTime = Timer.getFloatTime();
+                                                isEnd = true;
+                                                trest.mouseControl = false;
+                                                for (Enemy enemy1 : Enemy.enemies) {
+                                                    enemy1.setCurrentDelay(0);
+                                                }
                                             }
                                         }
-                                    }
-                                    if (dest <= rad) {
-                                        if (length == 0) {
-                                            length = dest;
-                                            nearPoint = new float[]{player.getPhantomXY().get(i)[0], player.getPhantomXY().get(i)[1]};
-                                        } else if (length > dest) {
-                                            length = dest;
-                                            nearPoint = new float[]{player.getPhantomXY().get(i)[0], player.getPhantomXY().get(i)[1]};
+                                        if (dest <= rad) {
+                                            if (length == 0) {
+                                                length = dest;
+                                                nearPoint = new float[]{player.getPhantomXY().get(i)[0], player.getPhantomXY().get(i)[1]};
+                                            } else if (length > dest) {
+                                                length = dest;
+                                                nearPoint = new float[]{player.getPhantomXY().get(i)[0], player.getPhantomXY().get(i)[1]};
+                                            }
+                                            isNearby = true;
                                         }
-                                        isNearby = true;
+                                    }
+                                    if (isEnd) {
+                                        eatenPlayerTimelast = Timer.getFloatTime() - eatenPlayerTime;
                                     }
                                 }
-                                if (isEnd) {
-                                    eatenPlayerTimelast = Timer.getFloatTime() - eatenPlayerTime;
+
+                                if (enemy.isEatAndAngry() /*|| isEnd*/) {
+                                    enemy.moveCheck(player.getPhantomXY().get(0), a, true);
+                                } else if (isNearby) {
+                                    enemy.moveCheck(nearPoint, a, true);
+                                } else {
+                                    enemy.moveCheck(new float[2], a, false);
                                 }
+                                boolean notSelf = true;
                             }
-
-                            if (enemy.isEatAndAngry() /*|| isEnd*/) {
-                                enemy.moveCheck(player.getPhantomXY().get(0), true);
-                            } else if (isNearby) {
-                                enemy.moveCheck(nearPoint, true);
-                            } else {
-                                enemy.moveCheck(new float[2], false);
-                            }
-                            boolean notSelf = true;
+                            playerProcess(player);
+                            isGo = false;
                         }
-                        playerProcess(player);
-                        isGo = false;
-
-
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-//                    averageList.add(Timer.getTime() - checkTime);
-//                    if (durat >= 1) {
-//                        checkTime = 0;
-//                        for(double d : averageList){
-//                            checkTime += d;
-//                        }
-//                        System.out.println(checkTime/averageList.size());
-//                        durat = 0;
-//                    }
                 }
             });
         } catch (Exception e) {
@@ -456,9 +440,27 @@ public class Process {
 
     public void playerProcess(Player player) {
         player.moveCheck();
-    }
-
-    public static void eatTheApple() {
+//            for (int i = 0; i < player.getPhantomXY().size(); i++) {
+//                for (Point point : pointArrayList) {
+//                    points.add(new Point(point.x + (int) player.getPhantomXY().get(i)[0], point.y + (int) player.getPhantomXY().get(i)[1]));
+//                    colors.add(player.getColor());
+//                }
+//            }
+//            for (Enemy enemy : Enemy.enemies) {
+//                for (float[] i : enemy.getPhantomXY()) {
+////        if(polygon.cont
+//
+//                    for (Point point : pointEnemyArrayList) {
+//
+//                        if (Math.pow(i[0] - (double) (Picture.width / 2), 2) + Math.pow(i[1] - (double) Picture.height / 2, 2) >= Math.pow(300, 2)) {
+//                            continue;
+//                        }
+//
+//                        points.add(new Point(point.x + (int) i[0], point.y + (int) i[1]));
+//                        colors.add(enemy.getColor());
+//                    }
+//                }
+//            }
 
     }
 
@@ -867,7 +869,6 @@ public class Process {
         return new Point((int) (p.getX()), (int) p.getY());
 
     }
-
 }
 
 
