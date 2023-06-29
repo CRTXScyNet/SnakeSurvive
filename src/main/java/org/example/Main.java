@@ -4,10 +4,10 @@ import org.example.gpu.trest;
 
 public class Main {
     public static void main(String[] args) {
-//        try {
+        try {
             new trest();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

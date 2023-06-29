@@ -3,6 +3,7 @@ package org.example.gpu;
 import org.example.Enemy.Enemy;
 import org.example.Painter.Process;
 import org.example.Player.Player;
+import org.example.gpu.io.Movement;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
 import org.joml.Vector3f;
@@ -37,8 +38,8 @@ public class trest {
         }
         GLFWVidMode vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         assert vidMode != null;
-        width = (int)(vidMode.width()*0.9);
-        height = (int)(vidMode.height()*0.9);
+        width = (int) (vidMode.width() * 0.9);
+        height = (int) (vidMode.height() * 0.9);
 //        width = 500;
 //                height = 500;
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
@@ -47,7 +48,6 @@ public class trest {
         Window window = new Window(width, height);
 
 //        window.setFullscreen(true);
-
         window.createWindow("what'sup");
         half = (float) window.width / 1.5f;
         GL.createCapabilities();
@@ -114,10 +114,6 @@ public class trest {
             while (unprocessed >= frame_cap) {
                 canRender = true;
                 unprocessed -= frame_cap;
-//
-//                for (int i = 0; i < ModelRendering.selfList.size(); i++) {
-//                    ModelRendering.selfList.get(i).update(window);
-//                }
 
 
                 if (frameTime >= 1) {
@@ -126,17 +122,7 @@ public class trest {
                     frames = 0;
                 }
             }
-//            if (Process.ringIsReady) {
-//                Process.ringIsReady = false;
-//                ModelRendering sfdg = new ModelRendering(window, Color.GREEN, false, null);
-//                for (int i = 0; i < Process.targets1.size(); i++) {
-//                    sfdg.addModel(new Model(window, 50));
-//                    sfdg.getModels().get(i).getMovement()
-//                            .setPosition(new Vector3f(Process.targets1.get(i).x, Process.targets1.get(i).y, 0));
-//                }
 
-
-//            }
 
             if (canRender) {
                 glClear(GL_COLOR_BUFFER_BIT);
@@ -157,10 +143,7 @@ public class trest {
                         Player.players.get(0).isShorter = false;
                     }
                 }
-if(Process.reset){
-    reset();
-    reset = false;
-}
+
                 moveBackground();
 
                 for (int i = 0; i < ModelRendering.selfList.size(); i++) {
@@ -168,11 +151,23 @@ if(Process.reset){
                 }
 
 
+                if(reset){
+                    reset();
+                    Process.reset = false;
+                    reset = false;
+
+                    Process.isPaused = false;
+                    Process.isEnd = false;
+                    mouseControl = false;
+                }
+
                 window.swapBuffer();
                 frames++;
 
             }
-            Process.ready = true;
+            if(!Process.ready) {
+                Process.ready = true;
+            }
         }
 //        for(ModelRendering rendering : ModelRendering.selfList){
 //            rendering.clear();
@@ -193,7 +188,7 @@ if(Process.reset){
             Process.isPaused = !Process.isPaused;
         }
         if (window.getInput().isKeyPressed(GLFW_KEY_R)) {
-            reset = true;
+           Process.reset = true;
             System.out.println("restart");
         }
 
@@ -237,7 +232,6 @@ if(Process.reset){
     }
 
     public static void reset() {
-
         //Здесь добавить списки
         for (Enemy snake : Enemy.enemies) {
             snake.reset();
