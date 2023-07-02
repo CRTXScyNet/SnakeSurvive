@@ -100,6 +100,9 @@ public class Process {
     public static HashMap<Point, Point> toTargets = new HashMap<>();
     public static boolean ringWayIsReady = false;
     public static boolean ringIsReady = false;
+    public static Node[] graph;
+    public static int graphWidth;
+    public static int graphHeight;
 
     public Process(Window window) {
         this.width = window.width;
@@ -118,8 +121,36 @@ public class Process {
         fromDown = (int) (height * 2) / Enemy.step * Enemy.step;
 
 
-        renderingArrow = new ModelRendering(window, Color.red, true, null,"pointer");
-        renderingArrow.addModel(new Model(window, 100));
+        renderingArrow = new ModelRendering(window, Color.red, true, null, "applePointer");
+        renderingArrow.addModel(new Model(window, 100, 2));
+        graphWidth = window.width / size - 1;
+        graphHeight = window.height / size - 1;
+        graph = new Node[graphWidth * graphHeight];
+        for (int x = 0; x < graphWidth; x++) {
+            for (int y = 0; y < graphHeight; y++) {
+                Point p = new Point(x * size - graphWidth * size / 2 + size / 2, y * size - graphHeight * size / 2 + size / 2);
+//                rendering.getModels().get(x + y * graphWidth).getMovement().setPosition(new Vector3f(p.x, p.y, 0));
+
+                graph[x + y * graphWidth] = new Node(p, x, y);
+
+                if (y != 0)
+                    graph[x + y * graphWidth].setDown(graph[x + (y - 1) * graphWidth]);
+
+                if (y != graphHeight - 1)
+                    graph[x + y * graphWidth].setUp(graph[x + (y + 1) * graphWidth]);
+                else
+                    graph[x + y * graphWidth].setUp(graph[x]);
+
+                if (x != 0)
+                    graph[x + y * graphWidth].setLeft(graph[(x - 1) + y * graphWidth]);
+
+                if (x != graphWidth - 1)
+                    graph[x + y * graphWidth].setRight(graph[(x + 1) + y * graphWidth]);
+                else
+                    graph[x + y * graphWidth].setRight(graph[y * graphWidth]);
+
+            }
+        }
 
 //        walls = new Walls(width, height);
         apple = new Apple(window);
@@ -204,7 +235,7 @@ public class Process {
 
                             buf = 0;
                             if (trest.reset) {
-                                if(!reset){
+                                if (!reset) {
                                     reset = true;
                                 }
                                 continue;
@@ -221,7 +252,7 @@ public class Process {
 
 //                pointsToErase.clear();
 
-                            isGo=true;
+                            isGo = true;
                             if (trest.mouseControl) {
 
                                 if (player.getDirection() != null) {

@@ -65,7 +65,7 @@ public class ModelRendering {
 
             }
         }
-        if(isApple){
+        if(isApple && !Process.appleVisible){
 //           redA = 0;
 //           greenA = 0;
 //           blueA = 0;

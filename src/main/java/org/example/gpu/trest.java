@@ -27,7 +27,7 @@ public class trest {
     public static ArrayList<ModelRendering> background3 = new ArrayList<>();
     public static float half;
     public static boolean reset = false;
-    private ModelRendering foreground;
+
 
     public trest() {
 
@@ -55,21 +55,21 @@ public class trest {
 
         glEnable(GL_TEXTURE_2D);
 
-foreground = new ModelRendering(window,Color.black,false,null,"foreground");
+
         for (int j = 0; j < 220; j++) {
             Color color = new Color((int) (Math.random() * 100), (int) (Math.random() * 255), (int) (Math.random() * 255));
             background.add(new ModelRendering(window, color, false, null,"background"));
-            background.get(j).addModel(new Model(window, (int) (Math.random() * 30 + 20)));
+            background.get(j).addModel(new Model(window, (int) (Math.random() * 30 + 20),0));
         }
         for (int j = 0; j < 200; j++) {
             Color color = new Color((int) (Math.random() * 100), (int) (Math.random() * 255), (int) (Math.random() * 255));
             background2.add(new ModelRendering(window, color, false, null,"background"));
-            background2.get(j).addModel(new Model(window, (int) (Math.random() * 40 + 30)));
+            background2.get(j).addModel(new Model(window, (int) (Math.random() * 40 + 30),0));
         }
         for (int j = 0; j < 150; j++) {
             Color color = new Color((int) (Math.random() * 100), (int) (Math.random() * 255), (int) (Math.random() * 255));
             background3.add(new ModelRendering(window, color, false, null,"background"));
-            background3.get(j).addModel(new Model(window, (int) (Math.random() * 60 + 40)));
+            background3.get(j).addModel(new Model(window, (int) (Math.random() * 60 + 40),0));
         }
 
         for (int i = 0; i < ModelRendering.selfList.size(); i++) {

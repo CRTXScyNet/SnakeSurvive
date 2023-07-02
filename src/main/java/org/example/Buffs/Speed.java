@@ -9,7 +9,7 @@ import java.awt.*;
 
 public class Speed {
     private static float[] xy = new float[]{};
-    static Color color = new Color(Color.RED.getRGB());
+    static Color color = new Color(239, 108, 0);
 
     private static int size = 10;
 
@@ -50,7 +50,7 @@ public class Speed {
         xy = new float[]{(int)(Math.random()*window.width-(window.width/2)) ,  (int)(Math.random()*window.height-(window.height/2))};
         System.out.printf("Apple x: %s, y: %s ", xy[0],xy[1]);
         rendering = new ModelRendering(window,color,true,null,"apple");
-        rendering.addModel(new Model(window, (int)(size*50)));
+        rendering.addModel(new Model(window, (int)(size*50),2));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy[0],(float)xy[1],0));
     }
 

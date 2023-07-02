@@ -6,14 +6,19 @@ import org.joml.Vector3f;
 public class Movement {
     private Vector3f position;
     private Matrix4f projection;
+    private float zPos ;
+    public float getZ(){
+        return this.zPos;
+    }
 
- public Movement(int width,int height){
-     position = new Vector3f(0,0,0);
+ public Movement(int width,int height,float z){
+        zPos = z;
+     position = new Vector3f(0,0,zPos);
      projection = new Matrix4f().setOrtho2D(-width/2,width/2,-height/2,height/2);
  }
 
     public void setPosition(Vector3f position) {
-        this.position = position;
+        this.position = position.add(new Vector3f(0,0,zPos));
     }
     public void addPosition(Vector3f position){
      this.position.add(position);

@@ -51,7 +51,7 @@ public class Apple {
         xy = new float[]{(int)(Math.random()*window.width-(window.width/2)) ,  (int)(Math.random()*window.height-(window.height/2))};
         System.out.printf("Apple x: %s, y: %s ", xy[0],xy[1]);
         rendering = new ModelRendering(window,color,true,null,"apple");
-        rendering.addModel(new Model(window, (int)(size*50)));
+        rendering.addModel(new Model(window, (int)(size*50),0.5f));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy[0],(float)xy[1],0));
     }
 

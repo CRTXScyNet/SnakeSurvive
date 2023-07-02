@@ -118,7 +118,7 @@ public class Player extends Entity {
         players.add(this);
 
         rendering = new ModelRendering(window, color, false, this,"player");
-        rendering.addModel(new Model(window, (int) (size * 30)));
+        rendering.addModel(new Model(window, (int) (size * 30),1));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) 0, (float) 0, 0));
 
 
@@ -145,7 +145,7 @@ public class Player extends Entity {
             float yp = phantomXY.get(phantomXY.size() - 1)[1];
             phantomXY.add(new float[]{xp, yp});
             directionOfPhantomXY.add(new float[]{0,0});
-            rendering.addModel(new Model(window, (int) (size * 30)));
+            rendering.addModel(new Model(window, (int) (size * 30),1));
             rendering.getModels().get(xy.size() - 1).getMovement().setPosition(new Vector3f((float) xp, (float) yp, 0));
         }
     }
@@ -178,7 +178,7 @@ public class Player extends Entity {
         xy.clear();
         xy.add(new float[]{0, 0});
         rendering.clear();
-        rendering.addModel(new Model(window, (int) (size * 30)));
+        rendering.addModel(new Model(window, (int) (size * 30),1));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) 0, (float) 0, 0));
 //        move(width/2,height/2);
         for (int i = 0; i < snakeLength; i++) {
