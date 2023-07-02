@@ -27,6 +27,7 @@ public class trest {
     public static ArrayList<ModelRendering> background3 = new ArrayList<>();
     public static float half;
     public static boolean reset = false;
+    private ModelRendering foreground;
 
     public trest() {
 
@@ -37,8 +38,8 @@ public class trest {
         }
         GLFWVidMode vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         assert vidMode != null;
-        width = (int)(vidMode.width()*0.9);
-        height = (int)(vidMode.height()*0.9);
+        width = (int) (vidMode.width() * 0.9);
+        height = (int) (vidMode.height() * 0.9);
 //        width = 500;
 //                height = 500;
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
@@ -54,20 +55,20 @@ public class trest {
 
         glEnable(GL_TEXTURE_2D);
 
-
+foreground = new ModelRendering(window,Color.black,false,null,"foreground");
         for (int j = 0; j < 220; j++) {
             Color color = new Color((int) (Math.random() * 100), (int) (Math.random() * 255), (int) (Math.random() * 255));
-            background.add(new ModelRendering(window, color, false, null));
+            background.add(new ModelRendering(window, color, false, null,"background"));
             background.get(j).addModel(new Model(window, (int) (Math.random() * 30 + 20)));
         }
         for (int j = 0; j < 200; j++) {
             Color color = new Color((int) (Math.random() * 100), (int) (Math.random() * 255), (int) (Math.random() * 255));
-            background2.add(new ModelRendering(window, color, false, null));
+            background2.add(new ModelRendering(window, color, false, null,"background"));
             background2.get(j).addModel(new Model(window, (int) (Math.random() * 40 + 30)));
         }
         for (int j = 0; j < 150; j++) {
             Color color = new Color((int) (Math.random() * 100), (int) (Math.random() * 255), (int) (Math.random() * 255));
-            background3.add(new ModelRendering(window, color, false, null));
+            background3.add(new ModelRendering(window, color, false, null,"background"));
             background3.get(j).addModel(new Model(window, (int) (Math.random() * 60 + 40)));
         }
 
@@ -121,6 +122,9 @@ public class trest {
 
 
                 if (frameTime >= 1) {
+                    if(!Process.isGo){
+
+                    }
                     frameTime = 0;
                     System.out.println("FPS: " + frames);
                     frames = 0;
@@ -140,6 +144,12 @@ public class trest {
 
             if (canRender) {
                 glClear(GL_COLOR_BUFFER_BIT);
+
+                if (Process.reset) {
+                    reset();
+                    reset = false;
+                }
+
                 for (int i = 0; i < Enemy.enemies.size(); i++) {
                     if (Enemy.enemies.get(i).isGrow) {
                         Enemy.enemies.get(i).grow();
@@ -157,10 +167,7 @@ public class trest {
                         Player.players.get(0).isShorter = false;
                     }
                 }
-if(Process.reset){
-    reset();
-    reset = false;
-}
+
                 moveBackground();
 
                 for (int i = 0; i < ModelRendering.selfList.size(); i++) {

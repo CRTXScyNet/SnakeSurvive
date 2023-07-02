@@ -5,6 +5,7 @@ import org.example.Painter.Process;
 import org.example.gpu.Window;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
+import org.example.gpu.trest;
 import org.joml.Vector3f;
 
 import java.awt.*;
@@ -142,6 +143,9 @@ public class Enemy extends Entity{
     public boolean isGrow = false;
     public boolean reset = false;
     private Window window;
+
+
+
     private ModelRendering rendering;
 
     public Enemy(Window window, boolean isActive) {
@@ -165,7 +169,7 @@ public class Enemy extends Entity{
             activeEnemies.add(this);
             color = new Color(150, 150, 255);
         }
-        rendering = new ModelRendering(window, color, false, this);
+        rendering = new ModelRendering(window, color, false, this,"enemy");
         rendering.addModel(new Model(window, (int) (size * 30)));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) co.x, (float) co.y, 0));
         for (int i = 0; i < snakeLength; i++) {

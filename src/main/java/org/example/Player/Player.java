@@ -117,7 +117,7 @@ public class Player extends Entity {
         color = new Color((int) (Math.random() * 254 + 1), (int) (Math.random() * 254 + 1), (int) (Math.random() * 254 + 1) /*Color.cyan.getRGB()*/);
         players.add(this);
 
-        rendering = new ModelRendering(window, color, false, this);
+        rendering = new ModelRendering(window, color, false, this,"player");
         rendering.addModel(new Model(window, (int) (size * 30)));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) 0, (float) 0, 0));
 

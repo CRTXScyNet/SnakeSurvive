@@ -32,13 +32,13 @@ public class ModelRendering {
 
     private Entity entity = null;
 
-    public ModelRendering(Window window, Color color, boolean isApple , Entity entity) {
+    public ModelRendering(Window window, Color color, boolean isApple , Entity entity,String shaderName) {
         this.entity = entity;
         this.isApple = isApple;
         this.color = color;
         this.window = window;
         selfList.add(this);
-        shader = new Shader("shader");
+        shader = new Shader(shaderName);
 //        red = (float)Math.random()*0.7f;
 //        green = (float)Math.random()*0.7f;
 //        blue = (float)Math.random()*0.7f;

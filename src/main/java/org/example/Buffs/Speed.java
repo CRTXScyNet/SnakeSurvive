@@ -1,4 +1,4 @@
-package org.example.Painter;
+package org.example.Buffs;
 
 import org.example.gpu.Window;
 import org.example.gpu.render.Model;
@@ -6,9 +6,8 @@ import org.example.gpu.render.ModelRendering;
 import org.joml.Vector3f;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
 
-public class Apple {
+public class Speed {
     private static float[] xy = new float[]{};
     static Color color = new Color(Color.RED.getRGB());
 
@@ -44,9 +43,9 @@ public class Apple {
     }
     private int width;
     private int height;
-    private Window window;
+    private org.example.gpu.Window window;
     private ModelRendering rendering;
-    Apple(Window window){
+    Speed(Window window){
         this.window = window;
         xy = new float[]{(int)(Math.random()*window.width-(window.width/2)) ,  (int)(Math.random()*window.height-(window.height/2))};
         System.out.printf("Apple x: %s, y: %s ", xy[0],xy[1]);

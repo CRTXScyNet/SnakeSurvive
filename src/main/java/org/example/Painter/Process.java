@@ -91,7 +91,7 @@ public class Process {
     private int agressiveMode = 300;
     ArrayList<Line> lines = new ArrayList<>();
     Walls walls;
-    static boolean isGo = false;
+    public static boolean isGo = false;
 
 
     private ModelRendering renderingArrow;
@@ -118,7 +118,7 @@ public class Process {
         fromDown = (int) (height * 2) / Enemy.step * Enemy.step;
 
 
-        renderingArrow = new ModelRendering(window, Color.red, true, null);
+        renderingArrow = new ModelRendering(window, Color.red, true, null,"pointer");
         renderingArrow.addModel(new Model(window, 100));
 
 //        walls = new Walls(width, height);
@@ -201,16 +201,14 @@ public class Process {
                         buf += time2;
                         time = org.example.gpu.Timer.getTime();
                         if (buf >= cap) {
+
                             buf = 0;
                             if (trest.reset) {
-                                reset = true;
+                                if(!reset){
+                                    reset = true;
+                                }
                                 continue;
-//                    reset();
-//                        try {
-//                    TimeUnit.MILLISECONDS.sleep(500);
-//                        } catch (Exception e) {
-//
-//                        }
+
                             } else if (reset) {
                                 reset = false;
                                 isPaused = false;
@@ -223,7 +221,7 @@ public class Process {
 
 //                pointsToErase.clear();
 
-
+                            isGo=true;
                             if (trest.mouseControl) {
 
                                 if (player.getDirection() != null) {
