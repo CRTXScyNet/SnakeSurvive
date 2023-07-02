@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 public class Process {
     private int width;
     private int height;
+    public  static float appleDistance = 0;
     public static boolean reset = false;
     public static boolean isPaused = false;
     public static boolean isEnd = false;
@@ -118,7 +119,7 @@ public class Process {
         fromDown = (int) (height * 2) / Enemy.step * Enemy.step;
 
 
-        renderingArrow = new ModelRendering(window, Color.red, true, null,"pointer");
+        renderingArrow = new ModelRendering(window, Color.red, true, null,"applePointer");
         renderingArrow.addModel(new Model(window, 100));
 
 //        walls = new Walls(width, height);
@@ -193,7 +194,7 @@ public class Process {
                     }
                 }
                 double cap = 1.0 / 500.0;
-                double time = org.example.gpu.Timer.getTime(); //TODO
+                double time = org.example.gpu.Timer.getTime();
                 double buf = 0;
                 while (true) {
                     try {
@@ -296,9 +297,10 @@ public class Process {
                                 }
                             }
                             if (appleVisible) {
+                                appleDistance = (float)Math.sqrt(Math.pow(Math.abs(a[0]), 2) + Math.pow(Math.abs(a[1]),2));
 
 
-                                if (Math.pow(Math.abs(p[0] - a[0]), 2) + Math.pow(Math.abs(p[1] - a[1]), 2) <= collisionWithApple) {       //Проверка колизии змеи и яблока
+                                if (Math.pow(Math.abs(p[0] - a[0]), 2) + Math.pow(Math.abs(p[1] - a[1]),2) <= collisionWithApple) {       //Проверка колизии змеи и яблока
                                     appleSpawned = false;
                                     appleVisible = false;
                                     player.setDelay();
@@ -386,16 +388,16 @@ public class Process {
                                 for (float[] ePoint : enemy.getPhantomXY()) {
                                     for (int i = 0; i < player.getPhantomXY().size(); i++) {
                                         float dest = (float) Math.sqrt(Math.pow(player.getPhantomXY().get(i)[0] - ePoint[0], 2) + Math.pow(player.getPhantomXY().get(i)[1] - ePoint[1], 2));
-                                        if (dest <= Enemy.getSize() + Player.getSize() - 1) {
-                                            if (!isEnd) {
-                                                eatenPlayerTime = Timer.getFloatTime();
-                                                isEnd = true;
-                                                trest.mouseControl = false;
-                                                for (Enemy enemy1 : Enemy.enemies) {
-                                                    enemy1.setCurrentDelay(0);
-                                                }
-                                            }
-                                        }
+//                                        if (dest <= Enemy.getSize() + Player.getSize() - 1) {
+//                                            if (!isEnd) {
+//                                                eatenPlayerTime = Timer.getFloatTime();
+//                                                isEnd = true;                          TODO
+//                                                trest.mouseControl = false;
+//                                                for (Enemy enemy1 : Enemy.enemies) {
+//                                                    enemy1.setCurrentDelay(0);
+//                                                }
+//                                            }
+//                                        }
                                         if (dest <= rad) {
                                             if (length == 0) {
                                                 length = dest;
@@ -421,7 +423,7 @@ public class Process {
                                 }
                                 boolean notSelf = true;
                             }
-                            playerProcess(player);
+                            player.moveCheck();
                             isGo = false;
                         }
                     } catch (Exception e) {
@@ -436,31 +438,7 @@ public class Process {
 
     }
 
-    public void playerProcess(Player player) {
-        player.moveCheck();
-//            for (int i = 0; i < player.getPhantomXY().size(); i++) {
-//                for (Point point : pointArrayList) {
-//                    points.add(new Point(point.x + (int) player.getPhantomXY().get(i)[0], point.y + (int) player.getPhantomXY().get(i)[1]));
-//                    colors.add(player.getColor());
-//                }
-//            }
-//            for (Enemy enemy : Enemy.enemies) {
-//                for (float[] i : enemy.getPhantomXY()) {
-////        if(polygon.cont
-//
-//                    for (Point point : pointEnemyArrayList) {
-//
-//                        if (Math.pow(i[0] - (double) (Picture.width / 2), 2) + Math.pow(i[1] - (double) Picture.height / 2, 2) >= Math.pow(300, 2)) {
-//                            continue;
-//                        }
-//
-//                        points.add(new Point(point.x + (int) i[0], point.y + (int) i[1]));
-//                        colors.add(enemy.getColor());
-//                    }
-//                }
-//            }
 
-    }
 
 
     static boolean appleSpawned = false;

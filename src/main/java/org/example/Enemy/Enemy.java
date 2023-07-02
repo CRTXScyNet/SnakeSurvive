@@ -5,14 +5,14 @@ import org.example.Painter.Process;
 import org.example.gpu.Window;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
-import org.example.gpu.trest;
 import org.joml.Vector3f;
 
 import java.awt.*;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class Enemy extends Entity{
+public class Enemy extends Entity {
     private int width;
     private int height;
     private static final double innerPlace = 1;
@@ -32,18 +32,18 @@ public class Enemy extends Entity{
                     getMovement().setPosition(new Vector3f((float) phantomXY.get(i)[0], (float) phantomXY.get(i)[1], 0));
         }
     }
+
     public void teleportXy(float[] direct) {
 
 
-            xy.set(0, new float[]{direct[0],direct[1]});
+        xy.set(0, new float[]{direct[0], direct[1]});
 
 
-            phantomXY.set(0, new float[]{direct[0],direct[1]});
+        phantomXY.set(0, new float[]{direct[0], direct[1]});
 
 
-            rendering.getModels().get(0).
-                    getMovement().setPosition(new Vector3f((float) phantomXY.get(0)[0], (float) phantomXY.get(0)[1], 0));
-
+        rendering.getModels().get(0).
+                getMovement().setPosition(new Vector3f((float) phantomXY.get(0)[0], (float) phantomXY.get(0)[1], 0));
 
 
     }
@@ -117,7 +117,7 @@ public class Enemy extends Entity{
                 this.delay = (int) delayDouble;
             } else {
                 if (delay > 3) {
-                    delayDouble -= delayDouble*0.2;
+                    delayDouble -= delayDouble * 0.2;
                     this.delay = (int) delayDouble;
                 }
             }
@@ -131,9 +131,6 @@ public class Enemy extends Entity{
     public static ArrayList<Boolean> snakeIsReady = new ArrayList<>();
 
 
-
-
-
     private boolean isMove = false;
 
 
@@ -143,7 +140,6 @@ public class Enemy extends Entity{
     public boolean isGrow = false;
     public boolean reset = false;
     private Window window;
-
 
 
     private ModelRendering rendering;
@@ -169,7 +165,7 @@ public class Enemy extends Entity{
             activeEnemies.add(this);
             color = new Color(150, 150, 255);
         }
-        rendering = new ModelRendering(window, color, false, this,"enemy");
+        rendering = new ModelRendering(window, color, false, this, "enemy");
         rendering.addModel(new Model(window, (int) (size * 30)));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) co.x, (float) co.y, 0));
         for (int i = 0; i < snakeLength; i++) {
@@ -277,7 +273,7 @@ public class Enemy extends Entity{
         setPhantomXY();
         movePhantom();
         if (eatAndAngry && timer <= 0) {
-            timerStat *=2;
+            timerStat *= 2;
             timer = timerStat;
             eatAndAngry = false;
             setCurrentDelay(getDelay() * 2);
@@ -367,59 +363,48 @@ public class Enemy extends Entity{
 
         float x = getXy().get(0)[0];
         float y = getXy().get(0)[1];
-        boolean dX = Math.abs(xTarget - x) > Math.abs(yTarget - y);
-
-        boolean down = yTarget > y;
-        boolean up = yTarget < y;
-        boolean left = xTarget < x;
-        boolean right = xTarget > x;
+Point2D target = new Point2D.Double(xTarget,yTarget);
         downNotSelf = true;
         upNotSelf = true;
         leftNotSelf = true;
         rightNotSelf = true;
 
-        try {
-            notSelf(x, y);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+          ArrayList<Point2D> doubles =  notSelf(x, y);
+
         if (!downNotSelf && !upNotSelf && !rightNotSelf && !leftNotSelf) {
             if (!reverse() && isTeleport() && Process.isEnd) {
-Point p = getRandomPoint();
-                teleportXy(new float[]{p.x,p.y});
+                Point p = getRandomPoint();
+                teleportXy(new float[]{p.x, p.y});
 
             }
             return;
         }
-
-        if (left && dX && leftNotSelf) {
-            move(x - step, y);
-
-        } else if (right && dX && rightNotSelf) {
-            move(x + step, y);
-
-        } else if (up && upNotSelf) {
-            move(x, y - step);
-
-        } else if (down && downNotSelf) {
-            move(x, y + step);
-
-        } else if (right && rightNotSelf) {
-            move(x + step, y);
-
-        } else if (left && leftNotSelf) {
-            move(x - step, y);
-
-        } else {
-            lastWay(x, y, upNotSelf, downNotSelf, rightNotSelf, leftNotSelf);
+        Collections.shuffle(doubles);
+        Point2D next = null;
+        if(doubles.size()>0) {
+            for (Point2D d : doubles) {
+                if (next == null){
+                    next = d;
+                }else if (next.distance(target)> d.distance(target)){
+                    next = d;
+                }
+            }
         }
+        if(next != null){
+move((float)next.getX(),(float)next.getY());
+        }else {
+            reverse();
+        }
+
 //            setLines();
 
 
     }
-    public boolean isTeleport(){
 
-        return Math.pow(xy.get(0)[0],2) + Math.pow(xy.get(0)[1],2) < Math.pow(10,2);
+    public boolean isTeleport() {
+
+        return Math.pow(xy.get(0)[0], 2) + Math.pow(xy.get(0)[1], 2) < Math.pow(30, 2);
     }
 
     public void setLines() {
@@ -530,8 +515,8 @@ Point p = getRandomPoint();
 //    upNotSelf = notSelf(x, y - step);
 //    leftNotSelf = notSelf(x - step, y);
 //    rightNotSelf = notSelf(x + step, y);
-    private void notSelf(double x, double y) {
-
+    private ArrayList<Point2D> notSelf(float x, float y) {
+        ArrayList<Point2D> doubles = new ArrayList<>();
         for (float[] i : getXy()) {
             if (Math.abs(i[0] - (x + step)) < step * 0.8 && Math.abs(i[1] - y) < step * 0.8) {
                 rightNotSelf = false;
@@ -559,7 +544,19 @@ Point p = getRandomPoint();
             }
         }
 
-
+        if (rightNotSelf) {
+            doubles.add(new Point2D.Float(x + step,y));
+        }
+        if (leftNotSelf) {
+            doubles.add(new Point2D.Float(x - step,y));
+        }
+        if (upNotSelf) {
+            doubles.add(new Point2D.Float(x,y - step));
+        }
+        if (downNotSelf) {
+            doubles.add(new Point2D.Float(x,y + step));
+        }
+        return doubles;
     }
 
     public void movePhantom() {
@@ -643,25 +640,6 @@ Point p = getRandomPoint();
 
                 return false;
             } else {
-/*//                taillessCopy[0] = phantomXY.get(0)[0];
-//                taillessCopy[1] = phantomXY.get(0)[1];
-                double directionX = directionOfPhantomXY.get(directionOfPhantomXY.size()-1)[0];
-                double directionY = directionOfPhantomXY.get(directionOfPhantomXY.size()-1)[1];
-                double taillessX  = Math.abs((xy.get(xy.size()-1).x -  taillessPhantomCopy.get(taillessPhantomCopy.size()-1)[0])/directionX);
-                double taillessY  = Math.abs((xy.get(xy.size()-1).y -  taillessPhantomCopy.get(taillessPhantomCopy.size()-1)[1])/directionY);
-                if(Double.isNaN(taillessX)){
-                    taillessX = 0;
-                }
-                if(Double.isNaN(taillessY)){
-                    taillessY = 0;
-                }
-                int count = (int)Math.max(taillessX,taillessY);
-                while (count>0){
-                    taillessPhantomCopy.add(new double[]{taillessPhantomCopy.get(taillessPhantomCopy.size()-1)[0]+=directionX,
-                            taillessPhantomCopy.get(taillessPhantomCopy.size()-1)[1]+=directionY});
-                    count--;
-                }*/
-//                movePhantom();
                 reverse = 0;
 
                 setPhantomXY();

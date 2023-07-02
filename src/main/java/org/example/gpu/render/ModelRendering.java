@@ -65,12 +65,19 @@ public class ModelRendering {
 
             }
         }
-        if(isApple){
+        if(isApple && !Process.appleVisible){
 //           redA = 0;
 //           greenA = 0;
 //           blueA = 0;
             time = -Process.eatenTimelast;
+
         }
+//        if(isApple){
+//            int i = (int)(window.width/(Process.appleDistance));
+//            System.out.println(i);
+//            shader.setUniform("dist", (float)i);
+//
+//        }
         if(Process.isEnd && entity instanceof Player){
             time = -Process.eatenPlayerTimelast;
         }

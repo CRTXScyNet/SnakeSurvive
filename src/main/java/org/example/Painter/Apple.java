@@ -14,7 +14,7 @@ public class Apple {
 
     private static int size = 10;
 
-
+public  static Apple apple;
     public static Color getAppleColor() {
         return color;
     }
@@ -23,6 +23,9 @@ public class Apple {
     }
     public static float[] getXy() {
         return xy;
+    }
+    public void reset(){
+     setXy();
     }
     public void moveXy(float[] direct) {
         float x = xy[0]-direct[0];
@@ -47,6 +50,7 @@ public class Apple {
     private Window window;
     private ModelRendering rendering;
     Apple(Window window){
+        apple = this;
         this.window = window;
         xy = new float[]{(int)(Math.random()*window.width-(window.width/2)) ,  (int)(Math.random()*window.height-(window.height/2))};
         System.out.printf("Apple x: %s, y: %s ", xy[0],xy[1]);

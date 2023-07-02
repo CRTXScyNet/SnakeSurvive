@@ -1,6 +1,7 @@
 package org.example.gpu;
 
 import org.example.Enemy.Enemy;
+import org.example.Painter.Apple;
 import org.example.Painter.Process;
 import org.example.Player.Player;
 import org.example.gpu.render.Model;
@@ -47,7 +48,7 @@ public class trest {
 
         Window window = new Window(width, height);
 
-//        window.setFullscreen(true);
+        window.setFullscreen(true);
 
         window.createWindow("what'sup");
         half = (float) window.width / 1.5f;
@@ -55,7 +56,7 @@ public class trest {
 
         glEnable(GL_TEXTURE_2D);
 
-foreground = new ModelRendering(window,Color.black,false,null,"foreground");
+
         for (int j = 0; j < 220; j++) {
             Color color = new Color((int) (Math.random() * 100), (int) (Math.random() * 255), (int) (Math.random() * 255));
             background.add(new ModelRendering(window, color, false, null,"background"));
@@ -249,6 +250,7 @@ foreground = new ModelRendering(window,Color.black,false,null,"foreground");
         for (Enemy snake : Enemy.enemies) {
             snake.reset();
         }
+        Apple.apple.reset();
         Player.players.get(0).reset();
 //        Apple.reset();
     }
