@@ -170,7 +170,7 @@ public class Enemy extends Entity{
             color = new Color(150, 150, 255);
         }
         rendering = new ModelRendering(window, color, false, this,"enemy");
-        rendering.addModel(new Model(window, (int) (size * 30),1));
+        rendering.addModel(new Model(window, (int) (size * 30)));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) co.x, (float) co.y, 0));
         for (int i = 0; i < snakeLength; i++) {
             addCircle();
@@ -194,7 +194,7 @@ public class Enemy extends Entity{
             float yp = phantomXY.get(phantomXY.size() - 1)[1];
             phantomXY.add(new float[]{xp, yp});
             directionOfPhantomXY.add(new float[]{0, 0});
-            rendering.addModel(new Model(window, (int) (size * 30),1));
+            rendering.addModel(new Model(window, (int) (size * 30)));
             rendering.getModels().get(xy.size() - 1).getMovement().setPosition(new Vector3f((float) xp, (float) yp, 0));
         }
     }
@@ -222,7 +222,7 @@ public class Enemy extends Entity{
         xy.add(new float[]{co.x, co.y});
         setPhantomXY();
         rendering.clear();
-        rendering.addModel(new Model(window, (int) (size * 30),1));
+        rendering.addModel(new Model(window, (int) (size * 30)));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) co.x, (float) co.y, 0));
         move(co.x, co.y);
         for (int i = 0; i < snakeLength; i++) {

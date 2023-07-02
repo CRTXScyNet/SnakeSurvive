@@ -54,18 +54,13 @@ public class Model implements Cleaner.Cleanable {
 
     private int width;
     private int heigth;
-    private float zPos;
-    public float getZ(){
-        return this.zPos;
-    }
 
-    public Model(org.example.gpu.Window window, int scale,float z) {
-        zPos = z;
+    public Model(org.example.gpu.Window window, int scale) {
         this.width = window.width;
         this.heigth = window.height;
 
         this.scale = scale;
-        movement = new Movement(window.width, window.height,0);
+        movement = new Movement(window.width, window.height);
 //        texture = new Texture("./img/2.png");
 
         draw_count = vertices.length;
