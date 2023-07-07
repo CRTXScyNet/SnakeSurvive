@@ -46,9 +46,7 @@ vec4 color3 = vec4((50-length(ss))*0.015,(50-length(ss))*0.015,(50-length(ss))*0
 //}
 if(t <0){
     t *= -1;
-    color.x /= t*10;
-    color.y /= t*10;
-    color.z /= t*10;
+    color /= t*10;
 
 
 }

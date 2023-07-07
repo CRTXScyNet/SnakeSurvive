@@ -1,4 +1,4 @@
-package org.example;
+package org.example.Tests;
 
 import java.awt.*;
 import java.util.ArrayList;

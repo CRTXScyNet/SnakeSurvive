@@ -21,24 +21,25 @@ ss*=100;
 float s ;
 float s2;
 float s3;
-
+float s4;
 
 
 vec2 uv = coords-0.5;
 vec2 uv2 = coords-0.5;
 
-//s = step(length(uv),0.4);
-//s2 = step(length(uv),0.95);
-s3 = step(length(uv),.5);
-
+s  = step(length(uv),length(abs(sin(time+5)))/50);
+s2 = step(length(uv),length(abs(sin(time+5)))/50+.004);
+s3 = step(length(uv),length(abs(sin(time)))/50);
+s4 = step(length(uv),length(abs(sin(time)))/50+.004);
+vec4 ringColor = vec4(0, ((length(uv) >= s3 && length(uv) <= s4)||(length(uv) >= s && length(uv) <= s2))? 1 : 0 , 0,0);
 //uv.x += (sin(time) + cos(time*2.8))/5;
 //uv.y += (cos(time) + sin(time*5.1))/5;
 //uv2.x -= (cos(time) + sin(time*3.5))/5;
 //uv2.y -= (sin(time) + cos(time*4.5))/5;
 
 //if(s >= length(uv)){
-//vec4 color = vec4((0.55-length(uv))*7,(0.55-length(uv))*7,(0.55-length(uv))*7,(0.5-length(uv))*7);
-vec4 color = vec4(0.2/length(uv)*0.1,0.2/length(uv)*0.1,0.2/length(uv)*0.1,(0.1/length(uv)*0.1));
+//vec4 color = vec4(0.2/length(uv)*0.1,0.2/length(uv)*0.1,0.2/length(uv)*0.1,(0.1/length(uv)*0.1));
+vec4 color = vec4(abs(sin(uv.x*t/uv.y)*sin(uv.y*t/uv.x)) , abs(sin(uv.x*(t+1)/uv.y)*sin(uv.y*(t+1)/uv.x)) , abs(sin(uv.x*(t+2)/uv.y)*sin(uv.y*(t+2)/uv.x)),(1-length(uv)*20));
 vec4 color3 = vec4((50-length(ss))*0.015,(50-length(ss))*0.015,(50-length(ss))*0.015,1);
 //vec4 color2 = vec4(0.2/length(uv2)*0.1,0.2/length(uv2)*0.1,0.2/length(uv2)*0.1,0.2/length(uv2)*0.1);
 //}else{
@@ -46,15 +47,13 @@ vec4 color3 = vec4((50-length(ss))*0.015,(50-length(ss))*0.015,(50-length(ss))*0
 //}
 if(t <0){
     t *= -1;
-    color.x /= t*10;
-    color.y /= t*10;
-    color.z /= t*10;
-
-
+//    color.x /= t*10;
+//    color.y /= t*10;
+//    color.z /= t*10;
 }
 
 
 
-gl_FragColor = (color * selfColor*color3) ;
+gl_FragColor = (color * selfColor*color3) +ringColor*color3;
 
 }

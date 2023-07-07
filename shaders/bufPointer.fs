@@ -6,6 +6,7 @@ uniform vec2 u_resolution;
 uniform float time;
 uniform sampler2D sampler;
 uniform vec4 rgb;
+uniform float dist;
 
 varying vec2 coords;
 
@@ -38,7 +39,8 @@ s3 = step(length(uv),.5);
 
 //if(s >= length(uv)){
 //vec4 color = vec4((0.55-length(uv))*7,(0.55-length(uv))*7,(0.55-length(uv))*7,(0.5-length(uv))*7);
-vec4 color = vec4(0.2/length(uv)*0.1,0.2/length(uv)*0.1,0.2/length(uv)*0.1,(0.1/length(uv)*0.1));
+
+vec4 color = vec4(0.5/length(uv)*0.1,0.5/length(uv)*0.1,0.5/length(uv)*0.1,(0.1/length(uv)*0.1));
 vec4 color3 = vec4((50-length(ss))*0.015,(50-length(ss))*0.015,(50-length(ss))*0.015,1);
 //vec4 color2 = vec4(0.2/length(uv2)*0.1,0.2/length(uv2)*0.1,0.2/length(uv2)*0.1,0.2/length(uv2)*0.1);
 //}else{
@@ -46,15 +48,13 @@ vec4 color3 = vec4((50-length(ss))*0.015,(50-length(ss))*0.015,(50-length(ss))*0
 //}
 if(t <0){
     t *= -1;
-    color.x /= t*10;
-    color.y /= t*10;
-    color.z /= t*10;
-
-
+    color /= t*10;
+}else{
+color*=abs(sin(t*5))+0.1;
 }
 
 
 
-gl_FragColor = (color * selfColor*color3) ;
+gl_FragColor = (color * selfColor * color3) ;
 
 }

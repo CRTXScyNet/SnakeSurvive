@@ -109,7 +109,7 @@ public class Model implements Cleaner.Cleanable {
 //        }
     }
 
-    public void render(float time) {
+    public void render() {
 
 //        texture.bind(0);
 

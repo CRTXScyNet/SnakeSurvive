@@ -1,16 +1,21 @@
 package org.example.gpu;
 
+import org.example.Buffs.BuffParent;
+import org.example.Buffs.Fear;
+import org.example.Buffs.Speed;
 import org.example.Enemy.Enemy;
 import org.example.Painter.Apple;
 import org.example.Painter.Process;
 import org.example.Player.Player;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
+import org.example.obstructions.WormHole;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 
 import java.awt.*;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -18,6 +23,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 
 public class trest {
+
     public static boolean mouseControl = false;
     static int width = 500;
     static int height = 500;
@@ -28,6 +34,7 @@ public class trest {
     public static ArrayList<ModelRendering> background3 = new ArrayList<>();
     public static float half;
     public static boolean reset = false;
+    public static float mainTime = 0;
     private ModelRendering foreground;
 
     public trest() {
@@ -41,14 +48,13 @@ public class trest {
         assert vidMode != null;
         width = (int) (vidMode.width() * 0.9);
         height = (int) (vidMode.height() * 0.9);
-//        width = 500;
-//                height = 500;
+
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
 
         Window window = new Window(width, height);
 
-        window.setFullscreen(true);
+//        window.setFullscreen(true);
 
         window.createWindow("what'sup");
         half = (float) window.width / 1.5f;
@@ -78,6 +84,10 @@ public class trest {
         }
 
         new Process(window);
+        Process.buffs.add(new Fear(window));
+        for (int i = 0; i < 50; i++) {
+            Process.buffs.add(new Speed(window));
+        }
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -87,7 +97,9 @@ public class trest {
         int frames = 0;
         double time = Timer.getTime();
         double unprocessed = 0;
-        float uTime = Timer.getFloatTime();
+float randomBuffs = 0;
+float holesTime = 0;
+
 
 
         while (!window.shouldClose()) {
@@ -110,8 +122,24 @@ public class trest {
             double passed = time2 - time;
             unprocessed += passed;
             frameTime += passed;
+            randomBuffs += (float) time2 - (float)time;
+            holesTime +=(float) time2 - (float)time;
+            if(!Process.isPaused){
+                mainTime +=(float) time2 - (float)time;
+            }
             time = time2;
-            float uTime2 = Timer.getFloatTime() - uTime;
+
+            if(!Process.isPaused){
+
+                if (randomBuffs >= 1) {
+                    randomBuffs = 0;
+                    addBuffs();
+                }
+                if (holesTime >= 1) {
+                    addSomeHoles(window);
+                    holesTime = 0;
+                }
+            }
             window.update();
             while (unprocessed >= frame_cap) {
                 canRender = true;
@@ -123,11 +151,9 @@ public class trest {
 
 
                 if (frameTime >= 1) {
-                    if(!Process.isGo){
 
-                    }
                     frameTime = 0;
-                    System.out.println("FPS: " + frames);
+//                    System.out.println("FPS: " + frames);
                     frames = 0;
                 }
             }
@@ -172,7 +198,7 @@ public class trest {
                 moveBackground();
 
                 for (int i = 0; i < ModelRendering.selfList.size(); i++) {
-                    ModelRendering.selfList.get(i).renderModels(uTime2);
+                    ModelRendering.selfList.get(i).renderModels();
                 }
 
 
@@ -244,14 +270,53 @@ public class trest {
         }
     }
 
+    public void addBuffs(){
+
+        for(BuffParent parent :Process.buffs){
+                if(parent.isExist()){
+                    continue;
+                }else {
+                    if(parent.getChance()>Math.random()){
+                        parent.addSome();
+                    }
+                }
+        }
+
+    }
+    static double chance = 0.01;
+    public void addSomeHoles(Window window){
+        if(Process.holes.size()<=20) {
+            chance += 0.001;
+            if (Math.random() < chance) {
+                Process.holes.add(new WormHole(window));
+
+            }
+        }
+
+    }
+    public  static float getMainTime(){
+        return mainTime;
+    }
+
+
+
+
     public static void reset() {
 
         //Здесь добавить списки
         for (Enemy snake : Enemy.enemies) {
             snake.reset();
         }
+        for (int i = 0; i < Process.holes.size(); i++) {
+            Process.holes.get(i).reset();
+        }
+        Process.holes.clear();
+        chance = 0.1;
         Apple.apple.reset();
         Player.players.get(0).reset();
+        for (BuffParent buffs :Process.buffs){
+            buffs.reset();
+        }
 //        Apple.reset();
     }
 }

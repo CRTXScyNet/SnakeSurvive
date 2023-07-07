@@ -28,6 +28,8 @@ public class ModelRendering {
     private float green;
     private float blue;
     private Color color;
+
+    float time;
     boolean isApple;
 
     private Entity entity = null;
@@ -48,13 +50,19 @@ public class ModelRendering {
     }
 
 
+    public float getTime() {
+        return time;
+    }
 
+    public void setTime(float time) {
+        this.time = time;
+    }
 
     public void addModel(Model model) {
         models.add(model);
     }
 
-    public void renderModels(float time) {
+    public void renderModels() {
         shader.bind();
         float redA = red;
         float greenA = green;
@@ -65,34 +73,34 @@ public class ModelRendering {
 
             }
         }
-        if(isApple && !Process.appleVisible){
-//           redA = 0;
-//           greenA = 0;
-//           blueA = 0;
-            time = -Process.eatenTimelast;
-
-        }
-//        if(isApple){
-//            int i = (int)(window.width/(Process.appleDistance));
+//        if(isApple && !Process.appleVisible){
+////           redA = 0;
+////           greenA = 0;
+////           blueA = 0;
+//            time = -Process.eatenTimelast;
+//
+//        }
+        if(isApple){
+            int i = (int)(window.width/(Process.appleDistance));
 //            System.out.println(i);
 //            shader.setUniform("dist", (float)i);
 //
-//        }
+        }
         if(Process.isEnd && entity instanceof Player){
             time = -Process.eatenPlayerTimelast;
         }
         shader.setUniform("time", time);
+        shader.setUniform("rgb", redA, greenA, blueA);
+        shader.setUniform("u_resolution", window.width, window.height);
         if (models.size() == 0) {
             return;
         }
         for (int i = models.size() - 1; i >= 0; i--) {
             try {
                 shader.setUniform("projection", models.get(i).getMovement().projection().scale(models.get(i).getScale()));
-                shader.setUniform("rgb", redA, greenA, blueA);
-                shader.setUniform("u_resolution", window.width, window.height);
-                models.get(i).render(time);
+                models.get(i).render();
             } catch (Exception e) {
-e.printStackTrace();
+continue;
             }
         }
     }
