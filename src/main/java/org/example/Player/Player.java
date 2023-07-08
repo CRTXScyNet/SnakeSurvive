@@ -83,6 +83,8 @@ public class Player extends Entity {
 
 
     static boolean speedBoost = false;
+    public static boolean absorb = false;
+    public static ArrayList<float[]> absorbArray = new ArrayList<>();
     private Window window;
     private ModelRendering rendering;
 
@@ -337,17 +339,17 @@ public class Player extends Entity {
                     reset();
                     reset = false;
                 }
-
-                if(speedBoostTime>0&&!speedBoost && step < maxStep){
-                    step*=2;
-                }
-                if (speedBoostTime <= 0) {
+                if (speedBoostTime <= 0|| step<maxStep/2) {
                     speedBoost = false;
-                } else {
+                }
+                if(speedBoostTime>0&&!speedBoost && step <= maxStep){
+                    step*=1.5;
+                }
+
+                if (speedBoostTime > 0){
                     speedBoostTime -= speedBoostTimer;
                     speedBoost = true;
                 }
-
                 if (step > minStep && !trest.mouseControl && !speedBoost) {
                     step *= 0.9999;
                 } else if (step > minStep && !canIncreaseSpeed && !speedBoost) {
@@ -413,39 +415,21 @@ public class Player extends Entity {
 //                    }
 //                }
 //            }
-            for (int i = xy.size() - 1; i > 0; i--) {
-                float distance = (float) Math.sqrt(Math.pow(xy.get(i - 1)[0] - xy.get(i)[0], 2) + Math.pow(xy.get(i - 1)[1] - xy.get(i)[1], 2));
+            for (int i =  0; i < xy.size()-1; i++) {
+                float distance = (float) Math.sqrt(Math.pow(xy.get(i+1)[0] - xy.get(i)[0], 2) + Math.pow(xy.get(i+1)[1] - xy.get(i)[1], 2));
                 float distanceDif = (size-distance)/2;
                 float angle;
                 if (distance > size) {
-                    angle = (float) Math.atan((xy.get(i - 1)[1] - xy.get(i)[1]) / (xy.get(i - 1)[0] - xy.get(i)[0]));
-                    if (xy.get(i - 1)[0] - xy.get(i)[0] < 0) {
-                        xy.set(i, new float[]{xy.get(i - 1)[0] + (float) (size * Math.cos(angle)), xy.get(i - 1)[1] + (float) (size * Math.sin(angle))});
+                    angle = (float) Math.atan((xy.get(i)[1] - xy.get(i + 1)[1]) / (xy.get(i)[0] - xy.get(i + 1)[0]));
+                    if (xy.get(i)[0] - xy.get(i + 1)[0] < 0) {
+                        xy.set(i+1, new float[]{xy.get(i)[0] + (float) (size * Math.cos(angle)), xy.get(i)[1] + (float) (size * Math.sin(angle))});
                     } else {
-//
-
-                        xy.set(i, new float[]{xy.get(i - 1)[0] - (float) (size * Math.cos(angle)), xy.get(i - 1)[1] - (float) (size * Math.sin(angle))});
+                        xy.set(i+1, new float[]{xy.get(i)[0] - (float) (size * Math.cos(angle)), xy.get(i)[1] - (float) (size * Math.sin(angle))});
                     }
                 }
 
             }
-//            if(!trest.mouseControl){
-//                for (int i = 0; i < xy.size()-1; i++) {
-//                    float distance = (float) Math.sqrt(Math.pow(xy.get(i + 1)[0] - xy.get(i)[0], 2) + Math.pow(xy.get(i + 1)[1] - xy.get(i)[1], 2));
-//                    float angle;
-//                    if (distance > size) {
-//                        angle = (float) Math.atan((xy.get(i + 1)[1] - xy.get(i)[1]) / (xy.get(i + 1)[0] - xy.get(i)[0]));
-//                        if (xy.get(i + 1)[0] - xy.get(i)[0] < 0) {
-//                            xy.set(i, new float[]{xy.get(i + 1)[0] + (float) (size * Math.cos(angle)), xy.get(i + 1)[1] + (float) (size * Math.sin(angle))});
-//                        } else {
-////
-//
-//                            xy.set(i, new float[]{xy.get(i + 1)[0] - (float) (size * Math.cos(angle)), xy.get(i + 1)[1] - (float) (size * Math.sin(angle))});
-//                        }
-//                    }
-//
-//                }
-//            }
+
             direction = new float[]{x / 100, y / 100};
 
 
@@ -484,47 +468,11 @@ public class Player extends Entity {
                     if (xy.get(i)[0] - xy.get(j)[0] < 0) {
                         xy.set(i, new float[]{xy.get(j)[0] - (float) ((size - distanceDif) * Math.cos(angle)), xy.get(j)[1] - (float) ((size - distanceDif) * Math.sin(angle))});
                         xy.set(j, new float[]{xy.get(i)[0] + (float) ((size) * Math.cos(angle)), xy.get(i)[1] + (float) ((size) * Math.sin(angle))});
-//                            for (int u = 1; u < xy.size(); u++) {
-//                                if (u == j || u == i) {
-//                                    continue;
-//                                }
-//                                float distance2 = (float) Math.sqrt(Math.pow(xy.get(j)[0] - xy.get(u)[0], 2) + Math.pow(xy.get(j)[1] - xy.get(u)[1], 2));
-//                                float distanceDif2 = size-distance;
-//                                float angle2;
-//                                if (distance2 != 0 && distance2 < size) {
-//                                    angle2 = (float) Math.atan((xy.get(j)[1] - xy.get(u)[1]) / (xy.get(j)[0] - xy.get(u)[0]));
-//                                    if (xy.get(j)[0] - xy.get(u)[0] < 0) {
-////                                        xy.set(j, new float[]{xy.get(u)[0] - (float) ((size-distanceDif2) * Math.cos(angle2)), xy.get(u)[1] - (float) ((size-distanceDif2) * Math.sin(angle2))});
-//                                        xy.set(u, new float[]{xy.get(j)[0] + (float) (size * Math.cos(angle2)), xy.get(j)[1] + (float) (size * Math.sin(angle2))});
-//                                    } else {
-////                                        xy.set(j, new float[]{xy.get(u)[0] + (float) ((size-distanceDif2) * Math.cos(angle2)), xy.get(u)[1] + (float) ((size-distanceDif2) * Math.sin(angle2))});
-//                                        xy.set(u, new float[]{xy.get(j)[0] - (float) (size * Math.cos(angle2)), xy.get(j)[1] - (float) (size * Math.sin(angle2))});
-//                                    }
-//                                }
-//                            }
-
                     } else {
                         xy.set(i, new float[]{xy.get(j)[0] + (float) ((size - distanceDif) * Math.cos(angle)), xy.get(j)[1] + (float) ((size - distanceDif) * Math.sin(angle))});
 
                         xy.set(j, new float[]{xy.get(i)[0] - (float) ((size) * Math.cos(angle)), xy.get(i)[1] - (float) ((size) * Math.sin(angle))});
-//                        for (int u = 1; u < xy.size(); u++) {
-//                            if (u == j || u == i) {
-//                                continue;
-//                            }
-//                            float distance2 = (float) Math.sqrt(Math.pow(xy.get(j)[0] - xy.get(u)[0], 2) + Math.pow(xy.get(j)[1] - xy.get(u)[1], 2));
-//                            float distanceDif2 = size-distance;
-//                            float angle2;
-//                            if (distance2 != 0 && distance2 < size) {
-//                                angle2 = (float) Math.atan((xy.get(j)[1] - xy.get(u)[1]) / (xy.get(j)[0] - xy.get(u)[0]));
-//                                if (xy.get(j)[0] - xy.get(u)[0] < 0) {
-////                                    xy.set(j, new float[]{xy.get(u)[0] - (float) ((size-distanceDif2) * Math.cos(angle2)), xy.get(u)[1] - (float) ((size-distanceDif2) * Math.sin(angle2))});
-//                                    xy.set(u, new float[]{xy.get(j)[0] + (float) (size * Math.cos(angle2)), xy.get(j)[1] + (float) (size * Math.sin(angle2))});
-//                                } else {
-////                                    xy.set(j, new float[]{xy.get(u)[0] + (float) ((size-distanceDif2) * Math.cos(angle2)), xy.get(u)[1] + (float) ((size-distanceDif2) * Math.sin(angle2))});
-//                                    xy.set(u, new float[]{xy.get(j)[0] - (float) (size * Math.cos(angle2)), xy.get(j)[1] - (float) (size * Math.sin(angle2))});
-//                                }
-//                            }
-//                        }
+
                     }
                     deepPhysic(j);
                 }
@@ -535,7 +483,7 @@ public class Player extends Entity {
     }
 
     public void deepPhysic(int i) {
-        for (int j = xy.size() - 1; j >= 0; j--) {
+        for (int j = xy.size() - 1; j > 0; j--) {
             if (j == i) {
                 continue;
             }
@@ -554,7 +502,23 @@ public class Player extends Entity {
         }
     }
 
+    public void addAbsorbedSnake(){
+        for (int i = 0; i < absorbArray.size(); i++) {
 
-    static int maxSize = 100;
+            if (xy.size() < maxSize) {
+                float x = absorbArray.get(i)[0];
+                float y = absorbArray.get(i)[1];
+                xy.add(new float[]{x, y});
+
+                direction = new float[]{0, 0};
+                rendering.addModel(new Model(window, (int) (size * 30)));
+                rendering.getModels().get(xy.size() - 1).getMovement().setPosition(new Vector3f((float) x, (float) y, 0));
+            }
+        }
+
+    }
+
+
+   public static int maxSize = 160;
 
 }

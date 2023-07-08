@@ -28,7 +28,7 @@ public class WormHole {
     private float spawn;
     private final float timeToShow = 1;
     private float startToMove;
-    private final float whenToMove = 15;
+    private final float whenToMove = 30;
     private Window window;
     private ModelRendering rendering;
 

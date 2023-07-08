@@ -5,9 +5,7 @@ import org.example.Enemy.Enemy;
 import org.example.Enemy.Line;
 import org.example.Enemy.PolygonDots;
 import org.example.Player.Player;
-import org.example.gpu.Timer;
 import org.example.gpu.Window;
-import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
 import org.example.gpu.trest;
 import org.example.obstructions.WormHole;
@@ -22,12 +20,13 @@ import java.util.concurrent.TimeUnit;
 public class Process {
     private int width;
     private int height;
-    public  static float appleDistance = 0;
+    public static float appleDistance = 0;
     public static boolean reset = false;
     public static boolean isPaused = false;
     public static boolean isEnd = false;
 
     public static boolean ready = false;
+    public static boolean enemyEaten = false;
     private boolean targetChanged = false;
     public static boolean eaten = false;
     public static float eatenTime = 0;
@@ -51,6 +50,7 @@ public class Process {
     //    static ArrayList<Point> pointsToErase = new ArrayList<>();
     static ArrayList<Point> pointsOfApple = new ArrayList<>();
     static ArrayList<Color> colors = new ArrayList<>();
+    public static ArrayList<Enemy> absorbedEnemies = new ArrayList<>();
 
     public static ArrayList<Point> getPointsOfApple() {
         return pointsOfApple;
@@ -68,6 +68,7 @@ public class Process {
     public static ArrayList<Color> getColors() {
         return colors;
     }
+
     public static ArrayList<BuffParent> buffs = new ArrayList<>();
     public static ArrayList<WormHole> holes = new ArrayList<>();
 
@@ -100,9 +101,8 @@ public class Process {
     public static boolean isGo = false;
 
 
-
     static public Apple apple;
-    public static ArrayList<Point> targets1 = new ArrayList<>();
+
     public static HashMap<Point, Point> toTargets = new HashMap<>();
     public static boolean ringWayIsReady = false;
     public static boolean ringIsReady = false;
@@ -112,16 +112,16 @@ public class Process {
         this.width = window.width;
         this.height = window.height;
 
-        outLeft = (int) (-width*1.5) / Enemy.step * Enemy.step;
+        outLeft = (int) (-width * 1.5) / Enemy.step * Enemy.step;
         fromLeft = (int) (-width * 3) / Enemy.step * Enemy.step;
 
-        outRight = (int) (width*1.5) / Enemy.step * Enemy.step;
+        outRight = (int) (width * 1.5) / Enemy.step * Enemy.step;
         fromRight = (int) (width * 3) / Enemy.step * Enemy.step;
 
-        outUp = (int) (-height*1.5) / Enemy.step * Enemy.step;
+        outUp = (int) (-height * 1.5) / Enemy.step * Enemy.step;
         fromUp = (int) (-height * 3) / Enemy.step * Enemy.step;
 
-        outDown = (int) (height*1.5) / Enemy.step * Enemy.step;
+        outDown = (int) (height * 1.5) / Enemy.step * Enemy.step;
         fromDown = (int) (height * 3) / Enemy.step * Enemy.step;
 //        outLeft = (int) (-width*1.5) / Enemy.step * Enemy.step;
 //        fromLeft = (int) (-width * 3) / Enemy.step * Enemy.step;
@@ -136,8 +136,6 @@ public class Process {
 //        fromDown = (int) (height * 3) / Enemy.step * Enemy.step;
 
 
-
-
 //        walls = new Walls(width, height);
         apple = new Apple(window);
         Player player = new Player(window);
@@ -149,18 +147,6 @@ public class Process {
         }
 
         double radius1 = Math.pow(width / 5 - 2, 2);
-//        for (int x = -width / 4; x <= width / 4; x++) {
-//            for (int y = -width / 4; y <= width / 4; y++) {
-//                double dist = (Math.pow(x, 2)) + (Math.pow(y, 2));
-//                if (dist >= radius1 &&
-//                        dist <= Math.pow(radius1, 2)) {
-//                    targets1.add(new Point(x, y));
-//                }
-//            }
-//        }
-//        ringIsReady = true;
-
-
         Executors.newSingleThreadExecutor().submit(() -> {
             boolean closer;
 
@@ -173,25 +159,6 @@ public class Process {
                     } else {
                         nearest.setLocation(0, 0);
                     }
-//                    if (Math.random() > 0.5) {
-//                        closer = true;
-//                    } else {
-//                        closer = false;
-//                    }
-//
-//                    for (Point p : targets1) {
-//                        double firstDistance = Math.sqrt(Math.pow(Math.abs(p.x - x), 2) + Math.pow(Math.abs(p.y - y), 2));
-//                        double lastDistance = Math.sqrt(Math.pow(Math.abs(x - nearest.x), 2) + Math.pow(Math.abs(y - nearest.y), 2));
-//                        if (closer) {
-//                            if (firstDistance < lastDistance) {
-//                                nearest.setLocation(p.x, p.y);
-//                            }
-//                        } else {
-//                            if (firstDistance <= lastDistance) {
-//                                nearest.setLocation(p.x, p.y);
-//                            }
-//                        }
-//                    }
                     toTargets.put(new Point(x, y), new Point(nearest.x, nearest.y));
                 }
             }
@@ -224,7 +191,7 @@ public class Process {
 
                             buf = 0;
                             if (trest.reset) {
-                                if(!reset){
+                                if (!reset) {
                                     reset = true;
                                 }
                                 continue;
@@ -241,13 +208,22 @@ public class Process {
 
 //                pointsToErase.clear();
 
-                            isGo=true;
+                            while (enemyEaten) {
+                                try{
+                                    TimeUnit.MILLISECONDS.sleep(1);
+                                }catch (Exception e){
 
-                            for(BuffParent parent : buffs){
-                                if(parent.isExist()) {
+                                }
+                                if (isGo) {
+                                    isGo = false;
+                                }
+                            }
+                            isGo = true;
+                            for (BuffParent parent : buffs) {
+                                if (parent.isExist()) {
                                     try {
                                         parent.update();
-                                    }catch (Exception e){
+                                    } catch (Exception e) {
                                         e.printStackTrace();
                                     }
                                 }
@@ -263,8 +239,8 @@ public class Process {
                                     screenMove = true;
                                     direction = player.getDirection();
                                 }
-                                for(BuffParent parent : buffs){
-                                    if(parent.isExist()) {
+                                for (BuffParent parent : buffs) {
+                                    if (parent.isExist()) {
                                         if (parent.getXy().getX() < (outLeft)) {
                                             parent.moveXy(new float[]{fromLeft, 0});
 
@@ -326,7 +302,9 @@ public class Process {
                                 }
                             }
                             for (Enemy enemy : Enemy.enemies) {
-
+                                if (enemy.getXy().size() == 0) {
+                                    continue;
+                                }
                                 if (enemy.getXy().get(0)[0] < (outLeft)) {
                                     enemy.moveXy(new float[]{fromLeft, 0});
                                     enemy.reverse();
@@ -357,7 +335,9 @@ public class Process {
                                 apple.moveXy(new float[]{0, fromDown});
                             }
                             apple.setTime(trest.getMainTime());
-                            player.setTime(trest.getMainTime());
+                            if(!isEnd) {
+                                player.setTime(trest.getMainTime());
+                            }
                             float[] p = player.getXy().get(0);
                             if (appleSpawned && !appleVisible) {
                                 if (eatenTimelast > 0) {
@@ -371,10 +351,10 @@ public class Process {
                                 }
                             }
                             if (appleVisible) {
-                                appleDistance = (float)Math.sqrt(Math.pow(Math.abs(a[0]), 2) + Math.pow(Math.abs(a[1]),2));
+                                appleDistance = (float) Math.sqrt(Math.pow(Math.abs(a[0]), 2) + Math.pow(Math.abs(a[1]), 2));
 
 
-                                if (Math.pow(Math.abs(p[0] - a[0]), 2) + Math.pow(Math.abs(p[1] - a[1]),2) <= collisionWithApple) {       //Проверка колизии змеи и яблока
+                                if (Math.pow(Math.abs(p[0] - a[0]), 2) + Math.pow(Math.abs(p[1] - a[1]), 2) <= collisionWithApple) {       //Проверка колизии змеи и яблока
                                     appleSpawned = false;
                                     appleVisible = false;
                                     player.setDelay();
@@ -385,6 +365,9 @@ public class Process {
                                     eaten = true;
                                 } else {
                                     for (Enemy enemy : Enemy.activeEnemies) {
+                                        if (enemy.getXy().size() == 0) {
+                                            continue;
+                                        }
                                         if (Math.pow(Math.abs(enemy.getXy().get(0)[0] - a[0]), 2) + Math.pow(Math.abs(enemy.getXy().get(0)[1] - a[1]), 2) <= collisionWithApple) {       //Проверка колизии змеи и яблока
 
                                             appleSpawned = false;
@@ -439,7 +422,9 @@ public class Process {
 
 
                             for (Enemy enemy : Enemy.enemies) {
-
+                                if (enemy.getXy().size() == 0) {
+                                    continue;
+                                }
                                 boolean isNearby = false;
                                 boolean appleIsNearby = false;
                                 float[] nearPoint = new float[2];
@@ -448,52 +433,72 @@ public class Process {
                                 float length = 0;
                                 nearPoint = new float[2];
                                 float appleDest = (float) Math.sqrt(Math.pow(Apple.getXy()[0] - enemy.getXy().get(0)[0], 2) + Math.pow(Apple.getXy()[1] - enemy.getXy().get(0)[1], 2));
-                                if(appleDest<=rad){
+                                if (appleDest <= rad) {
                                     appleIsNearby = true;
                                 }
-                                for (float[] ePoint : enemy.getPhantomXY()) {
-                                    for (int i = 0; i < player.getXy().size(); i++) {
-                                        float dest = (float) Math.sqrt(Math.pow(player.getXy().get(i)[0] - ePoint[0], 2) + Math.pow(player.getXy().get(i)[1] - ePoint[1], 2));
+                                try {
+                                    boolean isBreak = false;
+                                    for (float[] ePoint : enemy.getPhantomXY()) {
+                                        for (int i = 0; i < player.getXy().size(); i++) {
+                                            float dest = (float) Math.sqrt(Math.pow(player.getXy().get(i)[0] - ePoint[0], 2) + Math.pow(player.getXy().get(i)[1] - ePoint[1], 2));
 
-                                        if (dest <= Enemy.getSize() + Player.getSize() - 1) {
-                                            if (!isEnd) {
-                                                eatenPlayerTime = trest.getMainTime();
-                                                isEnd = true;                         // TODO
-                                                trest.mouseControl = false;
-                                                for (Enemy enemy1 : Enemy.enemies) {
-                                                    enemy1.setCurrentDelay(0);
+                                            if (dest <= Enemy.getSize() + Player.getSize() - 1) {
+                                                if (!enemy.isActive /*&& player.getXy().size() < Player.maxSize*/) {
+                                                    Player.absorbArray.addAll(enemy.getXy());
+                                                    Player.absorb = true;
+                                                    absorbedEnemies.add(enemy);
+                                                    enemyEaten = true;
+                                                    isBreak = true;
+                                                    break;
+                                                } else {
+                                                    if (!isEnd) {
+                                                        eatenPlayerTime = trest.getMainTime();
+                                                        isEnd = true;                         // TODO
+                                                        trest.mouseControl = false;
+                                                        for (Enemy enemy1 : Enemy.enemies) {
+                                                            enemy1.setCurrentDelay(0);
+                                                        }
+                                                        isBreak = true;
+                                                        break;
+                                                    }
                                                 }
                                             }
-                                        }
-                                        if (dest <= rad) {
-                                            if (length == 0) {
-                                                length = dest;
-                                                nearPoint = new float[]{player.getXy().get(i)[0], player.getXy().get(i)[1]};
-                                            } else if (length > dest) {
-                                                length = dest;
-                                                nearPoint = new float[]{player.getXy().get(i)[0], player.getXy().get(i)[1]};
+                                            if (dest <= rad) {
+                                                if (length == 0) {
+                                                    length = dest;
+                                                    nearPoint = new float[]{player.getXy().get(i)[0], player.getXy().get(i)[1]};
+                                                } else if (length > dest) {
+                                                    length = dest;
+                                                    nearPoint = new float[]{player.getXy().get(i)[0], player.getXy().get(i)[1]};
+                                                }
+                                                isNearby = true;
                                             }
-                                            isNearby = true;
                                         }
+                                        if(isBreak){
+                                            break;
+                                        }
+
                                     }
 
+                                    enemy.unFear();
+                                    if (isNearby && enemyScared) {
+                                        enemy.fear();
+                                        nearPoint = new float[]{enemy.getXy().get(0)[0] * 2, enemy.getXy().get(0)[1] * 2};
+                                        enemy.moveCheck(nearPoint, appleIsNearby, true);
+                                    } else if (enemy.isEatAndAngry() || isEnd) {
+                                        enemy.moveCheck(player.getXy().get(0), appleIsNearby, true);
+
+                                    } else if (isNearby) {
+
+                                        enemy.moveCheck(nearPoint, appleIsNearby, true);
+
+                                    } else {
+                                        enemy.moveCheck(new float[2], appleIsNearby, false);
+                                    }
+
+                                } catch (Exception e) {
+
                                 }
-                                enemy.unFear();
-                                if(isNearby&&enemyScared){
-                                    enemy.fear();
-                                    nearPoint = new float[]{enemy.getXy().get(0)[0]*2,enemy.getXy().get(0)[1]*2};
-                                    enemy.moveCheck(nearPoint, appleIsNearby,true);
-                                }else if (enemy.isEatAndAngry() || isEnd) {
-                                    enemy.moveCheck(player.getXy().get(0),  appleIsNearby, true);
-
-                                } else if (isNearby) {
-
-                                        enemy.moveCheck(nearPoint,  appleIsNearby,true);
-
-                                } else {
-                                    enemy.moveCheck(new float[2],  appleIsNearby, false);
-                                }
-                                boolean notSelf = true;
                             }
                             if (isEnd) {
                                 eatenPlayerTimelast = trest.getMainTime() - eatenPlayerTime;
@@ -501,7 +506,7 @@ public class Process {
                             }
                             player.moveCheck();
 
-                            isGo = false;
+
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -534,7 +539,8 @@ public class Process {
 
     static Polygon polygon;
     Point center;
-    public void addEntities(){
+
+    public void addEntities() {
 
     }
 

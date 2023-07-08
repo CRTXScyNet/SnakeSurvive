@@ -87,8 +87,10 @@ public class ModelRendering {
 //
         }
         if(Process.isEnd && entity instanceof Player){
-            time = -Process.eatenPlayerTimelast;
+//            time = -Process.eatenPlayerTimelast;
+        System.out.println();
         }
+
         shader.setUniform("time", time);
         shader.setUniform("rgb", redA, greenA, blueA);
         shader.setUniform("u_resolution", window.width, window.height);

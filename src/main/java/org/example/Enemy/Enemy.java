@@ -684,7 +684,15 @@ move((float)next.getX(),(float)next.getY());
         return false;
 
     }
-
+    public void enemyAbsorbed(){
+xy.clear();
+rendering.clear();
+phantomXY.clear();
+directionOfPhantomXY.clear();
+amountOfAbsorbedEnemies++;
+enemies.remove(this);
+    }
+public static int amountOfAbsorbedEnemies = 0;
     static int maxSize = 60;
 
 }
