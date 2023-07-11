@@ -19,16 +19,16 @@ public class Apple {
     private ModelRendering rendering;
     private ModelRendering renderingPoiner;
 
-    Apple(Window window) {
+    public Apple(Window window) {
         apple = this;
         this.window = window;
         xy = new float[]{(int) (Math.random() * window.width * 3 - (window.width / 1.5)), (int) (Math.random() * window.height * 3 - (window.height / 1.5))};
 //        System.out.printf("Apple x: %s, y: %s ", xy[0],xy[1]);
-        rendering = new ModelRendering(window, color, true, null, "apple");
-        rendering.addModel(new Model(window, (int) (size * 50)));
+        rendering = new ModelRendering(window,  true, null, "apple");
+        rendering.addModel(new Model(window, (int) (size * 50),color));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy[0], (float) xy[1], 0));
-        renderingPoiner = new ModelRendering(window, Color.red, true, null,"applePointer");
-        renderingPoiner.addModel(new Model(window, 100));
+        renderingPoiner = new ModelRendering(window,  true, null,"applePointer");
+        renderingPoiner.addModel(new Model(window, 100,color));
     }
     public void setTime(float time){
         rendering.setTime(time);

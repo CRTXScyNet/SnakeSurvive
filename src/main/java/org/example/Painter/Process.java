@@ -33,7 +33,7 @@ public class Process {
     public static float eatenTimelast = 0;
     public static float eatenPlayerTime = 0;
     public static float eatenPlayerTimelast = 0;
-    private int eatenDelayStat = 500;
+    private int eatenDelayStat = 50;
     private int eatenDelay = eatenDelayStat;
 
     public static ArrayList<Point> getPointsOfArrow() {

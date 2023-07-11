@@ -7,6 +7,7 @@ import org.example.Player.Player;
 import org.example.gpu.Window;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
+import org.example.gpu.trest;
 import org.joml.Vector3f;
 
 import java.awt.*;
@@ -42,8 +43,8 @@ public class Enemy extends Entity {
             activeEnemies.add(this);
             color = new Color(150, 150, 255);
         }
-        rendering = new ModelRendering(window, color, false, this, "enemy");
-        rendering.addModel(new Model(window, (int) (size * 30)));
+        rendering = new ModelRendering(window,  false, this, "enemy");
+        rendering.addModel(new Model(window, (int) (size * 30),color));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) co.x, (float) co.y, 0));
         for (int i = 0; i < snakeLength; i++) {
             addCircle();
@@ -103,12 +104,13 @@ public class Enemy extends Entity {
 
 
     public static int step = (int) (Enemy.getSize() * stepOfSize);
-   public static double delayStat = 200;
-    static double delayStatActive = 75; //TODO
+   public static double delayStat = 40;
+    static double delayStatActive = 20; //TODO
     private double delayDouble = delayStat;
     private int delay = (int) delayDouble;
     private int delayCount = 0;
-    private double timerStat = 10;
+    private double timerForRestart = 10;
+    private double timerStat = timerForRestart;
     private double timer = timerStat;
 
 
@@ -194,7 +196,7 @@ public void fear(){
             float yp = phantomXY.get(phantomXY.size() - 1)[1];
             phantomXY.add(new float[]{xp, yp});
             directionOfPhantomXY.add(new float[]{0, 0});
-            rendering.addModel(new Model(window, (int) (size * 30)));
+            rendering.addModel(new Model(window, (int) (size * 30),color));
             rendering.getModels().get(xy.size() - 1).getMovement().setPosition(new Vector3f(xp, yp, 0));
         }
     }
@@ -209,7 +211,7 @@ public void fear(){
         Point co = getRandomPoint();
         hunt = false;
         eatAndAngry = false;
-        timer = timerStat;
+        timer = timerForRestart;
         if (isActive) {
             delayDouble = delayStatActive;
             delay = (int) delayStatActive;
@@ -222,7 +224,7 @@ public void fear(){
         xy.add(new float[]{co.x, co.y});
         setPhantomXY();
         rendering.clear();
-        rendering.addModel(new Model(window, (int) (size * 30)));
+        rendering.addModel(new Model(window, (int) (size * 30),color));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) co.x, (float) co.y, 0));
         move(co.x, co.y);
         for (int i = 0; i < snakeLength; i++) {
@@ -232,8 +234,8 @@ public void fear(){
     }
 
     public Point getRandomPoint() {
-        int x = (int) (-(window.width/1.5) + ((int) (Math.random() * ((window.width * 3) / (int) (size * stepOfSize))) * (int) (size * stepOfSize)));
-        int y = (int) (-(window.height/1.5) + ((int) (Math.random() * ((window.height * 3) / (int) (size * stepOfSize))) * (int) (size * stepOfSize)));
+        int x = (int) (-(window.width*1.5) + ((int) (Math.random() * ((window.width * 3) / (int) (size * stepOfSize))) * (int) (size * stepOfSize)));
+        int y = (int) (-(window.height*1.5) + ((int) (Math.random() * ((window.height * 3) / (int) (size * stepOfSize))) * (int) (size * stepOfSize)));
         if (Math.pow(Math.abs(x), 2) + Math.pow(Math.abs(y), 2) <= Math.pow(300, 2)) {
             return getRandomPoint();
         }
@@ -278,17 +280,17 @@ private double bufDelay = 0;
         if(delay == 0){
             movePhantom();
         }
-        if(!isActive&&!Process.isEnd){
+        if(!isActive&&!trest.isEnd){
             if (isNearby&&isScared) {
-                delay = (int) delayStat / 10;
+                delay = (int)(size*stepOfSize/(Player.step+Player.step/2));
             } else {
                 delay = (int) delayStat;
             }
-        }else if(isActive && !Process.isEnd){
+        }else if(isActive && !trest.isEnd){
             if (isNearby&&isScared) {
                 if(bufDelay == 0){
                     bufDelay = delayDouble;
-                    delayDouble/=4;
+                    delayDouble = (int)(size*stepOfSize/(Player.step+Player.step/2));
                     delay = (int)delayDouble;
                 }
             } else {
@@ -345,7 +347,7 @@ private double bufDelay = 0;
                 hunt = true;
                 xTarget = point[0];
                 yTarget = point[1];
-            } else if (Process.appleVisible&&appleIsNearby) {
+            } else if (trest.appleVisible&&appleIsNearby) {
                 xTarget = Apple.getXy()[0];
                 yTarget = Apple.getXy()[1];
             } else {
@@ -374,14 +376,14 @@ private double bufDelay = 0;
             xTarget = point[0];
             yTarget = point[1];
         }
-        if (Process.isEnd) {
+        if (trest.isEnd) {
             hunt = true;
-            if (Process.ringWayIsReady && !isActive) {
+            if (trest.ringWayIsReady && !isActive) {
 
                 Point nearest = new Point(0, 0);
                 Point self = new Point((int) xy.get(0)[0], (int) xy.get(0)[1]);
-                if (Process.toTargets.get(self) != null) {
-                    nearest = Process.toTargets.get(self);
+                if (trest.toTargets.get(self) != null) {
+                    nearest = trest.toTargets.get(self);
                 }
                 xTarget = nearest.x;
                 yTarget = nearest.y;
@@ -405,7 +407,7 @@ Point2D target = new Point2D.Double(xTarget,yTarget);
           ArrayList<Point2D> doubles =  notSelf(x, y);
 
         if (!downNotSelf && !upNotSelf && !rightNotSelf && !leftNotSelf) {
-            if (!reverse() && isTeleport() && Process.isEnd) {
+            if (!reverse() && isTeleport() && trest.isEnd) {
                 Point p = getRandomPoint();
                 teleportXy(new float[]{p.x, p.y});
 

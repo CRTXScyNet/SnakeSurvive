@@ -40,16 +40,15 @@ vec4 ringColor = vec4(0, ((length(uv) >= s3 && length(uv) <= s4)||(length(uv) >=
 //if(s >= length(uv)){
 //vec4 color = vec4(0.2/length(uv)*0.1,0.2/length(uv)*0.1,0.2/length(uv)*0.1,(0.1/length(uv)*0.1));
 vec4 color = vec4(abs(sin(uv.x*t/uv.y)*sin(uv.y*t/uv.x)) , abs(sin(uv.x*(t+1)/uv.y)*sin(uv.y*(t+1)/uv.x)) , abs(sin(uv.x*(t+2)/uv.y)*sin(uv.y*(t+2)/uv.x)),(1-length(uv)*20));
-vec4 color3 = vec4((50-length(ss))*0.015,(50-length(ss))*0.015,(50-length(ss))*0.015,1);
+vec4 color3 = vec4((40-length(ss))*0.015,(40-length(ss))*0.015,(40-length(ss))*0.015,1);
 //vec4 color2 = vec4(0.2/length(uv2)*0.1,0.2/length(uv2)*0.1,0.2/length(uv2)*0.1,0.2/length(uv2)*0.1);
 //}else{
 //color = vec4(0,1,0,0);
 //}
 if(t <0){
     t *= -1;
-//    color.x /= t*10;
-//    color.y /= t*10;
-//    color.z /= t*10;
+        color.a *= sin(t);
+    ringColor.a *= sin(t);
 }
 
 

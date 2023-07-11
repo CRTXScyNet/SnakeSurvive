@@ -5,29 +5,24 @@ import org.example.gpu.Window;
 
 import java.awt.*;
 
-public class Speed extends BuffParent {
-
-    private final Color color = new Color(238, 108, 0);
-
-    public Speed(Window window) {
+public class CutTheTail extends BuffParent{
+    public CutTheTail(Window window) {
         super(window);
+        color = new Color(0,255,255);
         renderInit("speed", "bufPointer", color);
-
-        setCanExistTime(15);
-        setBuffCanExistTime(5);
-        setChance(0.005);
+        setBuffCanExistTime(1);
+        setCanExistTime(20);
+        setChance(0.1);
     }
 
     @Override
     public void buffOnn() {
         super.buffOnn();
-Player.addSpeedTime(buffCanExistTime);
+        Player.players.get(0).cutTheTail();
     }
 
     @Override
     public void buffOff() {
         super.buffOff();
-
-
     }
 }

@@ -2,6 +2,7 @@ package org.example.Buffs;
 
 import org.example.Painter.Process;
 import org.example.gpu.Window;
+import org.example.gpu.trest;
 
 import java.awt.*;
 
@@ -21,12 +22,12 @@ public class Fear extends BuffParent {
     @Override
     public void buffOnn() {
         super.buffOnn();
-        Process.enemyScared = true;
+        trest.enemyScared = true;
     }
 
     @Override
     public void buffOff() {
         super.buffOff();
-        Process.enemyScared = false;
+        trest.enemyScared = false;
     }
 }

@@ -56,6 +56,6 @@ color*=abs(sin(t*5))+0.1;
 
 
 
-gl_FragColor = (color * selfColor*color3) ;
+gl_FragColor = (color * selfColor) ;
 
 }

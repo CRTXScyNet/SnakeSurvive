@@ -48,13 +48,13 @@ vec4 color3 = vec4((50-length(ss))*0.015,(50-length(ss))*0.015,(50-length(ss))*0
 //}
 if(t <0){
     t *= -1;
-    color /= t*10;
+        color.a *= sin(t);
 }else{
 color*=abs(sin(t*5))+0.1;
 }
 
 
 
-gl_FragColor = (color * selfColor * color3) ;
+gl_FragColor = (color * selfColor) ;
 
 }

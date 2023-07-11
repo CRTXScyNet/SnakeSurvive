@@ -27,31 +27,32 @@ public class ModelRendering {
     private float red;
     private float green;
     private float blue;
-    private Color color;
+
 
     float time;
     boolean isApple;
 
     private Entity entity = null;
 
-    public ModelRendering(Window window, Color color, boolean isApple , Entity entity,String shaderName) {
+    public ModelRendering(Window window, boolean isApple , Entity entity,String shaderName) {
         this.entity = entity;
         this.isApple = isApple;
-        this.color = color;
+
         this.window = window;
         selfList.add(this);
         shader = new Shader(shaderName);
-//        red = (float)Math.random()*0.7f;
-//        green = (float)Math.random()*0.7f;
-//        blue = (float)Math.random()*0.7f;
-        red = (float) color.getRed() / 255;
-        green = (float) color.getGreen() / 255;
-        blue = (float) color.getBlue() / 255;
+
+//        red = (float) color.getRed() / 255;
+//        green = (float) color.getGreen() / 255;
+//        blue = (float) color.getBlue() / 255;
     }
 
 
     public float getTime() {
         return time;
+    }
+    public void setRGB(){
+
     }
 
     public void setTime(float time) {
@@ -64,15 +65,8 @@ public class ModelRendering {
 
     public void renderModels() {
         shader.bind();
-        float redA = red;
-        float greenA = green;
-        float blueA = blue;
-        if(entity instanceof Enemy){
-            if(((Enemy) entity).hunt){
-                redA *= 3;
 
-            }
-        }
+
 //        if(isApple && !Process.appleVisible){
 ////           redA = 0;
 ////           greenA = 0;
@@ -91,14 +85,25 @@ public class ModelRendering {
         System.out.println();
         }
 
-        shader.setUniform("time", time);
-        shader.setUniform("rgb", redA, greenA, blueA);
+
+
         shader.setUniform("u_resolution", window.width, window.height);
         if (models.size() == 0) {
             return;
         }
         for (int i = models.size() - 1; i >= 0; i--) {
             try {
+                shader.setUniform("time", time+(models.size()-i)*0.1f);
+                float redA = (float) models.get(i).color.getRed()/255;
+                float greenA = (float)models.get(i).color.getGreen()/255;
+                float blueA = (float)models.get(i).color.getBlue()/255;
+                if(entity instanceof Enemy){
+                    if(((Enemy) entity).hunt){
+                        redA *= 3;
+
+                    }
+                }
+                shader.setUniform("rgb", redA, greenA, blueA);
                 shader.setUniform("projection", models.get(i).getMovement().projection().scale(models.get(i).getScale()));
                 models.get(i).render();
             } catch (Exception e) {

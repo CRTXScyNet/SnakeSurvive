@@ -40,6 +40,10 @@ public class Model implements Cleaner.Cleanable {
     private Texture texture;
 
     private Movement movement;
+    public Color color = new Color(0,0,0);
+    public void setRGB(Color color){
+        this.color = color;
+    }
 
 
     public int getScale() {
@@ -55,7 +59,8 @@ public class Model implements Cleaner.Cleanable {
     private int width;
     private int heigth;
 
-    public Model(org.example.gpu.Window window, int scale) {
+    public Model(org.example.gpu.Window window, int scale, Color color) {
+        this.color = color;
         this.width = window.width;
         this.heigth = window.height;
 
