@@ -6,6 +6,7 @@ import org.joml.Vector3f;
 public class Movement {
     private Vector3f position;
     private Matrix4f projection;
+    private float rotation = 0;
 
  public Movement(int width,int height){
      position = new Vector3f(0,0,0);
@@ -22,10 +23,13 @@ public class Movement {
     public void setProjection(Matrix4f projection) {
         this.projection = projection;
     }
+    public void setRotation(float r){
+     this.rotation = r;
+    }
 
     public Matrix4f projection() {
      Matrix4f target = new Matrix4f();
-     Matrix4f pos = new Matrix4f().setTranslation(position);
+     Matrix4f pos = new Matrix4f().setTranslation(position).rotate(rotation,new Vector3f(0,0,1));
      target = projection.mul(pos,target);
         return target;
     }

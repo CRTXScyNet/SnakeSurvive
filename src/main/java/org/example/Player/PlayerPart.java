@@ -14,9 +14,26 @@ import java.util.ArrayList;
 public class PlayerPart {
     private int width;
     private int height;
+    public static int maxAmountOfParts = 50;
     private static final double innerPlace = 0.9;
     private static final double exteriorBorder = (1 - innerPlace) / 2;
     static final double[] playGround = new double[]{innerPlace, exteriorBorder};
+
+    public static void refresh(){
+        if(playerParts.size()>maxAmountOfParts){
+            for (int i = playerParts.size()-1; i >= 0; i--) {
+                if(playerParts.get(i).playerPartHeadXY().distance(Player.playerHeadXY())>500){
+                    playerParts.get(i).clearPart();
+                    if(playerParts.size()<=maxAmountOfParts){
+                        return;
+                    }
+
+                }
+
+            }
+
+        }
+    }
 
     public void moveXy(float[] direct) {
         for (int i = 0; i < xy.size(); i++) {
@@ -54,6 +71,7 @@ public class PlayerPart {
     public float step = 0.5f;
 
 
+
     public void setDelay() {
         if (delay < 100) {
             delay += 1;
@@ -63,7 +81,7 @@ public class PlayerPart {
 
 
 
-    public static int snakeLength = 5;
+    public static int snakeLength = 30;
 
 
 
@@ -79,6 +97,7 @@ public class PlayerPart {
 
     private Window window;
     private ModelRendering rendering;
+    private float ignoreTime = 5;
     private float birthTime = 0;
 
     public PlayerPart(Window window) {
@@ -100,13 +119,6 @@ public class PlayerPart {
 //            addCircle();
 //        }
     }
-
-
-    public ArrayList<float[]> getXy() {
-        return xy;
-    }
-
-
     public void addCircle() {
         if (xy.size() < maxSize) {
             float x = xy.get(xy.size() - 1)[0];
@@ -117,6 +129,31 @@ public class PlayerPart {
             rendering.getModels().get(xy.size() - 1).getMovement().setPosition(new Vector3f((float) x, (float) y, 0));
         }
     }
+    public PlayerPart(Window window,ArrayList<float[]> xy) {
+
+        this.window = window;
+        this.xy.add(xy.get(0));
+        size = Player.size;
+        tMouse = (float) Math.random() * 6.28f;
+        color = new Color(0, 200, 200);
+        playerParts.add(this);
+ignoreTime = 0;
+        rendering = new ModelRendering(window, false, null, "playerPart");
+        rendering.addModel(new Model(window, (int) (size * 30), color));
+        rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) this.xy.get(0)[0], (float) this.xy.get(0)[1], 0));
+        birthTime = Timer.getFloatTime();
+        rendering.setTime(birthTime + trest.getMainTime());
+
+        for (int i = 1; i < xy.size(); i++) {
+            absorbCircle(xy.get(i));
+        }
+    }
+    public ArrayList<float[]> getXy() {
+        return xy;
+    }
+
+
+
 
 
     public void grow() {
@@ -135,14 +172,11 @@ public class PlayerPart {
         }
     }
 
-    public void minusCell() {
+    public void minusCell(int count) {
         try {
-            if (getXy().size() > 3) {
-                rendering.getModels().remove(getXy().size() - 1);
-                getXy().remove(getXy().size() - 1);
+                rendering.getModels().remove(count);
+                getXy().remove(count);
 
-
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -349,7 +383,7 @@ public class PlayerPart {
 
     public void moveCheck() {
         if (!canSee) {
-            if (Timer.getFloatTime() - birthTime >= 5) {
+            if (Timer.getFloatTime() - birthTime >= ignoreTime) {
                 canSee = true;
             }
         }

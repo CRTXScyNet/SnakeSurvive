@@ -67,7 +67,7 @@ this.color = color;
         renderingBuff.addModel(new Model(window, (int) (size * 50),color));
         renderingBuff.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy.getX(), (float) xy.getY(), 0));
 
-        renderingBuffPointer.addModel(new Model(window, 50,color));
+        renderingBuffPointer.addModel(new Model(window, 15,color));
         closing = false;
         isExist = true;
     }
@@ -150,9 +150,11 @@ this.color = color;
         if (TargetRadian < 0) {
             TargetRadian += 6.28;
         }
-        double pointWatchX = (450 * Math.sin(TargetRadian));
-        double pointWatchY = (450 * Math.cos(TargetRadian));
+        double pointWatchX = (80 * Math.sin(TargetRadian));
+        double pointWatchY = (80 * Math.cos(TargetRadian));
         renderingBuffPointer.getModels().get(0).getMovement().setPosition(new Vector3f((float) pointWatchX, (float) pointWatchY, 0));
+        renderingBuffPointer.getModels().get(0).getMovement().setRotation((float) -TargetRadian);
+
     }
 
     public void buffOnn() {

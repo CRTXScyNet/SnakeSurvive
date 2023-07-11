@@ -50,6 +50,7 @@ public class Model implements Cleaner.Cleanable {
         return scale;
     }
 
+
     private int scale = 0;
 
     public Movement getMovement() {

@@ -8,6 +8,7 @@ import org.example.Enemy.Enemy;
 import org.example.Painter.Apple;
 import org.example.Player.Player;
 import org.example.Player.PlayerPart;
+import org.example.gpu.io.Movement;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
 import org.example.obstructions.WormHole;
@@ -177,7 +178,7 @@ public class trest {
                     for(PlayerPart part : PlayerPart.playerParts){
                         count+=part.xy.size();
                     }
-                    if(count<500&&PlayerPart.playerParts.size()<50){
+                    if(count<500&&PlayerPart.playerParts.size()<PlayerPart.maxAmountOfParts){
                         for (int i = 0; i < 20; i++) {
                             new PlayerPart(window);
                         }
@@ -248,6 +249,7 @@ public void addSomeEntity(Window window){
         if (window.getInput().isKeyPressed(GLFW_KEY_E)) {
             isEnd = !isEnd;
         }
+
         if (window.getInput().isKeyPressed(GLFW_KEY_R)) {
             reset(window);
             isPaused = false;
@@ -255,6 +257,15 @@ public void addSomeEntity(Window window){
             mouseControl = false;
             System.out.println("restart");
         }
+//        if (window.getInput().isKeyDown(GLFW_KEY_LEFT)) {
+//            Movement.increaseRotation();
+//        }
+//        if (window.getInput().isKeyDown(GLFW_KEY_RIGHT)) {
+//            Movement.decreaseRotation();
+//        }
+//        if (window.getInput().isKeyPressed(GLFW_KEY_SPACE)) {
+//            System.out.println(Movement.getRotation());
+//        }
 
     }
 
@@ -601,6 +612,7 @@ public void addSomeEntity(Window window){
                 for (int i = 0; i < PlayerPart.playerParts.size(); i++) {
                     PlayerPart.playerParts.get(i).moveCheck();
                 }
+                PlayerPart.refresh();
 
 
             } catch (Exception e) {

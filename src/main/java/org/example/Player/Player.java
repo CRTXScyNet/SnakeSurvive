@@ -10,6 +10,7 @@ import org.joml.Vector3f;
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class Player extends Entity {
     private int width;
@@ -124,7 +125,6 @@ public class Player extends Entity {
             rendering.getModels().get(xy.size() - 1).getMovement().setPosition(new Vector3f((float) x, (float) y, 0));
         }
     }
-
 
 
     public void grow() {
@@ -253,7 +253,7 @@ public class Player extends Entity {
 
         if (!trest.mouseControl) {
 //            stepRad = step / 30;
-            stepRad = (float) dif * (step / 60);
+            stepRad = (float) dif * (step / 30);
         } else {
             stepRad = (float) dif * (step / 15);
         }
@@ -297,7 +297,7 @@ public class Player extends Entity {
                         canIncreaseSpeed = true;
                         count++;
                         if (step < maxStep) {
-                            step += Math.abs(stepRad) /10;
+                            step += Math.abs(stepRad) / 10;
                         } else {
 //                            System.out.println("Maximum!");
                         }
@@ -368,10 +368,10 @@ public class Player extends Entity {
                 }
                 if (step > minStep && !trest.mouseControl && !speedBoost) {
                     step *= 0.9999;
-                } else if (step > minStep&& !speedBoost) {// && !canIncreaseSpeed
-                    if(!canIncreaseSpeed ) {
+                } else if (step > minStep && !speedBoost) {// && !canIncreaseSpeed
+                    if (!canIncreaseSpeed) {
                         step *= 0.99;
-                    }else {
+                    } else {
                         step *= 0.999;
                     }
                 }
@@ -415,7 +415,9 @@ public class Player extends Entity {
     public void move(float x, float y) {
 
         try {
-
+            if(!trest.isEnd){
+                checkForAbsorb();
+            }
 //            if (!trest.mouseControl) {
 ////                float headDistance = (float) Math.sqrt(Math.pow(xy.get(0)[0], 2) + Math.pow(xy.get(0)[1], 2));
 ////
@@ -500,10 +502,10 @@ public class Player extends Entity {
             if (stop) {
                 step *= 0.99;
             }
-            if(trest.mouseControl){
+            if (trest.mouseControl) {
                 direction = new float[]{x / (20 - maxStep), y / (20 - maxStep)};
-            }else {
-                direction = new float[]{0,0};
+            } else {
+                direction = new float[]{0, 0};
             }
 
             //place for physics  TODO
@@ -589,19 +591,42 @@ public class Player extends Entity {
         return stop;
     }
 
-//    public void addAbsorbedSnake(ArrayList<float[]> absorbArray){
-//        for (int i = 0; i < absorbArray.size(); i++) {
-//
-//            if (xy.size() < maxSize) {
-//                float x = absorbArray.get(i)[0];
-//                float y = absorbArray.get(i)[1];
-//                xy.add(new float[]{x, y});
-//                rendering.addModel(new Model(window, (int) (size * 30)));
-//                rendering.getModels().get(xy.size() - 1).getMovement().setPosition(new Vector3f((float) x, (float) y, 0));
-//            }
-//        }
-//
-//    }
+    public void checkForAbsorb() {
+
+        for (PlayerPart part : PlayerPart.playerParts) {
+            if (part.playerPartHeadXY().distance(playerHeadXY()) < 200 && part.getXy().size() > 1) {
+                boolean eat = false;
+                for (int i = 1; i < part.xy.size(); i++) {
+                    Point2D partPoint = new Point2D.Float(part.xy.get(i)[0], part.xy.get(i)[1]);
+
+                    if (playerHeadXY().distance(partPoint) < size) {
+                        //Добавляем ячейку игроку
+                        //Создаем новую часть игрока с координатами откушеной части
+
+                        grow();
+                        ArrayList<float[]> newPart = new ArrayList<>();
+                        if(part.xy.size()-1 != i) {
+                            for (int j = i; j < part.xy.size(); j++) {
+                                newPart.add(new float[]{part.xy.get(j)[0], part.xy.get(j)[1]});
+                                part.minusCell(j);
+
+                                j--;
+                            }
+                            newPart.remove(0);
+                            new PlayerPart(window, newPart);
+                        }else{
+                            part.minusCell(part.xy.size()-1);
+                        }
+
+                        return;
+                    }
+
+                }
+
+            }
+        }
+
+    }
 
 
     public static int maxSize = 160;

@@ -11,7 +11,7 @@ public class CutTheTail extends BuffParent{
         color = new Color(0,255,255);
         renderInit("speed", "bufPointer", color);
         setBuffCanExistTime(1);
-        setCanExistTime(20);
+        setCanExistTime(5000);
         setChance(0.1);
     }
 

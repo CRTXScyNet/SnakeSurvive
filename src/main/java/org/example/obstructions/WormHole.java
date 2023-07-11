@@ -45,6 +45,7 @@ public class WormHole {
         rendering = new ModelRendering(window,  false, null, "wormHole");
         rendering.addModel(new Model(window, (int) (size * 50),color));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy[0], (float) xy[1], 0));
+
     }
 
     public void reset() {
@@ -91,7 +92,7 @@ public class WormHole {
                 }
             } else {
                 float timer = trest.getMainTime() - spawn;
-                rendering.setTime(-(timer * 1.1f) / (timeToShow) - 0.1f);
+                rendering.setTime(-(timer * 1.1f) / (timeToShow) - 0.2f);
 
                 if (timer >= timeToShow && !isPull) {
                     rendering.setTime(timer);

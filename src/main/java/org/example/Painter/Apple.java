@@ -28,7 +28,7 @@ public class Apple {
         rendering.addModel(new Model(window, (int) (size * 50),color));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy[0], (float) xy[1], 0));
         renderingPoiner = new ModelRendering(window,  true, null,"applePointer");
-        renderingPoiner.addModel(new Model(window, 100,color));
+        renderingPoiner.addModel(new Model(window, 30,color));
     }
     public void setTime(float time){
         rendering.setTime(time);
@@ -51,6 +51,7 @@ public class Apple {
         double pointWatchX = (100 * Math.sin(TargetRadian));
         double pointWatchY = (100 * Math.cos(TargetRadian));
         renderingPoiner.getModels().get(0).getMovement().setPosition(new Vector3f((float) pointWatchX, (float) pointWatchY, 0));
+        renderingPoiner.getModels().get(0).getMovement().setRotation((float) -TargetRadian);
 
     }
 

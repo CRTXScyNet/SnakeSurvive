@@ -26,11 +26,11 @@ float s3;
 
 
 vec2 uv = coords-0.5;
-vec2 uv2 = coords-0.5;
+vec2 uv2 = vec2(coords.x-0.5,coords.y-1.4);
 
 //s = step(length(uv),0.4);
 //s2 = step(length(uv),0.95);
-s3 = step(length(uv),.5);
+s3 = step(length(uv2),.6);
 
 //uv.x += (sin(time) + cos(time*2.8))/5;
 //uv.y += (cos(time) + sin(time*5.1))/5;
@@ -39,15 +39,14 @@ s3 = step(length(uv),.5);
 
 //if(s >= length(uv)){
 //vec4 color = vec4((0.55-length(uv))*7,(0.55-length(uv))*7,(0.55-length(uv))*7,(0.5-length(uv))*7);
-vec4 color = vec4(0.5/length(uv)*0.1,0.5/length(uv)*0.1,0.5/length(uv)*0.1,(0.1/length(uv)*0.1));
-vec4 color3 = vec4((50-length(ss))*0.015,(50-length(ss))*0.015,(50-length(ss))*0.015,1);
-//vec4 color2 = vec4(0.2/length(uv2)*0.1,0.2/length(uv2)*0.1,0.2/length(uv2)*0.1,0.2/length(uv2)*0.1);
+vec4 color = vec4(0.5/length(vec2(uv.x,(uv.y-0.15)))*0.2,1,1,pow((abs(uv.y+0.5))/1.5 ,2) / abs(uv.x)*0.9);
+vec4 color2 = vec4(1,1,1,(pow((abs(uv.y+0.5))/1.5 ,2) >= abs(uv.x) && (length(uv2)>s3) ? 1:0));
 //}else{
 //color = vec4(0,1,0,0);
 //}
 if(t <0){
     t *= -1;
-    color.x /= t*10;
+    color.a -= t*1000;
     //color = vec4(0.5/length(uv)*0.1/(t*10),0.5/length(uv)*0.1/(t*10),0.5/length(uv)*0.1/(t*10),(0.1/length(uv)*0.1));
 }else{
 
@@ -56,6 +55,6 @@ color*=abs(sin(t*5))+0.1;
 
 
 
-gl_FragColor = (color * selfColor) ;
+gl_FragColor = (color * selfColor)*color2 ;
 
 }
