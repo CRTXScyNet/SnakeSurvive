@@ -1,20 +1,33 @@
 package org.example.Painter;
 
+import org.example.Player.Player;
 import org.example.gpu.Window;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
+import org.example.gpu.trest;
 import org.joml.Vector3f;
 
 import java.awt.*;
 
 public class Apple {
-    private static float[] xy = new float[]{};
+
     static Color color = new Color(Color.RED.getRGB());
-    private static int size = 10;
-    public static Apple apple;
     private int width;
     private int height;
+    private static int size = 10;
+    private int eatenDelayStat = 50;
+    private int eatenDelay = eatenDelayStat;
+    private static float[] xy = new float[]{};
+    public static float eatenTime = 0;
+    public static float eatenTimelast = 0;
+    static double collisionWithApple = Math.pow(Apple.getAppleSize()*2, 2);
+    public static Apple apple;
+
     private Window window;
+    public static boolean appleSpawned = false;
+    public static boolean appleVisible = false;
+
+    public static boolean eaten = false;
 
     private ModelRendering rendering;
     private ModelRendering renderingPoiner;
@@ -22,17 +35,79 @@ public class Apple {
     public Apple(Window window) {
         apple = this;
         this.window = window;
-        xy = new float[]{(int) (Math.random() * window.width * 3 - (window.width / 1.5)), (int) (Math.random() * window.height * 3 - (window.height / 1.5))};
+        xy = new float[]{(int) (Math.random() * trest.playGroundWidth / 2 - (trest.playGroundWidth/ 4)), (int) (Math.random() * trest.playGroundHeight/2 - (trest.playGroundHeight / 4))};
 //        System.out.printf("Apple x: %s, y: %s ", xy[0],xy[1]);
-        rendering = new ModelRendering(window,  true, null, "apple");
+        rendering = new ModelRendering(window,   null, "apple");
         rendering.addModel(new Model(window, (int) (size * 50),color));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy[0], (float) xy[1], 0));
-        renderingPoiner = new ModelRendering(window,  true, null,"applePointer");
+        renderingPoiner = new ModelRendering(window,   null,"applePointer");
         renderingPoiner.addModel(new Model(window, 30,color));
     }
+    public static boolean checkCollision(float[] xy){
+        if(!eaten && Math.pow(Math.abs(xy[0] - Apple.xy[0]), 2) + Math.pow(Math.abs(xy[1] - Apple.xy[1]), 2) <= collisionWithApple){
+            eaten = true;
+            return true;
+        }else {
+        return false;
+        }
+
+    }
+
+    public void update(){
+        if (appleSpawned && !appleVisible) {
+            if (eatenTimelast > 0) {
+                eatenTimelast -= (trest.mainTime - eatenTime);
+                setTime(-eatenTimelast);
+                eatenTime = trest.mainTime;
+
+            } else {
+                appleVisible = true;
+//                                    appleSpawned = false;
+            }
+        }
+        if (eatenDelay < eatenDelayStat) {
+            eatenDelay++;
+        }
+
+        if (eaten && appleVisible) {
+
+            appleSpawned = false;
+            appleVisible = false;
+            eatenTime = trest.mainTime;
+            eatenDelay = 0;
+        }
+
+        if (eaten) {
+            if (eatenTimelast > 0) {
+                eatenTimelast += trest.mainTime - eatenTime;
+                apple.setTime(-eatenTimelast);
+                eatenTime = trest.mainTime;
+            } else {
+                eatenTimelast = trest.mainTime - eatenTime;
+                apple.setTime(-eatenTimelast);
+            }
+            if (eatenDelay >= eatenDelayStat) {
+                apple.setXy();
+                eaten = false;
+            }
+        }
+        if (eatenDelay >= eatenDelayStat) {
+            eatenTime = trest.mainTime;
+            appleSpawned = true;
+        }
+        if(appleVisible) {
+            apple.setTime(trest.mainTime);
+        }
+    }
+private float pointerTime = 0;
     public void setTime(float time){
         rendering.setTime(time);
-        renderingPoiner.setTime(time);
+        if(appleVisible) {
+            pointerTime += (float) (1 - Player.playerHeadXY().distance(xy[0], xy[1]) / (window.width*1.5)) / 50;
+            renderingPoiner.setTime(pointerTime/*(float)(Player.playerHeadXY().distance(xy[0],xy[1])/(window.width*3))*/);
+        }else {
+            renderingPoiner.setTime(time);
+        }
     }
     public void moveXy(float[] direct) {
         float x = xy[0] - direct[0];
@@ -57,8 +132,8 @@ public class Apple {
 
     public void setXy() {
         try {
-            int x = (int) (Math.random() * window.width * 3 - (window.width / 1.5));
-            int y = (int) (Math.random() * window.height * 3 - (window.height / 1.5));
+            int x = (int) (Math.random() * trest.playGroundWidth - (trest.playGroundWidth/2));
+            int y = (int) (Math.random() * trest.playGroundHeight - (trest.playGroundHeight/2));
             xy = new float[]{x, y};
             rendering.getModels().get(0).getMovement().setPosition(new Vector3f(x, y, 0));
         } catch (Exception e) {
@@ -67,8 +142,19 @@ public class Apple {
         }
     }
     public void reset() {
-        setXy();
-    }
+        try {
+            appleSpawned = true;
+            appleVisible = false;
+            eaten = false;
+
+            int x = (int) (Math.random() * trest.playGroundWidth / 2 - (trest.playGroundWidth/ 4));
+            int y = (int) (Math.random() * trest.playGroundHeight/2 - (trest.playGroundHeight / 4));
+            xy = new float[]{x, y};
+            rendering.getModels().get(0).getMovement().setPosition(new Vector3f(x, y, 0));
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e);
+        }}
 
     public static Color getAppleColor() {
         return color;

@@ -51,9 +51,9 @@ public class BuffParent {
     public void renderInit(String buffShader, String buffPointerShader, Color color) {
 this.color = color;
 
-        renderingBuff = new ModelRendering(window,  false, null, buffShader);
+        renderingBuff = new ModelRendering(window,   null, buffShader);
 
-        renderingBuffPointer = new ModelRendering(window,  false, null, buffPointerShader);
+        renderingBuffPointer = new ModelRendering(window,  null, buffPointerShader);
     }
 
     public void addSome() {
@@ -63,7 +63,7 @@ this.color = color;
         beginTime = trest.getMainTime();
         isShowing = true;
 
-        xy = new Point2D.Float((float) (Math.random() * window.width *3 - (window.width*1.5)), (float) (Math.random() * window.height*3 - (window.height*1.5)));
+        xy = new Point2D.Float((float) (Math.random() * trest.playGroundWidth - (trest.playGroundWidth/2)), (float) (Math.random() *trest.playGroundHeight - (trest.playGroundHeight/2)));
         renderingBuff.addModel(new Model(window, (int) (size * 50),color));
         renderingBuff.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy.getX(), (float) xy.getY(), 0));
 

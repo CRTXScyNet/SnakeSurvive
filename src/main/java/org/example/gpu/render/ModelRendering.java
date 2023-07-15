@@ -9,7 +9,6 @@ import org.example.gpu.Window;
 import org.example.gpu.trest;
 import org.joml.Vector3f;
 
-import java.awt.*;
 import java.util.ArrayList;
 
 public class ModelRendering {
@@ -34,7 +33,7 @@ public class ModelRendering {
 
     private Entity entity = null;
 
-    public ModelRendering(Window window, boolean isApple , Entity entity,String shaderName) {
+    public ModelRendering(Window window, Entity entity, String shaderName) {
         this.entity = entity;
         this.isApple = isApple;
 
@@ -51,7 +50,8 @@ public class ModelRendering {
     public float getTime() {
         return time;
     }
-    public void setRGB(){
+
+    public void setRGB() {
 
     }
 
@@ -74,31 +74,31 @@ public class ModelRendering {
 //            time = -Process.eatenTimelast;
 //
 //        }
-        if(isApple){
-            int i = (int)(window.width/(Process.appleDistance));
+        if (isApple) {
+            int i = (int) (window.width / (Process.appleDistance));
 //            System.out.println(i);
 //            shader.setUniform("dist", (float)i);
 //
         }
-        if(Process.isEnd && entity instanceof Player){
+        if (Process.isEnd && entity instanceof Player) {
 //            time = -Process.eatenPlayerTimelast;
-        System.out.println();
+            System.out.println();
         }
 
-
-
+        shader.setUniform("curSpeed", speed);
+        shader.setUniform("speedScale", speedScale);
         shader.setUniform("u_resolution", window.width, window.height);
         if (models.size() == 0) {
             return;
         }
         for (int i = models.size() - 1; i >= 0; i--) {
             try {
-                shader.setUniform("time", time+(models.size()-i)*0.1f);
-                float redA = (float) models.get(i).color.getRed()/255;
-                float greenA = (float)models.get(i).color.getGreen()/255;
-                float blueA = (float)models.get(i).color.getBlue()/255;
-                if(entity instanceof Enemy){
-                    if(((Enemy) entity).hunt){
+                shader.setUniform("time", time + (models.size() - i) * 0.1f);
+                float redA = (float) models.get(i).color.getRed() / 255;
+                float greenA = (float) models.get(i).color.getGreen() / 255;
+                float blueA = (float) models.get(i).color.getBlue() / 255;
+                if (entity instanceof Enemy) {
+                    if (((Enemy) entity).hunt) {
                         redA *= 3;
 
                     }
@@ -107,7 +107,7 @@ public class ModelRendering {
                 shader.setUniform("projection", models.get(i).getMovement().projection().scale(models.get(i).getScale()));
                 models.get(i).render();
             } catch (Exception e) {
-continue;
+                continue;
             }
         }
     }
@@ -140,8 +140,8 @@ continue;
             return;
         }
         for (int i = 0; i < models.size(); i++) {
-            float x = (float) (Math.random() * trest.half*2 - trest.half);
-            float y = (float) (Math.random() * trest.half*2- trest.half);
+            float x = (float) (Math.random() * trest.half * 2 - trest.half);
+            float y = (float) (Math.random() * trest.half * 2 - trest.half);
             models.get(i).getMovement().setPosition(new Vector3f(x, y, 0));
         }
     }
@@ -149,5 +149,17 @@ continue;
     public static void removeModelRender(ModelRendering mr) {
         selfList.remove(mr);
 
+    }
+
+    private float speedScale = 0;
+
+    public void setSpeed(float speed) {
+        this.speed = speed;
+    }
+
+    private float speed = 0;
+
+    public void setSpeedScale(float scale) {
+        speedScale = scale;
     }
 }

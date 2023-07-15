@@ -27,7 +27,7 @@ public class Enemy extends Entity {
         Point co = getRandomPoint();
         xy.add(new float[]{co.x, co.y});
         setPhantomXY();
-
+        enemyHead.setLocation(xy.get(0)[0],xy.get(0)[1]);
         enemies.add(this);
 
 
@@ -43,7 +43,7 @@ public class Enemy extends Entity {
             activeEnemies.add(this);
             color = new Color(150, 150, 255);
         }
-        rendering = new ModelRendering(window,  false, this, "enemy");
+        rendering = new ModelRendering(window,   this, "enemy");
         rendering.addModel(new Model(window, (int) (size * 30),color));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) co.x, (float) co.y, 0));
         for (int i = 0; i < snakeLength; i++) {
@@ -56,6 +56,7 @@ public class Enemy extends Entity {
         for (int i = 0; i < xy.size(); i++) {
             xy.set(i, new float[]{xy.get(i)[0] - direct[0], xy.get(i)[1] - direct[1]});
         }
+        enemyHead.setLocation(xy.get(0)[0],xy.get(0)[1]);
         for (int i = 0; i < phantomXY.size(); i++) {
             phantomXY.set(i, new float[]{phantomXY.get(i)[0] - direct[0], phantomXY.get(i)[1] - direct[1]});
         }
@@ -69,7 +70,7 @@ public class Enemy extends Entity {
 
 
         xy.set(0, new float[]{direct[0], direct[1]});
-
+        enemyHead.setLocation(xy.get(0)[0],xy.get(0)[1]);
 
         phantomXY.set(0, new float[]{direct[0], direct[1]});
 
@@ -79,17 +80,23 @@ public class Enemy extends Entity {
 
 
     }
-
+public Point2D enemyHead = new Point2D.Float();
     private ArrayList<float[]> xy = new ArrayList<>();
     private ArrayList<float[]> directionOfPhantomXY = new ArrayList<>();
     private ArrayList<float[]> phantomXY = new ArrayList<>();
 
-    private void setPhantomXY() {
+    public void setPhantomXY() {
         phantomXY.clear();
         directionOfPhantomXY.clear();
         for (float[] p : xy) {
             directionOfPhantomXY.add(new float[]{0, 0});
             phantomXY.add(new float[]{p[0], p[1]});
+        }
+
+    }
+    public void setXy(){
+        for (int i = 0; i < phantomXY.size(); i++) {
+            xy.set(i, phantomXY.get(i));
         }
 
     }
@@ -99,12 +106,12 @@ public class Enemy extends Entity {
     public static ArrayList<Enemy> activeEnemies = new ArrayList<>();
     private Color color = new Color(Color.white.getRGB());
 
-    static double size = 5;
+    static float size = 5;
     static double stepOfSize = 2;
 
 
     public static int step = (int) (Enemy.getSize() * stepOfSize);
-   public static double delayStat = 40;
+   public static double delayStat = 30;
     static double delayStatActive = 20; //TODO
     private double delayDouble = delayStat;
     private int delay = (int) delayDouble;
@@ -175,6 +182,10 @@ public void fear(){
     private Window window;
 
 
+    public ModelRendering getRendering() {
+        return rendering;
+    }
+
     private ModelRendering rendering;
 
 
@@ -223,6 +234,7 @@ public void fear(){
         xy.clear();
         xy.add(new float[]{co.x, co.y});
         setPhantomXY();
+        enemyHead.setLocation(xy.get(0)[0],xy.get(0)[1]);
         rendering.clear();
         rendering.addModel(new Model(window, (int) (size * 30),color));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) co.x, (float) co.y, 0));
@@ -234,9 +246,9 @@ public void fear(){
     }
 
     public Point getRandomPoint() {
-        int x = (int) (-(window.width*1.5) + ((int) (Math.random() * ((window.width * 3) / (int) (size * stepOfSize))) * (int) (size * stepOfSize)));
-        int y = (int) (-(window.height*1.5) + ((int) (Math.random() * ((window.height * 3) / (int) (size * stepOfSize))) * (int) (size * stepOfSize)));
-        if (Math.pow(Math.abs(x), 2) + Math.pow(Math.abs(y), 2) <= Math.pow(300, 2)) {
+        int x = (int) (-(trest.playGroundWidth/2) + ((int) (Math.random() * ((trest.playGroundWidth) / (int) (size * stepOfSize))) * (int) (size * stepOfSize)));
+        int y = (int) (-(trest.playGroundHeight/2) + ((int) (Math.random() * ((trest.playGroundHeight) / (int) (size * stepOfSize))) * (int) (size * stepOfSize)));
+        if (Math.pow(Math.abs(x), 2) + Math.pow(Math.abs(y), 2) <= Math.pow(500, 2)) {
             return getRandomPoint();
         }
         return new Point(x, y);
@@ -261,6 +273,89 @@ public void fear(){
     public boolean hunt = false;
 private double bufDelay = 0;
 
+public void update(){
+
+    if (xy.size() == 0) {
+        return;
+    }
+    boolean isNearby = false;
+    boolean appleIsNearby = false;
+    float[] nearPoint = new float[2];
+    int rad;
+    if(isActive){
+        rad = 300;
+    }else {
+        rad = 500;
+    }
+
+    int playerRad = 150;
+    float length = 0;
+    nearPoint = new float[2];
+    float appleDest = (float) Math.sqrt(Math.pow(Apple.getXy()[0] - xy.get(0)[0], 2) + Math.pow(Apple.getXy()[1] - xy.get(0)[1], 2));
+    if (appleDest <= rad) {
+        appleIsNearby = true;
+    }
+    try {
+
+        if(!trest.isEnd){
+            boolean isBreak = false;
+            for (float[] ePoint : getPhantomXY()) {
+                for (int j = 0; j < Player.player.getXy().size(); j++) {
+                    float dest = (float) Math.sqrt(Math.pow(Player.player.getXy().get(j)[0] - ePoint[0], 2) + Math.pow(Player.player.getXy().get(j)[1] - ePoint[1], 2));
+
+                    if (dest <= getSize() + Player.getSize() - 1) {
+                        if (!trest.isEnd) {
+                            trest.eatenPlayerTime = trest.mainTime;
+                            trest.isEnd = true;                         // TODO
+                            trest.mouseControl = false;
+                            for (Enemy enemy1 : Enemy.enemies) {
+                                enemy1.setCurrentDelay(0);
+                            }
+                            isBreak = true;
+                            break;
+                        }
+                    }
+                    if (dest <= playerRad) {
+                        if (length == 0) {
+                            length = dest;
+                            nearPoint = new float[]{Player.player.getXy().get(j)[0], Player.player.getXy().get(j)[1]};
+                        } else if (length > dest) {
+                            length = dest;
+                            nearPoint = new float[]{Player.player.getXy().get(j)[0], Player.player.getXy().get(j)[1]};
+                        }
+                        isNearby = true;
+                    }
+                }
+                if (isBreak) {
+                    break;
+                }
+            }
+        }
+        unFear();
+        if (isNearby && trest.enemyScared) {
+            fear();
+            nearPoint = new float[]{xy.get(0)[0] * 2, xy.get(0)[1] * 2};
+            moveCheck(nearPoint, appleIsNearby, true);
+        } else if (isEatAndAngry() || trest.isEnd) {
+            moveCheck(Player.player.getXy().get(0), appleIsNearby, true);
+
+        } else if (isNearby) {
+
+            moveCheck(nearPoint, appleIsNearby, true);
+
+        } else {
+            moveCheck(new float[2], appleIsNearby, false);
+        }
+        if(Apple.appleVisible && isActive &&Apple.checkCollision(xy.get(0))){
+            grow();
+            setEatAndAngry(true);
+            setCurrentDelay((int) (getDelay() / 2));
+        }
+    } catch (Exception e) {
+
+    }
+}
+
     public void moveCheck(float[] point,boolean appleIsNearby, boolean isNearby) {
 
 
@@ -282,7 +377,7 @@ private double bufDelay = 0;
         }
         if(!isActive&&!trest.isEnd){
             if (isNearby&&isScared) {
-                delay = (int)(size*stepOfSize/(Player.step+Player.step/2));
+                delay = (int)(size*stepOfSize/(Player.step/2));
             } else {
                 delay = (int) delayStat;
             }
@@ -290,7 +385,7 @@ private double bufDelay = 0;
             if (isNearby&&isScared) {
                 if(bufDelay == 0){
                     bufDelay = delayDouble;
-                    delayDouble = (int)(size*stepOfSize/(Player.step+Player.step/2));
+                    delayDouble = (int)(size*stepOfSize/(Player.step/2));
                     delay = (int)delayDouble;
                 }
             } else {
@@ -322,6 +417,15 @@ private double bufDelay = 0;
 
                 xTarget = point[0];
                 yTarget = point[1];
+            } else if (Apple.appleVisible&&appleIsNearby) {
+                if(enemyHead.distance(Apple.getXy()[0],Apple.getXy()[1])>150){
+                    xTarget = Apple.getXy()[0];
+                    yTarget = Apple.getXy()[1];
+                }else {
+                    xTarget = xy.get(0)[0] + (xy.get(0)[0] - Apple.getXy()[0]);
+                    yTarget = xy.get(0)[1] + (xy.get(0)[1] - Apple.getXy()[1]);
+                }
+
             } else {
 
                 xTarget = xy.get(0)[0];
@@ -347,7 +451,7 @@ private double bufDelay = 0;
                 hunt = true;
                 xTarget = point[0];
                 yTarget = point[1];
-            } else if (trest.appleVisible&&appleIsNearby) {
+            } else if (Apple.appleVisible&&appleIsNearby) {
                 xTarget = Apple.getXy()[0];
                 yTarget = Apple.getXy()[1];
             } else {
@@ -592,6 +696,24 @@ move((float)next.getX(),(float)next.getY());
         }
         return doubles;
     }
+    public void makeChainTogether(){
+        for (int i = 0; i < phantomXY.size() - 1; i++) {
+            float distance = (float) Math.sqrt(Math.pow(phantomXY.get(i + 1)[0] - phantomXY.get(i)[0], 2) + Math.pow(phantomXY.get(i + 1)[1] - phantomXY.get(i)[1], 2));
+            float angle;
+            if (distance > size*2) {
+                angle = (float) Math.atan((phantomXY.get(i)[1] - phantomXY.get(i + 1)[1]) / (phantomXY.get(i)[0] - phantomXY.get(i + 1)[0]));
+                if (phantomXY.get(i)[0] - phantomXY.get(i + 1)[0] < 0) {
+                    phantomXY.set(i + 1, new float[]{phantomXY.get(i)[0] + (float) (size*2 * Math.cos(angle)), phantomXY.get(i)[1] + (float) (size*2 * Math.sin(angle))});
+                } else {
+                    phantomXY.set(i + 1, new float[]{phantomXY.get(i)[0] - (float) (size*2 * Math.cos(angle)), phantomXY.get(i)[1] - (float) (size*2 * Math.sin(angle))});
+                }
+            }
+
+        }
+//        for (int i = 0; i < phantomXY.size(); i++) {
+//            phantomXY.set(i,xy.get(i));
+//        }
+    }
 
     public void movePhantom() {
         try {
@@ -656,7 +778,7 @@ move((float)next.getX(),(float)next.getY());
             xy.get(0)[1] = y;
 
             directionOfPhantomXY.set(0, new float[]{(xy.get(0)[0] - phantomXY.get(0)[0]) / (delay + 1), (xy.get(0)[1] - phantomXY.get(0)[1]) / (delay + 1)});
-
+            enemyHead.setLocation(xy.get(0)[0],xy.get(0)[1]);
         } catch (Exception e) {
             e.printStackTrace();
 

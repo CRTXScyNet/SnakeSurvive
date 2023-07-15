@@ -1,7 +1,7 @@
 package org.example.obstructions;
 
 import org.example.Player.Player;
-import org.example.Player.PlayerPart;
+import org.example.Player.GluePart;
 import org.example.gpu.Window;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
@@ -40,9 +40,9 @@ public class WormHole {
         spawn = trest.getMainTime();
         wormHole = this;
         this.window = window;
-        xy = new float[]{(int) (Math.random() * window.width * 3 - (window.width * 1.5)), (int) (Math.random() * window.height * 3 - (window.height * 1.5))};
+        xy = new float[]{(int) (Math.random() * trest.playGroundWidth- (trest.playGroundWidth/ 2)), (int) (Math.random() * trest.playGroundHeight - (trest.playGroundHeight / 2))};
 //        System.out.printf("Apple x: %s, y: %s ", xy[0],xy[1]);
-        rendering = new ModelRendering(window,  false, null, "wormHole");
+        rendering = new ModelRendering(window,   null, "wormHole");
         rendering.addModel(new Model(window, (int) (size * 50),color));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy[0], (float) xy[1], 0));
 
@@ -64,7 +64,7 @@ public class WormHole {
     public void setXy() {
         spawn = trest.getMainTime();
         try {
-            xy = new float[]{(int) (Math.random() * window.width * 3 - (window.width * 1.5)), (int) (Math.random() * window.height * 3 - (window.height * 1.5))};
+            xy = new float[]{(int) (Math.random() * trest.playGroundWidth- (trest.playGroundWidth/ 2)), (int) (Math.random() * trest.playGroundHeight - (trest.playGroundHeight / 2))};
             rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy[0], (float) xy[1], 0));
         } catch (Exception e) {
             e.printStackTrace();
@@ -80,8 +80,8 @@ public class WormHole {
                 if (Player.playerHeadXY().distance(new Point2D.Float(xy[0], xy[1])) < 200) {
                     isNear = true;
                 }
-                for (PlayerPart part: PlayerPart.playerParts){
-                    if(part.playerPartHeadXY().distance(new Point2D.Float(xy[0], xy[1])) < 200){
+                for (GluePart part: GluePart.glueParts){
+                    if(part.gluePartHeadXY().distance(new Point2D.Float(xy[0], xy[1])) < 200){
                         pullPart(part);
                     }
 
@@ -142,7 +142,7 @@ public class WormHole {
             isNear = false;
         }
     }
-    public void pullPart(PlayerPart part) {
+    public void pullPart(GluePart part) {
 
         for (int j = part.xy.size() - 1; j >= 0; j--) {
 
