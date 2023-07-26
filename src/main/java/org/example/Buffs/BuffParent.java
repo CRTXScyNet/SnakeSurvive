@@ -1,6 +1,7 @@
 package org.example.Buffs;
 
 import org.example.Player.Player;
+import org.example.Sound.LWJGLSound;
 import org.example.gpu.Window;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
@@ -39,14 +40,26 @@ public class BuffParent {
     protected boolean isExist = false;
     protected boolean closing = false;
     protected boolean isShowing = false;
+    protected boolean soundExist = false;
+
+
 
     protected Window window;
     protected Color color = new Color(0,0,0);
+    protected LWJGLSound constantSound = null;
+    protected LWJGLSound pickUpSound = null;
 
     public BuffParent(Window window) {
+
         chance = 0.5;
         this.window = window;
+
     }
+    public void soundInit(String soundPath,boolean isLoop){
+        constantSound = new LWJGLSound(soundPath,isLoop);
+        pickUpSound = new LWJGLSound("./sounds/shard1.ogg",false);
+        soundExist = true;
+    };
 
     public void renderInit(String buffShader, String buffPointerShader, Color color) {
 this.color = color;
@@ -82,11 +95,19 @@ this.color = color;
             float y = (float) xy.getY() - direct[1];
             xy = new Point2D.Float(x, y);
             renderingBuff.getModels().get(0).getMovement().setPosition(new Vector3f((float) x, (float) y, 0));
+
         }
 
     }
 
     public void update() {
+        if(constantSound != null) {
+            constantSound.update((float) xy.getX(), (float) xy.getY());
+            if (isExist || isShowing){
+                constantSound.play();
+            }
+        }
+
         if (!isShowing) {
             if (isExist) {
                 if (!eaten && xy.distance(Player.playerHeadXY()) < size * 2) {
@@ -94,8 +115,10 @@ this.color = color;
                     closing = true;
                     buffOnn();
 
+
                 }
                 if (!eaten) {
+
                     setPointerPosition();
                     existingTimer = trest.getMainTime() - beginTime;
                     renderingBuff.setTime(existingTimer);
@@ -106,6 +129,7 @@ this.color = color;
                     }
 
                 } else {
+
                     buffTimer = trest.getMainTime() - catchTime;
                     if (buffTimer >= buffCanExistTime/* && !remove*/) {
                         buffOff();
@@ -114,29 +138,51 @@ this.color = color;
                 if (closing) {
                     if (!eaten) {
                         float timer = trest.getMainTime() - timeOfEnd;
-                        renderingBuff.setTime(-(timerForShow - timer) * 1.1f / timerForShow - 0.1f);
-                        renderingBuffPointer.setTime(-(timerForShow - timer) * 1.1f / timerForShow - 0.1f);
+                        float secTime = -(timerForShow - timer) * 1.1f / timerForShow - 0.1f;
+                        renderingBuff.setTime(secTime);
+                        renderingBuffPointer.setTime(secTime);
+                        if(constantSound != null) {
+                            constantSound.fadeOut(timer, timerForShow);
+                        }
                         if (timer >= timerForShow) {
                             hide();
                             isExist = false;
+                            if(constantSound != null) {
+                                constantSound.setFadeOut(false);
+                            }
                         }
                     } else {
-                        float timer = trest.getMainTime() - timeOfEnd;
-                        renderingBuff.setTime(-(timerForShow - timer) * 1.1f / timerForShow - 0.1f);
-                        renderingBuffPointer.setTime(-(timerForShow - timer) * 1.1f / timerForShow - 0.1f);
+                        float timer = trest.getMainTime() - catchTime;
+                        float secTime = -(timerForShow - timer) * 1.1f / timerForShow - 0.1f;
+                        renderingBuff.setTime(secTime);
+                        renderingBuffPointer.setTime(secTime);
+                        if(constantSound != null) {
+                            constantSound.fadeOut(timer, timerForShow);
+                        }
                         if (timer >= timerForShow) {
                             hide();
+                            if(constantSound != null) {
+                                constantSound.setFadeOut(false);
+                            }
                         }
                     }
                 }
             }
         }else {
+
             setPointerPosition();
             float timer = trest.getMainTime() - beginTime;
-            renderingBuff.setTime(-(timer) * 1.1f / timerForShow - 0.1f);
-            renderingBuffPointer.setTime(-(timer) * 1.1f / timerForShow - 0.1f);
+            float secTime = -(timer) * 1.1f / timerForShow - 0.1f;
+            renderingBuff.setTime(secTime);
+            renderingBuffPointer.setTime(secTime);
+            if(constantSound != null) {
+                constantSound.appearIn(timer, timerForShow);
+            }
             if (timer >= timerForShow) {
                 isShowing = false;
+                if(constantSound != null) {
+                    constantSound.setAppearIn(false);
+                }
             }
         }
     }
@@ -159,7 +205,11 @@ this.color = color;
 
     public void buffOnn() {
         eaten = true;
+        if(pickUpSound != null){
+            pickUpSound.play();
+        }
         catchTime = trest.getMainTime();
+
 
     }
 
@@ -169,6 +219,9 @@ this.color = color;
     }
 
     public void hide() {
+        if(constantSound != null) {
+            constantSound.stop();
+        }
         renderingBuff.clear();
         renderingBuffPointer.clear();
     }
@@ -192,6 +245,12 @@ this.color = color;
     public void reset() {
         renderingBuff.clear();
         renderingBuffPointer.clear();
+        if(constantSound != null) {
+            constantSound.delete();
+        }
+        if(pickUpSound != null) {
+            pickUpSound.delete();
+        }
         eaten = false;
         isExist = false;
     }

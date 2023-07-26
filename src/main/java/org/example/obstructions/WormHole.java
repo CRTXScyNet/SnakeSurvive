@@ -2,6 +2,7 @@ package org.example.obstructions;
 
 import org.example.Player.Player;
 import org.example.Player.GluePart;
+import org.example.Sound.MainSoundsController;
 import org.example.gpu.Window;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
@@ -10,6 +11,7 @@ import org.joml.Vector3f;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
+import java.nio.charset.MalformedInputException;
 
 public class WormHole {
     private float[] xy = new float[]{};
@@ -125,7 +127,13 @@ public class WormHole {
             float distance = (float) Math.sqrt(Math.pow(xy[0] - Player.xy.get(j)[0], 2) + Math.pow(xy[1] - Player.xy.get(j)[1], 2));
 //                float distanceDif = distance;
             float angle;
-            if (distance > 10 && distance < 200) {
+            if (distance> 10 && distance < 200) {
+                if(j == 0){
+                    float pitch = 0.7f + (distance/200*0.3f);
+                    MainSoundsController.setPitch(pitch);
+
+                }
+                MainSoundsController.setPitchChange(true);
                 stillNear = true;
                 angle = (float) Math.atan((xy[1] - Player.xy.get(j)[1]) / (xy[0] - Player.xy.get(j)[0]));
                 double translocationX = (distance - ((100 - distance / 10) * 0.012)) * Math.cos(angle);

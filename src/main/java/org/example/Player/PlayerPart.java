@@ -298,8 +298,10 @@ if(callBack){
 
                     if (!isEmpty) {
                         Player.player.eatTheApple();
+                    }else {
+                        Player.player.grow();
                     }
-                    Player.player.grow();
+
                     reset();
                     return;
                 }

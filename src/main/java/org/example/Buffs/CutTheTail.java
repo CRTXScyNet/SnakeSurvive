@@ -13,6 +13,13 @@ public class CutTheTail extends BuffParent{
         setBuffCanExistTime(1);
         setCanExistTime(5000);
         setChance(0.1);
+        soundInit("./sounds/CutTheTailConstSound.ogg",true);
+
+    }
+
+    @Override
+    public void update() {
+        super.update();
     }
 
     @Override

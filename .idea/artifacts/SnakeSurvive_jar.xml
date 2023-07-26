@@ -3,7 +3,6 @@
     <output-path>$PROJECT_DIR$/out/artifacts/SnakeSurvive_jar</output-path>
     <root id="archive" name="SnakeSurvive.jar">
       <element id="module-output" name="SnakeSurvive" />
-      <element id="extracted-dir" path="$USER_HOME$/Downloads/joml-1.10.5.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/../lwjgl/lwjgl-assimp-natives-windows.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/../lwjgl/lwjgl-assimp.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/../lwjgl/lwjgl-bgfx-natives-windows.jar" path-in-jar="/" />
@@ -91,6 +90,7 @@
       <element id="extracted-dir" path="$PROJECT_DIR$/../lwjgl/lwjgl.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/../lwjgl/lwjgl3-awt-0.1.8-sources.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/../lwjgl/lwjgl3-awt-0.1.8.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/Downloads/joml-1.10.5.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>

@@ -1,12 +1,12 @@
 package org.example.Tests;
 
-public class test{
+import org.example.gpu.trest;
 
-//    public static void main(String[] args) {
-//ArrayList<AbsTest> absTests = new ArrayList<>();
-//absTests.add(new AbsChild());
-//absTests.get(0).Say();
-//    }
+import javax.sound.sampled.*;
+import java.io.File;
+
+public class test {
+
 }
 
 

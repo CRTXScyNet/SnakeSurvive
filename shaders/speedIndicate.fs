@@ -26,10 +26,10 @@ float speed = curSpeed;
 uv.y -= 0.3;
 
 
-float c = length(uv)<0.5 && uv.y< -0.2? length(uv) :0;  // radius obrezania
+float c = length(uv)<0.5 && uv.y< -0.2? length(uv) :0.0;  // radius obrezania
 float r = modulo((-speed+abs((uv.y+0.5)*uv.x)),0.05 )<= 0.3? 1:0;  // uzor
 
-vec4 color = vec4(r*c+c*10,c*(((length(uv))*r))*2,0,length(vec2(uv.x,(uv.y-0.3))*4)-2.6);
+vec4 color = vec4(r*c+c*10,c*(((length(uv))*r))*10,0,length(vec2(uv.x,(uv.y-0.3))*4)-2.6);
 
 
 //

@@ -16,6 +16,7 @@ public class Speed extends BuffParent {
         setCanExistTime(15);
         setBuffCanExistTime(5);
         setChance(0.1);
+        soundInit("./sounds/CutTheTailConstSound.ogg",true);
     }
 
     @Override

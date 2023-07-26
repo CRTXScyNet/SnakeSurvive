@@ -40,7 +40,7 @@ public class Player extends Entity {
 
     private double chance = Math.random() * 0.8 + 0.2;
 
-    static float size = 8;
+    static float size = 6;
     static double stepOfSize = 2;
 
     public static void setStep() {
@@ -317,7 +317,7 @@ public class Player extends Entity {
 
         if (!trest.mouseControl) {
 //            stepRad = step / 30;
-            stepRad = (float) Math.abs(dif) / (30 / (step / 2));
+            stepRad = (float) Math.abs(dif) / (20 / (step / 2));
         } else {
             stepRad = (float) Math.abs(dif) / (15 / (step / 2));
         }
@@ -366,7 +366,7 @@ public class Player extends Entity {
 //                            System.out.println("Maximum!");
                     }
                     if (count == maxCount) {
-                        System.out.println("Maximum!");
+//                        System.out.println("Maximum!");
                     }
                 }
             } else {
@@ -380,12 +380,12 @@ public class Player extends Entity {
     }
 
     public void increaseSpeed() {
-        maxStep += 0.05;
+        maxStep += 0.1;
 
     }
 
     public void decreaseSpeed() {
-        maxStep -= 0.05;
+        maxStep -= 0.1;
 
     }
 
@@ -398,7 +398,7 @@ public class Player extends Entity {
     static double timer = timerStat;
     double timeTo = trest.getMainTime();
     double dif = 0;
-    static float speedBoostTime = 0;
+   public static float speedBoostTime = 0;
     static float speedBoostTimer = 0;
 
     public static void addSpeedTime(float time) {
@@ -414,18 +414,18 @@ public class Player extends Entity {
             dif += trest.getMainTime() - timeTo;
             speedBoostTimer = (float) (trest.getMainTime() - timeTo);
             timeTo = trest.getMainTime();
-            if (dif >= 100.0 / countOfApples) {
+            if (countOfApples<50 && dif >= 100.0 / countOfApples) {
                 grow();
                 dif = 0;
             }
 
 
             try {
-                if (speedBoostTime <= 0 || step < maxStep / 2) {
+                if (speedBoostTime <= 0 || step < maxStep ) {
                     speedBoost = false;
                 }
-                if (speedBoostTime > 0 && !speedBoost && step <= maxStep + minStep) {
-                    step *= 1.5;
+                if (speedBoostTime > 0 && !speedBoost && step <= maxStep*1.5) {
+                    step *= 1.2f;
                 }
 
                 if (speedBoostTime > 0) {
@@ -571,19 +571,18 @@ public class Player extends Entity {
             if (trest.mouseControl) {
                 float maxDistance = 80;
                 float distance = (float) playerHeadXY().distance(0, 0);
-                if (distance > maxDistance) {
+//                if (distance > maxDistance) {
                     float angle = (float) Math.atan((-y) / (-x));
-                    double translocationX = Player.step * Math.cos(angle);
-                    double translocationY = Player.step * Math.sin(angle);
+                    double translocationX = distance/5 * Math.cos(angle);
+                    double translocationY = distance/5 * Math.sin(angle);
                     if (-x < 0) {
                         direction = new float[]{(float) +translocationX, (float) +translocationY};
                     } else {
                         direction = new float[]{(float) -translocationX, (float) -translocationY};
                     }
-//                    direction = new float[]{direction[0]/2, direction[1]/2};
-                } else {
-                    direction = new float[]{x / 20, y / 20};
-                }
+//                } else {
+//                    direction = new float[]{x / 20, y / 20};
+//                }
             } else {
                 direction = new float[]{0, 0};
             }

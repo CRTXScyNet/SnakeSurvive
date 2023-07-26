@@ -4,6 +4,7 @@ import org.example.Painter.Apple;
 import org.example.Painter.Picture;
 import org.example.Painter.Process;
 import org.example.Player.Player;
+import org.example.Sound.MainSoundsController;
 import org.example.gpu.Window;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
@@ -278,6 +279,11 @@ public void update(){
     if (xy.size() == 0) {
         return;
     }
+    if(Math.sqrt(Math.pow(enemyHead.getX(),2)+Math.pow(enemyHead.getY(),2))<300){
+        MainSoundsController.white_snakes_bool = true;
+    }else {
+        MainSoundsController.empty_space_bool = true;
+    }
     boolean isNearby = false;
     boolean appleIsNearby = false;
     float[] nearPoint = new float[2];
@@ -304,18 +310,15 @@ public void update(){
                     float dest = (float) Math.sqrt(Math.pow(Player.player.getXy().get(j)[0] - ePoint[0], 2) + Math.pow(Player.player.getXy().get(j)[1] - ePoint[1], 2));
 
                     if (dest <= getSize() + Player.getSize() - 1) {
-                        if (!trest.isEnd) {
-                            trest.eatenPlayerTime = trest.mainTime;
-                            trest.isEnd = true;                         // TODO
-                            trest.mouseControl = false;
-                            for (Enemy enemy1 : Enemy.enemies) {
-                                enemy1.setCurrentDelay(0);
-                            }
+                        if (!trest.isEnd && !trest.immortal) {
+trest.end();
                             isBreak = true;
                             break;
                         }
+
                     }
                     if (dest <= playerRad) {
+
                         if (length == 0) {
                             length = dest;
                             nearPoint = new float[]{Player.player.getXy().get(j)[0], Player.player.getXy().get(j)[1]};
@@ -337,10 +340,11 @@ public void update(){
             nearPoint = new float[]{xy.get(0)[0] * 2, xy.get(0)[1] * 2};
             moveCheck(nearPoint, appleIsNearby, true);
         } else if (isEatAndAngry() || trest.isEnd) {
+            MainSoundsController.purple_snakes_hunting_bool = true;
             moveCheck(Player.player.getXy().get(0), appleIsNearby, true);
 
         } else if (isNearby) {
-
+            MainSoundsController.white_snakes_hunting_bool = true;
             moveCheck(nearPoint, appleIsNearby, true);
 
         } else {

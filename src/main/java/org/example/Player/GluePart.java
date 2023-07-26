@@ -1,5 +1,7 @@
 package org.example.Player;
 
+import org.example.Sound.LWJGLSound;
+import org.example.Sound.MainSoundsController;
 import org.example.gpu.Timer;
 import org.example.gpu.Window;
 import org.example.gpu.render.Model;
@@ -100,7 +102,9 @@ public class GluePart {
     private float ignoreTime = 5;
     private float birthTime = 0;
 
+
     public GluePart(Window window) {
+
 
         this.window = window;
         xy.add(getRandomPoint());
@@ -389,6 +393,7 @@ ignoreTime = 0;
                     for (float[] d : Player.players.get(0).getXy()) {
                         if (!playerIsNear && gluePartHeadXY().distance(new Point2D.Float(d[0], d[1])) < 100) {
                             playerIsNear = true;
+                            MainSoundsController.glue_part_bool = true;
                         }
                         if (playerIsNear) {
                             if (nearest == null) {
@@ -494,15 +499,15 @@ ignoreTime = 0;
 
 
 
-
-
             try {
                 float xTarget;
                 float yTarget;
                 if ((playerIsNear || gluePartIsNear || playerPartIsNear) && nearest != null) {
+
                     xTarget = (float) nearest.getX();
                     yTarget = (float) nearest.getY();
                 } else {
+
                     xTarget = xy.get(0)[0];
                     yTarget = xy.get(0)[1];
                 }

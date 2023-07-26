@@ -1,5 +1,8 @@
 package org.example.gpu;
 
+
+
+
 import org.example.Buffs.BuffParent;
 import org.example.Buffs.CutTheTail;
 import org.example.Buffs.Fear;
@@ -8,19 +11,26 @@ import org.example.Enemy.Enemy;
 import org.example.Painter.Apple;
 import org.example.Player.GluePart;
 import org.example.Player.Player;
+import org.example.Sound.LWJGLSound;
+import org.example.Sound.MainSound;
+import org.example.Sound.MainSoundsController;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
 import org.example.obstructions.WormHole;
 import org.joml.Vector3f;
+
 import org.lwjgl.glfw.GLFWVidMode;
-import org.lwjgl.opengl.GL;
+import org.lwjgl.openal.AL11;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.glClear;
 
 
 public class trest {
@@ -50,6 +60,7 @@ public class trest {
     static boolean appleSpawned = false;
     public static boolean appleVisible = false;
     public static boolean ringWayIsReady = false;
+    public static boolean exit = false;
 
     public static float eatenTime = 0;
     public static float eatenTimelast = 0;
@@ -74,6 +85,12 @@ public class trest {
     private static int expansePart = 1;
     static public Apple apple;
     static public Player player;
+//    static MainSound mainSound = null;
+    static MainSoundsController mainSound = null;
+    static LWJGLSound deathSound = null;
+
+
+
 
     public trest() {
 
@@ -92,14 +109,14 @@ public class trest {
 
         Window window = new Window(width, height);
 
-        window.setFullscreen(true);
+//        window.setFullscreen(true);
 
         window.createWindow("what'sup");
+
+
+
+
         half = (float) window.width / 1.5f;
-        GL.createCapabilities();
-
-        glEnable(GL_TEXTURE_2D);
-
 
         for (int j = 0; j < 220; j++) {
             Color color = new Color((int) (Math.random() * 100), (int) (Math.random() * 255), (int) (Math.random() * 255));
@@ -108,7 +125,7 @@ public class trest {
         }
         for (int j = 0; j < 200; j++) {
             Color color = new Color((int) (Math.random() * 100), (int) (Math.random() * 255), (int) (Math.random() * 255));
-            background2.add(new ModelRendering(window,  null, "background"));
+            background2.add(new ModelRendering(window, null, "background"));
             background2.get(j).addModel(new Model(window, (int) (Math.random() * 40 + 30), color));
         }
         for (int j = 0; j < 150; j++) {
@@ -121,11 +138,24 @@ public class trest {
             ModelRendering.selfList.get(i).randomPosition();
         }
 
+
         processInit(window);
 
 
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        mainSound = new MainSoundsController();
+
+        deathSound = new LWJGLSound("./sounds/game_over.ogg",false);
+        deathSound.setCastomVolume(0.1f);
+
+
+        loop(window);
+
+
+
+        window.destroyWindow();
+    }
+
+    public void loop(Window window) {
         double frame_cap = 1.0 / 60;
 
         double frameTime = 0;
@@ -134,19 +164,29 @@ public class trest {
         double unprocessed = 0;
         float addingEntity = 0;
         float processTime = 0;
+        int processCount = 0;
 
         expansePart = 1;
+        Executors.newSingleThreadExecutor().submit(()->{
+            float soundTimer = 0;
+            float soundTime = Timer.getFloatTime();
+            while (!window.shouldClose()){
+                soundTimer = Timer.getFloatTime() - soundTime;
+                if(soundTimer >= 0.01){
+                    mainSound.update();
+                    soundTimer =0;
+                    try{
+                        TimeUnit.MILLISECONDS.sleep(1);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+
+        });
 
         while (!window.shouldClose()) {
-
-            Point mouse = MouseInfo.getPointerInfo().getLocation();
-
-            mouse.x = mouse.x - window.windowPosX - window.width / 2;
-            mouse.y = (mouse.y - window.windowPosY - window.height / 2);
-//            System.out.println(mouse);
-            xMouse = mouse.x;
-            yMouse = -mouse.y;
-
             boolean canRender = false;
             double time2 = Timer.getTime();
             double passed = time2 - time;
@@ -159,16 +199,25 @@ public class trest {
                 mainTime += (float) time2 - (float) time;
             }
             time = time2;
-            scale();
+
             input(window);
             if (!isPaused && !isEnd) {
+                if(mainSound != null) {
+                    mainSound.play();
+                }
                 if (addingEntity >= 1) {
 
                     addSomeEntity(window);
                     addingEntity = 0;
                 }
+            }else if(isPaused){
+                if(mainSound != null) {
+                    mainSound.pause();
+                }
             }
             if (processTime >= 1.0 / 100) {
+                processCount++;
+                scale();
                 processTime = 0;
                 process();
                 moveBackground();
@@ -180,7 +229,8 @@ public class trest {
 
 
                 if (frameTime >= 1) {
-
+                    System.out.println(processCount);
+                    processCount = 0;
                     frameTime = 0;
                     System.out.println("FPS: " + frames);
                     frames = 0;
@@ -194,19 +244,19 @@ public class trest {
                 for (int i = 0; i < ModelRendering.selfList.size(); i++) {
                     ModelRendering.selfList.get(i).renderModels();
                 }
-
+                Point mouse = MouseInfo.getPointerInfo().getLocation();
+                mouse.x = mouse.x - window.windowPosX - window.width / 2;
+                mouse.y = (mouse.y - window.windowPosY - window.height / 2);
+//            System.out.println(mouse);
+                xMouse = mouse.x;
+                yMouse = -mouse.y;
                 window.swapBuffer();
                 frames++;
 
             }
-
+            if(exit)
+                exit(window);
         }
-//        for(ModelRendering rendering : ModelRendering.selfList){
-//            rendering.clear();
-//        }
-
-        glfwTerminate();
-        System.exit(0);
     }
 
     public static int speedCount = 0;
@@ -227,8 +277,8 @@ public class trest {
     public int currentGluePartCount = 0;
 
     public void stages() {
-        if(playGroundScale<2) {
-            playGroundScale = 1 + (int) Player.countOfApples * 0.01f;
+        if (playGroundScale < 2) {
+            playGroundScale = 1 + (int) Player.countOfApples * 0.02f;
         }
         if (fearCount < 2) {
             fearCount = (int) Math.floor(Player.countOfApples * 0.1);
@@ -328,6 +378,7 @@ public class trest {
             }
         }
 
+
     }
 
     static double chance = 0.001;
@@ -346,7 +397,7 @@ public class trest {
 
     public void input(Window window) {
         if (glfwGetKey(window.getWindow(), GLFW_KEY_ESCAPE) != 0) {
-            glfwSetWindowShouldClose(window.getWindow(), true);
+           exit = true;
         }
         if (window.getInput().isMouseButtonPressed(GLFW_MOUSE_BUTTON_1)) {
             if (!isEnd && !isPaused) {
@@ -365,9 +416,7 @@ public class trest {
         if (window.getInput().isKeyPressed(GLFW_KEY_P)) {
             isPaused = !isPaused;
         }
-        if (window.getInput().isKeyPressed(GLFW_KEY_E)) {
-            isEnd = !isEnd;
-        }
+
 
         if (window.getInput().isKeyPressed(GLFW_KEY_R)) {
             reset(window);
@@ -382,6 +431,9 @@ public class trest {
     }
 
     public void hacks(Window window) {
+        if (window.getInput().isKeyPressed(GLFW_KEY_E)) {
+            isEnd = !isEnd;
+        }
         if (window.getInput().isKeyPressed(GLFW_KEY_1)) {
             if (!isEnd && !isPaused) {
                 buffs.add(new Speed(window));
@@ -407,7 +459,28 @@ public class trest {
                 Player.player.lostTheApple();
             }
         }
+        if (window.getInput().isKeyPressed(GLFW_KEY_MINUS)) {
+            if (!isEnd && !isPaused) {
+                Player.player.lostTheApple();
+            }
+        }
+        if (window.getInput().isKeyPressed(GLFW_KEY_SPACE)) {
+            if (!isEnd && !isPaused) {
+                immortal = !immortal;
+            }
+        }
+
+//        if (window.getInput().isKeyPressed(GLFW_KEY_A)) {
+//            sound.play();
+//
+//        }
+//        if (window.getInput().isKeyPressed(GLFW_KEY_S)) {
+//            sound.stop();
+//
+//        }
     }
+
+    public static boolean immortal = false;
 
     public void moveBackground() {
         for (ModelRendering rendering : background3) {
@@ -453,7 +526,7 @@ public class trest {
 
 
     public static void reset(Window window) {
-GluePart.maxAmountOfGlueParts = 0;
+        GluePart.maxAmountOfGlueParts = 0;
         countOfApples = 0;
         passiveEnemyCount = 0;
         activeEnemyCount = 0;
@@ -461,6 +534,7 @@ GluePart.maxAmountOfGlueParts = 0;
         cutTheTailCount = 0;
         speedCount = 0;
         playGroundScale = 1;
+        mainSound.reset();
         scale();
         //Здесь добавить списки
         for (Enemy enemy : Enemy.enemies) {
@@ -478,10 +552,11 @@ GluePart.maxAmountOfGlueParts = 0;
         for (BuffParent buffs : buffs) {
             buffs.reset();
         }
+        if(deathSound != null) {
+            deathSound.stop();
+        }
         buffs.clear();
         GluePart.clear();
-
-
     }
 
     public static void scale() {
@@ -523,13 +598,6 @@ GluePart.maxAmountOfGlueParts = 0;
         apple = new Apple(window);
         player = new Player(window);
 
-//        for (int i = 0; i < 200; i++) {
-//            new Enemy(window, false);
-//        }
-//        for (int i = 0; i < 30; i++) {
-//            new Enemy(window, true);
-//        }
-
 
         //Вычисляем пути врагов после проигрыша
         radius1 = Math.pow(width / 4.5 - 2, 2);
@@ -568,7 +636,14 @@ GluePart.maxAmountOfGlueParts = 0;
                         }
                     }
                 }
-
+                for (int i = 0; i < buffs.size(); i++) {
+                    if (buffs.get(i) instanceof Fear) {
+                        if (((Fear) buffs.get(i)).isFear()) {
+                            Fear.fear();
+                            break;
+                        }
+                    }
+                }
 
                 moveEntity();
                 a = Apple.getXy();
@@ -584,6 +659,7 @@ GluePart.maxAmountOfGlueParts = 0;
                     GluePart.glueParts.get(i).moveCheck();
                 }
                 GluePart.refresh();
+
 
 
             } catch (Exception e) {
@@ -655,5 +731,36 @@ GluePart.maxAmountOfGlueParts = 0;
             return new float[]{0, fromDown};
         }
         return new float[2];
+    }
+
+    public static void end() {
+        if (!isEnd && !immortal) {
+            if(mainSound != null){
+                mainSound.stop();
+            }
+            //place for game over sound
+            if(deathSound != null) {
+                deathSound.play();
+            }
+            eatenPlayerTime = mainTime;
+            isEnd = true;                         // TODO
+            mouseControl = false;
+            Player.speedBoostTime = 0;
+            Player.step = Player.minStep;
+            for (Enemy enemy1 : Enemy.enemies) {
+                enemy1.setCurrentDelay(0);
+            }
+
+        }
+
+    }
+    public void exit(Window window){
+        if(mainSound != null) {
+            mainSound.delete();
+        }
+        for(LWJGLSound sound : LWJGLSound.sounds){
+            sound.delete();
+        }
+        glfwSetWindowShouldClose(window.getWindow(), true);
     }
 }
