@@ -3,10 +3,8 @@ package org.example.gpu.render;
 
 import org.example.Enemy.Enemy;
 import org.example.Enemy.Entity;
-import org.example.Painter.Process;
 import org.example.Player.Player;
-import org.example.gpu.Window;
-import org.example.gpu.trest;
+import org.example.gpu.gameProcess.trest;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -74,16 +72,18 @@ public class ModelRendering {
 //            time = -Process.eatenTimelast;
 //
 //        }
-        if (isApple) {
-            int i = (int) (window.width / (Process.appleDistance));
-//            System.out.println(i);
-//            shader.setUniform("dist", (float)i);
-//
-        }
-        if (Process.isEnd && entity instanceof Player) {
-//            time = -Process.eatenPlayerTimelast;
-            System.out.println();
-        }
+
+
+//        if (isApple) {
+//            int i = (int) (window.width / (Process.appleDistance));
+////            System.out.println(i);
+////            shader.setUniform("dist", (float)i);
+////
+//        }
+//        if (Process.isEnd && entity instanceof Player) {
+////            time = -Process.eatenPlayerTimelast;
+//            System.out.println();
+//        }
 
         shader.setUniform("curSpeed", speed);
         shader.setUniform("speedScale", speedScale);
@@ -123,10 +123,13 @@ public class ModelRendering {
 //        models.get(0).update(window);
     }
 
-    public void clear() {
+    public void clear(boolean shader) {
         for (int i = 0; i < models.size(); i++) {
             models.get(i).clean();
         }
+//        if(shader) {
+//            this.shader.clean();
+//        }
         models.clear();
     }
 

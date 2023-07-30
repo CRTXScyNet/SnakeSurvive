@@ -2,10 +2,10 @@ package org.example.Buffs;
 
 import org.example.Player.Player;
 import org.example.Sound.LWJGLSound;
-import org.example.gpu.Window;
+import org.example.gpu.render.Window;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
-import org.example.gpu.trest;
+import org.example.gpu.gameProcess.trest;
 import org.joml.Vector3f;
 
 import java.awt.*;
@@ -16,7 +16,7 @@ public class BuffParent {
         return xy;
     }
 
-    protected Point2D xy;
+    protected Point2D xy = new Point2D.Float(0,0);
     protected ModelRendering renderingBuff;
     protected ModelRendering renderingBuffPointer;
 
@@ -57,7 +57,9 @@ public class BuffParent {
     }
     public void soundInit(String soundPath,boolean isLoop){
         constantSound = new LWJGLSound(soundPath,isLoop);
+        constantSound.setCastomVolume(0.05f);
         pickUpSound = new LWJGLSound("./sounds/shard1.ogg",false);
+        pickUpSound.setCastomVolume(0.1f);
         soundExist = true;
     };
 
@@ -186,7 +188,13 @@ this.color = color;
             }
         }
     }
-
+    public boolean suddenExpose(){
+        if (xy.distance(0,0)>450) {
+            reset();
+            return true;
+        }
+        return false;
+    }
     public void setPointerPosition() {
         double xTarget = xy.getX();
         double yTarget = xy.getY();
@@ -222,8 +230,9 @@ this.color = color;
         if(constantSound != null) {
             constantSound.stop();
         }
-        renderingBuff.clear();
-        renderingBuffPointer.clear();
+        renderingBuff.clear(false);
+        renderingBuffPointer.clear(false);
+
     }
 
     public void setCanExistTime(float canExistTime) {
@@ -243,8 +252,10 @@ this.color = color;
     }
 
     public void reset() {
-        renderingBuff.clear();
-        renderingBuffPointer.clear();
+        renderingBuff.clear(true);
+        renderingBuffPointer.clear(true);
+        ModelRendering.removeModelRender(renderingBuff);
+        ModelRendering.removeModelRender(renderingBuffPointer);
         if(constantSound != null) {
             constantSound.delete();
         }

@@ -1,7 +1,5 @@
 package org.example.gpu.io;
 
-import org.example.gpu.trest;
-
 import java.util.Arrays;
 
 import static org.lwjgl.glfw.GLFW.*;

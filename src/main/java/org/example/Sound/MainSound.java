@@ -1,6 +1,6 @@
 package org.example.Sound;
 
-import org.example.gpu.trest;
+import org.example.gpu.gameProcess.trest;
 import org.lwjgl.openal.AL11;
 import org.lwjgl.system.MemoryUtil;
 

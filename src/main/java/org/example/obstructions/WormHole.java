@@ -3,15 +3,14 @@ package org.example.obstructions;
 import org.example.Player.Player;
 import org.example.Player.GluePart;
 import org.example.Sound.MainSoundsController;
-import org.example.gpu.Window;
+import org.example.gpu.render.Window;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
-import org.example.gpu.trest;
+import org.example.gpu.gameProcess.trest;
 import org.joml.Vector3f;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
-import java.nio.charset.MalformedInputException;
 
 public class WormHole {
     private float[] xy = new float[]{};
@@ -32,6 +31,7 @@ public class WormHole {
     private float spawn;
     private final float timeToShow = 3;
     private final float timeToClose = 1;
+    private float timer = 0;
     private float startToMove;
     private final float whenToMove = 15;
     private Window window;
@@ -51,7 +51,7 @@ public class WormHole {
     }
 
     public void reset() {
-        rendering.clear();
+        rendering.clear(true);
         ModelRendering.removeModelRender(rendering);
     }
 
@@ -74,8 +74,12 @@ public class WormHole {
         }
     }
 
-
+public boolean close = false;
     public void update() {
+        if(close){
+            return;
+        }
+
         if (!changePosition) {
 
             if (isPull) {
@@ -93,7 +97,6 @@ public class WormHole {
                     pullPlayer();
                 }
             } else {
-                float timer = trest.getMainTime() - spawn;
                 rendering.setTime(-(timer * 1.1f) / (timeToShow) - 0.2f);
 
                 if (timer >= timeToShow && !isPull) {
@@ -103,21 +106,44 @@ public class WormHole {
                     isPull = false;
                 }
             }
-            float timer = trest.getMainTime() - spawn;
+            timer = trest.getMainTime() - spawn;
             if (timer >= whenToMove) {
                 isPull = false;
                 changePosition = true;
                 startToMove = trest.getMainTime();
             }
         } else {
-            float timer = trest.getMainTime() - startToMove;
+            timer = trest.getMainTime() - startToMove;
             rendering.setTime(-(timeToClose - timer) * 1.1f / timeToClose - 0.1f);
             if (timer >= timeToClose) {
                 setXy();
-                changePosition = false;
+if(suddenExpose){
+    close = true;
+}
+                    changePosition = false;
+
             }
         }
 
+    }
+    private Point2D zero = new Point2D.Float(0,0);
+    private boolean suddenExpose = false;
+    public boolean suddenExpose(){
+        suddenExpose = true;
+        if (zero.distance(xy[0],xy[1])>600) {
+            reset();
+            return true;
+        }
+        if(isPull){
+            isPull = false;
+            changePosition = true;
+            startToMove = trest.getMainTime();
+        }
+        if(close){
+            reset();
+            return true;
+        }
+        return false;
     }
 
     public void pullPlayer() {

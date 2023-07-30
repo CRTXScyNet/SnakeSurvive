@@ -3,8 +3,7 @@ package org.example.Buffs;
 import org.example.Enemy.Enemy;
 import org.example.Player.GluePart;
 import org.example.Player.Player;
-import org.example.gpu.Window;
-import org.example.gpu.trest;
+import org.example.gpu.render.Window;
 
 import java.awt.*;
 import java.awt.geom.Point2D;

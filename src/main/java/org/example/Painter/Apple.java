@@ -2,18 +2,17 @@ package org.example.Painter;
 
 import org.example.Player.Player;
 import org.example.Sound.LWJGLSound;
-import org.example.gpu.Window;
+import org.example.gpu.render.Window;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
-import org.example.gpu.trest;
+import org.example.gpu.gameProcess.trest;
 import org.joml.Vector3f;
 
 import java.awt.*;
-import java.io.File;
+import java.awt.geom.Point2D;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class Apple {
@@ -25,6 +24,10 @@ public class Apple {
     private int eatenDelayStat = 50;
     private int eatenDelay = eatenDelayStat;
     private static float[] xy = new float[]{};
+
+
+
+    private  static Point2D point2D = new Point2D.Float();
     public static float eatenTime = 0;
     public static float eatenTimelast = 0;
     static double collisionWithApple = Math.pow(Apple.getAppleSize() * 2, 2);
@@ -49,6 +52,7 @@ public class Apple {
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy[0], (float) xy[1], 0));
         renderingPoiner = new ModelRendering(window, null, "applePointer");
         renderingPoiner.addModel(new Model(window, 30, color));
+        point2D.setLocation(xy[0],xy[1]);
         soundInit();
     }
 
@@ -155,6 +159,7 @@ public class Apple {
         double pointWatchY = (100 * Math.cos(TargetRadian));
         renderingPoiner.getModels().get(0).getMovement().setPosition(new Vector3f((float) pointWatchX, (float) pointWatchY, 0));
         renderingPoiner.getModels().get(0).getMovement().setRotation((float) -TargetRadian);
+        point2D.setLocation(xy[0],xy[1]);
 
     }
 
@@ -164,6 +169,7 @@ public class Apple {
             int y = (int) (Math.random() * trest.playGroundHeight - (trest.playGroundHeight / 2));
             xy = new float[]{x, y};
             rendering.getModels().get(0).getMovement().setPosition(new Vector3f(x, y, 0));
+            point2D.setLocation(xy[0],xy[1]);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(e);
@@ -202,6 +208,7 @@ public class Apple {
             int y = (int) (Math.random() * trest.playGroundHeight / 2 - (trest.playGroundHeight / 4));
             xy = new float[]{x, y};
             rendering.getModels().get(0).getMovement().setPosition(new Vector3f(x, y, 0));
+            point2D.setLocation(xy[0],xy[1]);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(e);
@@ -222,6 +229,9 @@ public class Apple {
 
     public ModelRendering getRendering() {
         return rendering;
+    }
+    public static Point2D getPoint2D() {
+        return point2D;
     }
 
 

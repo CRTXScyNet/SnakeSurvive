@@ -47,6 +47,9 @@ empty_space.setFadeTime(5);
         glue_part_hunting.setRandom(true);
         glue_part_hunting.setFadeTime(1);
         setVolume(0.2f);
+        white_snakes_hunting.setVolume(0.4f);
+        white_snakes_hunting2.setVolume(0.4f);
+        white_snakes_hunting3.setVolume(0.4f);
 //        MainSound purple_snakes_hunting = new MainSound("./sounds/mainSound/white_snakes_hunting_3.ogg",true);
 
     }
@@ -93,7 +96,7 @@ empty_space.setFadeTime(5);
         glue_part_bool = false;
     }
     private void calcState(){
-        if(!purple_snakes_hunting_bool  && !white_snakes_hunting_bool){
+        if(!white_snakes_hunting_bool){
             empty_space_bool = true;
 
         }else{

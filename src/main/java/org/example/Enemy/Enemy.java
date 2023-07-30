@@ -1,14 +1,13 @@
 package org.example.Enemy;
 
 import org.example.Painter.Apple;
-import org.example.Painter.Picture;
-import org.example.Painter.Process;
+
 import org.example.Player.Player;
 import org.example.Sound.MainSoundsController;
-import org.example.gpu.Window;
+import org.example.gpu.render.Window;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
-import org.example.gpu.trest;
+import org.example.gpu.gameProcess.trest;
 import org.joml.Vector3f;
 
 import java.awt.*;
@@ -51,6 +50,24 @@ public class Enemy extends Entity {
             addCircle();
         }
     }
+    public void moveXy() {
+float halfX = -window.width/2f;
+        float halfY = -window.height/2f;
+        float x = (float)enemyHead.getX();
+        float y = (float)enemyHead.getY();
+        if (x < -halfX) {
+            moveXy(new float[]{halfX*2, 0});
+        }
+        if (x > halfX) {
+            moveXy(new float[]{-halfX*2, 0});
+        }
+        if (y < -halfY) {
+            moveXy(new float[]{0, halfY*2});
+        }
+        if (y > halfY) {
+            moveXy(new float[]{0, -halfY*2});
+        }
+    }
 
     public void moveXy(float[] direct) {
 
@@ -65,6 +82,12 @@ public class Enemy extends Entity {
             rendering.getModels().get(i).
                     getMovement().setPosition(new Vector3f(phantomXY.get(i)[0], phantomXY.get(i)[1], 0));
         }
+    }
+    public void removeEnemy(){
+        rendering.clear(true);
+        phantomXY.clear();
+        enemies.remove(this);
+
     }
 
     public void teleportXy(float[] direct) {
@@ -117,13 +140,14 @@ public Point2D enemyHead = new Point2D.Float();
     private double delayDouble = delayStat;
     private int delay = (int) delayDouble;
     private int delayCount = 0;
-    private double timerForRestart = 10;
-    private double timerStat = timerForRestart;
+    private static double timerForRestart = 10;
+    private static double timerStat = timerForRestart;
     private double timer = timerStat;
 
 
     public void setEatAndAngry(boolean eatAndAngry) {
         this.eatAndAngry = eatAndAngry;
+        timer = timerStat;
     }
 
     public boolean isEatAndAngry() {
@@ -236,7 +260,7 @@ public void fear(){
         xy.add(new float[]{co.x, co.y});
         setPhantomXY();
         enemyHead.setLocation(xy.get(0)[0],xy.get(0)[1]);
-        rendering.clear();
+        rendering.clear(true);
         rendering.addModel(new Model(window, (int) (size * 30),color));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) co.x, (float) co.y, 0));
         move(co.x, co.y);
@@ -247,8 +271,8 @@ public void fear(){
     }
 
     public Point getRandomPoint() {
-        int x = (int) (-(trest.playGroundWidth/2) + ((int) (Math.random() * ((trest.playGroundWidth) / (int) (size * stepOfSize))) * (int) (size * stepOfSize)));
-        int y = (int) (-(trest.playGroundHeight/2) + ((int) (Math.random() * ((trest.playGroundHeight) / (int) (size * stepOfSize))) * (int) (size * stepOfSize)));
+        int x = (int) (-(window.width/2) + ((int) (Math.random() * ((window.width) / (int) (size * stepOfSize))) * (int) (size * stepOfSize)));
+        int y = (int) (-(window.height/2) + ((int) (Math.random() * ((window.height) / (int) (size * stepOfSize))) * (int) (size * stepOfSize)));
         if (Math.pow(Math.abs(x), 2) + Math.pow(Math.abs(y), 2) <= Math.pow(500, 2)) {
             return getRandomPoint();
         }
@@ -273,7 +297,7 @@ public void fear(){
 
     public boolean hunt = false;
 private double bufDelay = 0;
-
+private Point2D apple = new Point2D.Float();
 public void update(){
 
     if (xy.size() == 0) {
@@ -300,6 +324,28 @@ public void update(){
     float appleDest = (float) Math.sqrt(Math.pow(Apple.getXy()[0] - xy.get(0)[0], 2) + Math.pow(Apple.getXy()[1] - xy.get(0)[1], 2));
     if (appleDest <= rad) {
         appleIsNearby = true;
+        apple.setLocation(Apple.getXy()[0],Apple.getXy()[1]);
+    }else {
+
+        Point2D phantomApple = new Point2D.Float(Apple.getXy()[0],Apple.getXy()[1]);
+        if (Math.abs(enemyHead.getX()- Apple.getXy()[0])>trest.playGroundWidth/2) {
+            if (enemyHead.getX() < Apple.getXy()[0]) {
+                phantomApple.setLocation(Apple.getXy()[0] - trest.playGroundWidth, phantomApple.getY());
+            } else if (enemyHead.getX() > Apple.getXy()[0]) {
+                phantomApple.setLocation(Apple.getXy()[0] + trest.playGroundWidth, phantomApple.getY());
+            }
+        }
+        if (Math.abs(enemyHead.getY()- Apple.getXy()[1])>trest.playGroundHeight/2) {
+            if (enemyHead.getY() < Apple.getXy()[1]) {
+                phantomApple.setLocation(phantomApple.getX(), Apple.getXy()[1] - trest.playGroundHeight);
+            } else if (enemyHead.getY() > Apple.getXy()[1]) {
+                phantomApple.setLocation(phantomApple.getX(), Apple.getXy()[1] + trest.playGroundHeight);
+            }
+        }
+        if(phantomApple.distance(enemyHead)<=rad){
+            appleIsNearby = true;
+            apple.setLocation(phantomApple);
+        }
     }
     try {
 
@@ -350,14 +396,19 @@ trest.end();
         } else {
             moveCheck(new float[2], appleIsNearby, false);
         }
-        if(Apple.appleVisible && isActive &&Apple.checkCollision(xy.get(0))){
-            grow();
-            setEatAndAngry(true);
-            setCurrentDelay((int) (getDelay() / 2));
+        if(!eatAndAngry) {
+            if (Apple.appleVisible && isActive && Apple.checkCollision(xy.get(0))) {
+                grow();
+                setEatAndAngry(true);
+                setCurrentDelay((int) (getDelay() / 2));
+            }
         }
     } catch (Exception e) {
 
     }
+}
+public static void resetAngryTimer(){
+    timerStat = timerForRestart;
 }
 
     public void moveCheck(float[] point,boolean appleIsNearby, boolean isNearby) {
@@ -401,11 +452,11 @@ trest.end();
             }
         }
         if (eatAndAngry && timer <= 0) {
-            timerStat *= 2;
+            timerStat += timerForRestart;
             timer = timerStat;
             eatAndAngry = false;
             setCurrentDelay(getDelay() * 2);
-            setDelay();
+//            setDelay();
             hunt = false;
         }
 
@@ -422,12 +473,12 @@ trest.end();
                 xTarget = point[0];
                 yTarget = point[1];
             } else if (Apple.appleVisible&&appleIsNearby) {
-                if(enemyHead.distance(Apple.getXy()[0],Apple.getXy()[1])>150){
-                    xTarget = Apple.getXy()[0];
-                    yTarget = Apple.getXy()[1];
+                if(enemyHead.distance(apple)>150){
+                    xTarget = (float) apple.getX();
+                    yTarget = (float) apple.getY();
                 }else {
-                    xTarget = xy.get(0)[0] + (xy.get(0)[0] - Apple.getXy()[0]);
-                    yTarget = xy.get(0)[1] + (xy.get(0)[1] - Apple.getXy()[1]);
+                    xTarget = xy.get(0)[0] + (xy.get(0)[0] - (float) apple.getX());
+                    yTarget = xy.get(0)[1] + (xy.get(0)[1] - (float) apple.getY());
                 }
 
             } else {
@@ -456,8 +507,8 @@ trest.end();
                 xTarget = point[0];
                 yTarget = point[1];
             } else if (Apple.appleVisible&&appleIsNearby) {
-                xTarget = Apple.getXy()[0];
-                yTarget = Apple.getXy()[1];
+                xTarget = (float) apple.getX();
+                yTarget = (float) apple.getY();
             } else {
                 xTarget = xy.get(0)[0];
                 yTarget = xy.get(0)[1];
@@ -549,32 +600,32 @@ move((float)next.getX(),(float)next.getY());
         return Math.pow(xy.get(0)[0]- Player.playerHeadXY().getX(), 2) + Math.pow(xy.get(0)[1] - Player.playerHeadXY().getY(), 2) < Math.pow(30, 2);
     }
 
-    public void setLines() {
-        points.clear();
-        lines.clear();
-        if (Picture.rect.contains(new Point((int) phantomXY.get(0)[0], (int) phantomXY.get(0)[1]))) {
-            points.add(new Point((int) phantomXY.get(0)[0], (int) phantomXY.get(0)[1]));
-            for (int i = 1; i < phantomXY.size() - 1; i++) {
-                if ((int) phantomXY.get(i - 1)[0] != (int) phantomXY.get(i + 1)[0] && (int) phantomXY.get(i - 1)[1] != (int) phantomXY.get(i + 1)[1]) {
-                    points.add(new Point((int) phantomXY.get(i)[0], (int) phantomXY.get(i)[1]));
-                }
-
-
-            }
-            points.add(new Point((int) phantomXY.get(phantomXY.size() - 1)[0], (int) phantomXY.get(phantomXY.size() - 1)[1]));
-            Point t = null;
-
-            for (int i = 0; i < points.size(); i++) {
-                if (t == null) {
-                    t = points.get(i);
-                } else {
-                    lines.add(new Line(t, points.get(i)));
-                    t = new Point(points.get(i));
-                }
-            }
-
-        }
-    }
+//    public void setLines() {
+//        points.clear();
+//        lines.clear();
+//        if (Picture.rect.contains(new Point((int) phantomXY.get(0)[0], (int) phantomXY.get(0)[1]))) {
+//            points.add(new Point((int) phantomXY.get(0)[0], (int) phantomXY.get(0)[1]));
+//            for (int i = 1; i < phantomXY.size() - 1; i++) {
+//                if ((int) phantomXY.get(i - 1)[0] != (int) phantomXY.get(i + 1)[0] && (int) phantomXY.get(i - 1)[1] != (int) phantomXY.get(i + 1)[1]) {
+//                    points.add(new Point((int) phantomXY.get(i)[0], (int) phantomXY.get(i)[1]));
+//                }
+//
+//
+//            }
+//            points.add(new Point((int) phantomXY.get(phantomXY.size() - 1)[0], (int) phantomXY.get(phantomXY.size() - 1)[1]));
+//            Point t = null;
+//
+//            for (int i = 0; i < points.size(); i++) {
+//                if (t == null) {
+//                    t = points.get(i);
+//                } else {
+//                    lines.add(new Line(t, points.get(i)));
+//                    t = new Point(points.get(i));
+//                }
+//            }
+//
+//        }
+//    }
 
     private boolean downNotSelf = false;
     private boolean upNotSelf = false;
@@ -814,7 +865,7 @@ move((float)next.getX(),(float)next.getY());
     }
     public void enemyAbsorbed(){
 xy.clear();
-rendering.clear();
+rendering.clear(true);
 phantomXY.clear();
 directionOfPhantomXY.clear();
 amountOfAbsorbedEnemies++;

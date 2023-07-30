@@ -1,6 +1,4 @@
-package org.example.gpu;
-
-
+package org.example.gpu.gameProcess;
 
 
 import org.example.Buffs.BuffParent;
@@ -8,25 +6,25 @@ import org.example.Buffs.CutTheTail;
 import org.example.Buffs.Fear;
 import org.example.Buffs.Speed;
 import org.example.Enemy.Enemy;
+import org.example.Main;
 import org.example.Painter.Apple;
 import org.example.Player.GluePart;
 import org.example.Player.Player;
 import org.example.Sound.LWJGLSound;
-import org.example.Sound.MainSound;
 import org.example.Sound.MainSoundsController;
+import org.example.gpu.Timer;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
+import org.example.gpu.render.Window;
 import org.example.obstructions.WormHole;
 import org.joml.Vector3f;
-
 import org.lwjgl.glfw.GLFWVidMode;
-import org.lwjgl.openal.AL11;
 
 import java.awt.*;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
@@ -61,6 +59,7 @@ public class trest {
     public static boolean appleVisible = false;
     public static boolean ringWayIsReady = false;
     public static boolean exit = false;
+    public static boolean stageChanging = false;
 
     public static float eatenTime = 0;
     public static float eatenTimelast = 0;
@@ -85,11 +84,316 @@ public class trest {
     private static int expansePart = 1;
     static public Apple apple;
     static public Player player;
-//    static MainSound mainSound = null;
+    //    static MainSound mainSound = null;
     static MainSoundsController mainSound = null;
     static LWJGLSound deathSound = null;
+    static boolean hacks = false;
+
+    public static float scaleGround = 0;
+    public static float scaleFear = 0;
+    public static float scaleSpeedBuf = 0f;
+    public static float scaleCutTheTailBuf = 0f;
+    public static float scaleHoles = 0f;
+    public static float scalePassiveEnemy = 0f;
+    public static float scaleActiveEnemy = 0f;
+    public static float scaleGlueParts = 0f;
+
+//    scaleGround = 0.02f;
+//    scaleFear = 0.1f;
+//    scaleSpeedBuf = 0.5f;
+//    scaleCutTheTailBuf = 0.1f;
+//    scaleHoles = 0.25f;
+//    scalePassiveEnemy = 10f;
+//    scaleActiveEnemy = 1f;
+//    scaleGlueParts = 2.5f;
+
+    enum Stage {
+
+        FIRST_STAGE {
+            public void setStage() {
+                clear();
+                groundCount = 0f;
+
+                passiveEnemyCount = 100f;
+                if (roundCount != 0) {
+                    holesCount = 4f+roundCount;
+                    groundCount = 1f + roundCount * 0.1f;
+                    passiveEnemyCount = 100 + roundCount * 10;
+                    activeEnemyCount = 50 + roundCount * 5;
+                    gluePartsCount = 20f + roundCount;
+                    cutTheTailBufCount = 1+roundCount*0.2f;
+                    fearCount = 1+roundCount*0.2f;
+                    speedBufCount = roundCount*2;
+                }
+                super.setStage();
+            }
+
+            public Stage getNextStage() {
+                return FIRST_BOSS;
+            }
+
+            @Override
+            public void timer() {
+                stageTimer = 100;
+            }
+
+            @Override
+            public boolean isBoss() {
+                return false;
+            }
+        },
+        FIRST_BOSS {
+            public void setStage() {
+                clear();
+
+                gluePartsCount = 300f;
+
+                super.setStage();
+            }
+
+            public Stage getNextStage() {
+                return SECOND_STAGE;
+            }
+
+            @Override
+            public void timer() {
+                stageTimer = bossTime;
+            }
+
+            @Override
+            public boolean isBoss() {
+                return true;
+            }
+
+        },
+        SECOND_STAGE {
+            public void setStage() {
+                clear();
+                groundCount = 0f;
+                activeEnemyCount = 50;
+                if (roundCount != 0) {
+                    holesCount = 4f+roundCount;
+                    groundCount = 1f + roundCount * 0.1f;
+                    passiveEnemyCount = 100 + roundCount * (10 * 1.2f);
+                    activeEnemyCount = 50 + roundCount * (5 * 1.2f);
+                    gluePartsCount = 20f + roundCount * 1.2f;
+                    cutTheTailBufCount = 1+roundCount*0.2f;
+                    fearCount = 1+roundCount*0.2f;
+                    speedBufCount = roundCount*2;
+                }
+                super.setStage();
+            }
+
+            public Stage getNextStage() {
+                return SECOND_BOSS;
+            }
+
+            @Override
+            public void timer() {
+                stageTimer = 100;
+            }
+
+            @Override
+            public boolean isBoss() {
+                return false;
+            }
+        },
+        SECOND_BOSS {
+            public void setStage() {
+                clear();
+
+                gluePartsCount = 5f;
+                super.setStage();
+            }
+
+            public Stage getNextStage() {
+                return THIRD_STAGE;
+            }
+
+            @Override
+            public void timer() {
+                stageTimer = bossTime;
+            }
+
+            @Override
+            public boolean isBoss() {
+                return true;
+            }
+        },
+
+        THIRD_STAGE {
+            public void setStage() {
+                clear();
+
+                groundCount = 0.5f;
+                passiveEnemyCount = 80;
+                activeEnemyCount = 40;
+                if (roundCount != 0) {
+                    holesCount = 5f+roundCount;
+                    groundCount = 1f + roundCount * 0.1f;
+                    passiveEnemyCount = 100 + roundCount * (10 * 1.3f);
+                    activeEnemyCount = 50 + roundCount * (5 * 1.3f);
+                    gluePartsCount = 20f + roundCount * 1.3f;
+                    cutTheTailBufCount = 1+roundCount*0.2f;
+                    fearCount = 1+roundCount*0.2f;
+                    speedBufCount = roundCount*2;
+                }
+                super.setStage();
+            }
+
+            public Stage getNextStage() {
+                return THIRD_BOSS;
+            }
+
+            @Override
+            public void timer() {
+                stageTimer = 100;
+            }
+
+            @Override
+            public boolean isBoss() {
+                return false;
+            }
+        },
+        THIRD_BOSS {
+            public void setStage() {
+                clear();
+
+                gluePartsCount = 5f;
+                super.setStage();
+            }
+
+            public Stage getNextStage() {
+                return FOURTH_STAGE;
+            }
+
+            @Override
+            public void timer() {
+                stageTimer = bossTime;
+            }
+
+            @Override
+            public boolean isBoss() {
+                return true;
+            }
+        },
+        FOURTH_STAGE {
+            public void setStage() {
+                clear();
+
+                groundCount = 1f;
+                passiveEnemyCount = 100;
+                activeEnemyCount = 50;
+                gluePartsCount = 20f;
+                if (roundCount != 0) {
+                    holesCount = 5f+roundCount;
+                    groundCount = 1f + roundCount * 0.1f;
+                    passiveEnemyCount = 100 + roundCount * (10 * 1.4f);
+                    activeEnemyCount = 50 + roundCount * (5 * 1.4f);
+                    gluePartsCount = 20f + roundCount * 1.4f;
+                    cutTheTailBufCount = 1+roundCount;
+                    fearCount = 1+roundCount;
+                    speedBufCount = roundCount;
+                }
+                super.setStage();
+            }
+
+            public Stage getNextStage() {
+                return FOURTH_BOSS;
+            }
+
+            @Override
+            public void timer() {
+                stageTimer = 100;
+            }
+
+            @Override
+            public boolean isBoss() {
+                return false;
+            }
+        },
+        FOURTH_BOSS {
+            public void setStage() {
+                clear();
+                gluePartsCount = 5f;
+                super.setStage();
+            }
+
+            public Stage getNextStage() {
+                roundCount++;
+                return FIRST_STAGE;
+            }
+
+            @Override
+            public void timer() {
+                stageTimer = bossTime;
+            }
+
+            @Override
+            public boolean isBoss() {
+                return true;
+            }
 
 
+        };
+        static int roundCount = 0;
+        public void reset(){
+            stage = Stage.FIRST_STAGE;
+            roundCount = 0;
+            stage.setStage();
+        }
+
+        public void setStage() {
+            stage.timer();
+            stageStopWatch = 0;
+            setScale();
+            System.out.println(stage.name() + " round "+roundCount+" stated!");
+        }
+
+        ;
+
+        public void setScale() {
+            scaleFear = fearCount/ stageTimer;
+            scaleSpeedBuf = speedBufCount/ stageTimer;
+            scaleCutTheTailBuf = cutTheTailBufCount/ stageTimer;
+            scaleGround = groundCount / stageTimer;
+            scaleHoles = holesCount / stageTimer;
+            scalePassiveEnemy = passiveEnemyCount / stageTimer;
+            scaleActiveEnemy = activeEnemyCount / stageTimer;
+            scaleGlueParts = gluePartsCount / stageTimer;
+        }
+
+        public abstract Stage getNextStage();
+
+        public abstract void timer();
+
+        public void clear() {
+            groundCount = 0f;
+            fearCount = 0f;
+            speedBufCount = 0f;
+            cutTheTailBufCount = 0f;
+            holesCount = 0f;
+            passiveEnemyCount = 0f;
+            activeEnemyCount = 0f;
+            gluePartsCount = 0f;
+        }
+
+        public abstract boolean isBoss();
+
+        static float bossTime = 3;//5*60
+
+        static float stageTimer = 0;
+        private static float groundCount = 0f;
+        private static float fearCount = 0f;
+        private static float speedBufCount = 0f;
+        private static float cutTheTailBufCount = 0f;
+        private static float holesCount = 0f;
+        private static float passiveEnemyCount = 0f;
+        private static float activeEnemyCount = 0f;
+        private static float gluePartsCount = 0f;
+    }
+
+    public static Stage stage = Stage.FIRST_STAGE;
 
 
     public trest() {
@@ -107,13 +411,16 @@ public class trest {
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
 
-        Window window = new Window(width, height);
-
+        org.example.gpu.render.Window window = new org.example.gpu.render.Window(width, height);
+        if (Main.fullscreen) {
+            window.setFullscreen(true);
+        }
+        if (Main.hacks) {
+            hacks = true;
+        }
 //        window.setFullscreen(true);
 
         window.createWindow("what'sup");
-
-
 
 
         half = (float) window.width / 1.5f;
@@ -144,18 +451,19 @@ public class trest {
 
         mainSound = new MainSoundsController();
 
-        deathSound = new LWJGLSound("./sounds/game_over.ogg",false);
+        deathSound = new LWJGLSound("./sounds/game_over.ogg", false);
         deathSound.setCastomVolume(0.1f);
 
 
         loop(window);
 
 
-
         window.destroyWindow();
     }
 
-    public void loop(Window window) {
+    static float stageStopWatch = 0;
+
+    public void loop(org.example.gpu.render.Window window) {
         double frame_cap = 1.0 / 60;
 
         double frameTime = 0;
@@ -166,26 +474,13 @@ public class trest {
         float processTime = 0;
         int processCount = 0;
 
+        float stageTimer = 0;
+
         expansePart = 1;
-        Executors.newSingleThreadExecutor().submit(()->{
-            float soundTimer = 0;
-            float soundTime = Timer.getFloatTime();
-            while (!window.shouldClose()){
-                soundTimer = Timer.getFloatTime() - soundTime;
-                if(soundTimer >= 0.01){
-                    mainSound.update();
-                    soundTimer =0;
-                    try{
-                        TimeUnit.MILLISECONDS.sleep(1);
-                    }catch (Exception e){
-                        e.printStackTrace();
-                    }
-                }
 
-            }
-
-        });
-
+        stage.setStage();
+        stage.timer();
+        System.out.println(stage.name() + " stated!");
         while (!window.shouldClose()) {
             boolean canRender = false;
             double time2 = Timer.getTime();
@@ -198,11 +493,8 @@ public class trest {
             if (!isPaused) {
                 mainTime += (float) time2 - (float) time;
             }
-            time = time2;
-
-            input(window);
             if (!isPaused && !isEnd) {
-                if(mainSound != null) {
+                if (mainSound != null) {
                     mainSound.play();
                 }
                 if (addingEntity >= 1) {
@@ -210,14 +502,38 @@ public class trest {
                     addSomeEntity(window);
                     addingEntity = 0;
                 }
-            }else if(isPaused){
-                if(mainSound != null) {
+                if (stageStopWatch < Stage.stageTimer) {
+                    stageStopWatch += (float) time2 - (float) time;
+                    stageChanging = false;
+                } else {
+                    if(stage.isBoss()){
+                        stageChanging = true;
+                        stage = stage.getNextStage();
+                        stage.setStage();
+                        GluePart.clearParts();
+                    }else {
+                        stageChanging = true;
+//                        clearStage();
+                        stage = stage.getNextStage();
+                        stage.setStage();
+                        GluePart.clearParts();
+                        Enemy.resetAngryTimer();
+                    }
+//                    }
+                }
+
+            } else if (isPaused) {
+                if (mainSound != null) {
                     mainSound.pause();
                 }
             }
+            time = time2;
+
+            input(window);
+
             if (processTime >= 1.0 / 100) {
                 processCount++;
-                scale();
+                playgroundScale();
                 processTime = 0;
                 process();
                 moveBackground();
@@ -229,10 +545,10 @@ public class trest {
 
 
                 if (frameTime >= 1) {
-                    System.out.println(processCount);
+//                    System.out.println(processCount);
                     processCount = 0;
                     frameTime = 0;
-                    System.out.println("FPS: " + frames);
+//                    System.out.println("FPS: " + frames);
                     frames = 0;
                 }
             }
@@ -254,49 +570,61 @@ public class trest {
                 frames++;
 
             }
-            if(exit)
+            if (exit)
                 exit(window);
         }
     }
 
-    public static int speedCount = 0;
+
+    public static float playGroundScale = 1;
+    public static float playGroundWidth = 1;
+    public static float playGroundHeight = 1;
+    public static int speedBufCount = 0;
     public int currentSpeedCount = 0;
     public static int cutTheTailCount = 0;
-
     public int currentCutTheTailCount = 0;
+
     public static int fearCount = 0;
-
     public int currentFearCount = 0;
-    public static int activeEnemyCount = 0;
 
+    public static int activeEnemyCount = 0;
     public int currentActiveEnemyCount = 0;
+
     public static int passiveEnemyCount = 0;
 
     public int currentPassiveEnemyCount = 0;
-
     public int currentGluePartCount = 0;
 
-    public void stages() {
-        if (playGroundScale < 2) {
-            playGroundScale = 1 + (int) Player.countOfApples * 0.02f;
+
+    public void scale() {
+        playGroundScale = 1 + (int) stageStopWatch * scaleGround;
+        if (playGroundScale > 3) {
+            playGroundScale = 3;
         }
-        if (fearCount < 2) {
-            fearCount = (int) Math.floor(Player.countOfApples * 0.1);
+
+        fearCount = (int) Math.floor(stageStopWatch * scaleFear);
+//        if (fearCount > 2) {
+//            fearCount = 2;
+//        }
+//Player.countOfApples
+            speedBufCount = (int) Math.floor(stageStopWatch * scaleSpeedBuf);
+        cutTheTailCount = (int) Math.floor(stageStopWatch * scaleCutTheTailBuf);
+        holesCount = (int) Math.floor(stageStopWatch * scaleHoles);
+        passiveEnemyCount = (int) (scalePassiveEnemy * stageStopWatch);
+//            if (passiveEnemyCount > 200) {
+//                passiveEnemyCount = 200;
+//            }
+
+        activeEnemyCount = (int) Math.floor(stageStopWatch * scaleActiveEnemy);
+        if (activeEnemyCount > 50) {
+            activeEnemyCount = 50;
         }
-        speedCount = (int) Math.floor(Player.countOfApples * 0.5);
-        cutTheTailCount = (int) Math.floor(Player.countOfApples * 0.1);
-        holesCount = (int) Math.floor(Player.countOfApples * 0.25);
-        if (passiveEnemyCount < 200) {
-            passiveEnemyCount = Player.countOfApples * 10;
-        }
-        if (activeEnemyCount < 50) {
-            activeEnemyCount = (int) Math.floor(Player.countOfApples * 0.5);
-        }
-        GluePart.maxAmountOfGlueParts = (int) Math.floor(Player.countOfApples * 2.5);
+
+        GluePart.maxAmountOfGlueParts = (int) Math.floor(stageStopWatch * scaleGlueParts);
     }
 
-    public void calculate() {
-        stages();
+    public void calculateEntity() {
+        scale();
         //вычисления для бафов
         currentSpeedCount = 0;
         currentFearCount = 0;
@@ -310,7 +638,7 @@ public class trest {
                 currentCutTheTailCount++;
             }
         }
-        currentSpeedCount = speedCount - currentSpeedCount;
+        currentSpeedCount = speedBufCount - currentSpeedCount;
         currentFearCount = fearCount - currentFearCount;
         currentCutTheTailCount = cutTheTailCount - currentCutTheTailCount;
         //Вичисления для врагов
@@ -329,23 +657,27 @@ public class trest {
         currentPassiveEnemyCount = passiveEnemyCount - currentPassiveEnemyCount;
     }
 
-    public void addSomeEntity(Window window) {
-        calculate();
+    public void addSomeEntity(org.example.gpu.render.Window window) {
+        calculateEntity();
 
-        for (int i = 0; i < currentSpeedCount; i++) {
-            buffs.add(new Speed(window));
-        }
-        for (int i = 0; i < currentFearCount; i++) {
-            buffs.add(new Fear(window));
-        }
-        for (int i = 0; i < currentCutTheTailCount; i++) {
-            buffs.add(new CutTheTail(window));
-        }
-        for (int i = 0; i < currentPassiveEnemyCount; i++) {             // 200
-            new Enemy(window, false);
-        }
-        for (int i = 0; i < currentActiveEnemyCount; i++) {           //   30
-            new Enemy(window, true);
+//        if(!stageChanging){
+            for (int i = 0; i < currentSpeedCount; i++) {
+                buffs.add(new Speed(window));
+            }
+            for (int i = 0; i < currentFearCount; i++) {
+                buffs.add(new Fear(window));
+            }
+            for (int i = 0; i < currentCutTheTailCount; i++) {
+                buffs.add(new CutTheTail(window));
+            }
+//        }
+        if (!stage.isBoss()) {
+            for (int i = 0; i < currentPassiveEnemyCount; i++) {             // 200
+                new Enemy(window, false);
+            }
+            for (int i = 0; i < currentActiveEnemyCount; i++) {           //   30
+                new Enemy(window, true);
+            }
         }
 
         addBuffs();
@@ -363,6 +695,111 @@ public class trest {
 //                        }
 
             expansePart *= 2;
+        }
+    }
+
+    public void clearEnemies() {
+        for (int i = 0; i < Enemy.enemies.size(); i++) {
+            if (Enemy.enemies.get(i).enemyHead.distance(Player.playerHeadXY()) > 450) {
+                Enemy.enemies.get(i).removeEnemy();
+                i--;
+                if (Enemy.enemies.size() == 0) {
+                    return;
+                }
+
+            }
+
+        }
+
+    }
+    public void clearStage(){
+//        if(buffs.size()==0){
+//            return;
+//        }
+        for (int i = 0; i < buffs.size(); i++) {
+            if(buffs.get(i).suddenExpose()){
+                buffs.remove(i);
+                i--;
+            }
+
+        }
+        for (int i = 0; i < holes.size(); i++) {
+            if(holes.get(i).suddenExpose()){
+                holes.remove(i);
+                i--;
+            }
+        }
+//        if(buffs.size() ==0 && holes.size() == 0){
+//            stage = stage.getNextStage();
+//            stage.setStage();
+//        }
+    }
+
+    public void pushAway() {
+        int maxDistance = 600;
+        for (Enemy enemy : Enemy.enemies) {
+
+            boolean changed = false;
+            for (int i = 0; i < enemy.getXy().size(); i++) {
+
+                Point2D enemyPoint = new Point2D.Float(enemy.getXy().get(i)[0], enemy.getXy().get(i)[1]);
+                Point2D enemyPhantomPoint = new Point2D.Float(enemy.getPhantomXY().get(i)[0], enemy.getPhantomXY().get(i)[1]);
+                float distance = (float) enemyPoint.distance(0, 0);
+                float phantomDistance = (float) enemyPhantomPoint.distance(0, 0);
+                if (phantomDistance < maxDistance) {
+                    changed = true;
+                    float phantomAngle = (float) Math.atan((-enemyPhantomPoint.getY()) / (-enemyPhantomPoint.getX()));
+                    float newPosition = phantomDistance + (10);
+                    double phantomTranslocationX = newPosition * Math.cos(phantomAngle);
+                    double phantomTranslocationY = newPosition * Math.sin(phantomAngle);
+                    if (-enemyPhantomPoint.getX() < 0) {
+                        enemy.getPhantomXY().set(i, new float[]{+(float) phantomTranslocationX, +(float) phantomTranslocationY});
+                        enemy.getXy().set(i, enemy.getPhantomXY().get(i));
+                    } else {
+                        enemy.getPhantomXY().set(i, new float[]{-(float) phantomTranslocationX, -(float) phantomTranslocationY});
+                        enemy.getXy().set(i, enemy.getPhantomXY().get(i));
+                    }
+
+                }
+            }
+            if (changed) {
+//                    enemy.setXy();
+                enemy.makeChainTogether();
+                enemy.setXy();
+//                    enemy.setPhantomXY();
+
+            }
+        }
+        for (WormHole enemy : holes) {
+            Point2D point2D = new Point2D.Float(enemy.getXy()[0],enemy.getXy()[1]);
+                float phantomDistance = (float) point2D.distance(0, 0);
+                if (phantomDistance < maxDistance) {
+                    float phantomAngle = (float) Math.atan((-point2D.getY()) / (-point2D.getX()));
+                    float newPosition = phantomDistance + (10);
+                    double phantomTranslocationX = newPosition * Math.cos(phantomAngle);
+                    double phantomTranslocationY = newPosition * Math.sin(phantomAngle);
+                    if (-point2D.getX() < 0) {
+                        enemy.getXy()[0] = (float) phantomTranslocationX;
+                        enemy.getXy()[1] = (float) phantomTranslocationY;
+                    } else {
+                        enemy.getXy()[0] = -(float) phantomTranslocationX;
+                        enemy.getXy()[1] = -(float) phantomTranslocationY;
+                    }
+                }
+        }
+        for (BuffParent enemy : buffs) {
+            float phantomDistance = (float) enemy.getXy().distance(0, 0);
+            if (phantomDistance < maxDistance) {
+                float phantomAngle = (float) Math.atan((-enemy.getXy().getY()) / (-enemy.getXy().getX()));
+                float newPosition = phantomDistance + (10);
+                double phantomTranslocationX = newPosition * Math.cos(phantomAngle);
+                double phantomTranslocationY = newPosition * Math.sin(phantomAngle);
+                if (-enemy.getXy().getX() < 0) {
+                    enemy.getXy().setLocation(+(float) phantomTranslocationX, +(float) phantomTranslocationY);
+                } else {
+                    enemy.getXy().setLocation(-(float) phantomTranslocationX, -(float) phantomTranslocationY);
+                }
+            }
         }
     }
 
@@ -384,7 +821,7 @@ public class trest {
     static double chance = 0.001;
     public int holesCount = 0;
 
-    public void addSomeHoles(Window window) {
+    public void addSomeHoles(org.example.gpu.render.Window window) {
         if (holes.size() < holesCount) {
             chance += 0.001;
             if (Math.random() < chance) {
@@ -395,9 +832,9 @@ public class trest {
 
     }
 
-    public void input(Window window) {
+    public void input(org.example.gpu.render.Window window) {
         if (glfwGetKey(window.getWindow(), GLFW_KEY_ESCAPE) != 0) {
-           exit = true;
+            exit = true;
         }
         if (window.getInput().isMouseButtonPressed(GLFW_MOUSE_BUTTON_1)) {
             if (!isEnd && !isPaused) {
@@ -425,48 +862,53 @@ public class trest {
             mouseControl = false;
             System.out.println("restart");
         }
-        hacks(window);
+        if (hacks) {
+            hacks(window);
+        }
 
 
     }
 
-    public void hacks(Window window) {
+    public void hacks(org.example.gpu.render.Window window) {
         if (window.getInput().isKeyPressed(GLFW_KEY_E)) {
             isEnd = !isEnd;
         }
-        if (window.getInput().isKeyPressed(GLFW_KEY_1)) {
-            if (!isEnd && !isPaused) {
+        if (!isEnd && !isPaused) {
+            if (window.getInput().isKeyPressed(GLFW_KEY_1)) {
                 buffs.add(new Speed(window));
+
             }
-        }
-        if (window.getInput().isKeyPressed(GLFW_KEY_2)) {
-            if (!isEnd && !isPaused) {
+            if (window.getInput().isKeyPressed(GLFW_KEY_2)) {
                 buffs.add(new Fear(window));
+
             }
-        }
-        if (window.getInput().isKeyPressed(GLFW_KEY_3)) {
-            if (!isEnd && !isPaused) {
+            if (window.getInput().isKeyPressed(GLFW_KEY_3)) {
                 buffs.add(new CutTheTail(window));
+
             }
-        }
-        if (window.getInput().isKeyPressed(GLFW_KEY_EQUAL)) {
-            if (!isEnd && !isPaused) {
+            if (window.getInput().isKeyPressed(GLFW_KEY_EQUAL)) {
                 Player.player.eatTheApple();
+
             }
-        }
-        if (window.getInput().isKeyPressed(GLFW_KEY_MINUS)) {
-            if (!isEnd && !isPaused) {
+            if (window.getInput().isKeyPressed(GLFW_KEY_MINUS)) {
                 Player.player.lostTheApple();
+
             }
-        }
-        if (window.getInput().isKeyPressed(GLFW_KEY_MINUS)) {
-            if (!isEnd && !isPaused) {
+            if (window.getInput().isKeyPressed(GLFW_KEY_MINUS)) {
                 Player.player.lostTheApple();
+
             }
-        }
-        if (window.getInput().isKeyPressed(GLFW_KEY_SPACE)) {
-            if (!isEnd && !isPaused) {
+            if (window.getInput().isKeyPressed(GLFW_KEY_SPACE)) {
                 immortal = !immortal;
+
+            }
+            if (window.getInput().isKeyPressed(GLFW_KEY_TAB)) {
+                if(stage.isBoss()){
+                    stage = stage.getNextStage();
+                    stage.setStage();
+                }else {
+                    stageStopWatch = Stage.stageTimer;
+                }
             }
         }
 
@@ -519,26 +961,19 @@ public class trest {
         }
     }
 
-
     public static float getMainTime() {
         return mainTime;
     }
 
 
-    public static void reset(Window window) {
-        GluePart.maxAmountOfGlueParts = 0;
-        countOfApples = 0;
-        passiveEnemyCount = 0;
-        activeEnemyCount = 0;
-        fearCount = 0;
-        cutTheTailCount = 0;
-        speedCount = 0;
-        playGroundScale = 1;
+    public static void reset(org.example.gpu.render.Window window) {
+        stage.reset();
+
         mainSound.reset();
-        scale();
+        playgroundScale();
         //Здесь добавить списки
         for (Enemy enemy : Enemy.enemies) {
-            enemy.getRendering().clear();
+            enemy.getRendering().clear(true);
         }
         Enemy.enemies.clear();
         Enemy.amountOfAbsorbedEnemies = 0;
@@ -552,14 +987,14 @@ public class trest {
         for (BuffParent buffs : buffs) {
             buffs.reset();
         }
-        if(deathSound != null) {
+        if (deathSound != null) {
             deathSound.stop();
         }
         buffs.clear();
         GluePart.clear();
     }
 
-    public static void scale() {
+    public static void playgroundScale() {
         outLeft = (int) (-width * (playGroundScale / 2)) / Enemy.step * Enemy.step;
         fromLeft = (int) (-width * playGroundScale) / Enemy.step * Enemy.step;
 
@@ -574,11 +1009,8 @@ public class trest {
         playGroundHeight = fromDown;
     }
 
-    public static float playGroundScale = 1;
-    public static float playGroundWidth = 1;
-    public static float playGroundHeight = 1;
 
-    public void processInit(Window window) {
+    public void processInit(org.example.gpu.render.Window window) {
         //Вычисляем границы территории
         width = window.width;
         height = window.height;
@@ -600,7 +1032,7 @@ public class trest {
 
 
         //Вычисляем пути врагов после проигрыша
-        radius1 = Math.pow(width / 4.5 - 2, 2);
+        radius1 = Math.pow(width / 5f - 2, 2);
         boolean closer;
         for (int x = -width / 4; x <= width / 4; x++) {
             for (int y = -width / 4; y <= width / 4; y++) {
@@ -644,7 +1076,12 @@ public class trest {
                         }
                     }
                 }
-
+                if (stage.isBoss()) {
+                    pushAway();
+                    clearEnemies();
+                    clearStage();
+                }
+                GluePart.refresh();
                 moveEntity();
                 a = Apple.getXy();
                 apple.update();
@@ -658,8 +1095,10 @@ public class trest {
                 for (int i = 0; i < GluePart.glueParts.size(); i++) {
                     GluePart.glueParts.get(i).moveCheck();
                 }
-                GluePart.refresh();
 
+                Executors.newSingleThreadExecutor().submit(() -> {
+                    mainSound.update();
+                });
 
 
             } catch (Exception e) {
@@ -716,6 +1155,7 @@ public class trest {
                 enemy.reverse();
             }
         }
+
 //        apple.moveXy(moveGround(Apple.getXy()));
 
     }
@@ -735,11 +1175,11 @@ public class trest {
 
     public static void end() {
         if (!isEnd && !immortal) {
-            if(mainSound != null){
+            if (mainSound != null) {
                 mainSound.stop();
             }
             //place for game over sound
-            if(deathSound != null) {
+            if (deathSound != null) {
                 deathSound.play();
             }
             eatenPlayerTime = mainTime;
@@ -754,11 +1194,12 @@ public class trest {
         }
 
     }
-    public void exit(Window window){
-        if(mainSound != null) {
+
+    public void exit(Window window) {
+        if (mainSound != null) {
             mainSound.delete();
         }
-        for(LWJGLSound sound : LWJGLSound.sounds){
+        for (LWJGLSound sound : LWJGLSound.sounds) {
             sound.delete();
         }
         glfwSetWindowShouldClose(window.getWindow(), true);

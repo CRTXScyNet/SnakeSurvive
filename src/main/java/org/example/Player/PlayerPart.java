@@ -4,7 +4,8 @@ import org.example.Painter.Apple;
 import org.example.gpu.Timer;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
-import org.example.gpu.trest;
+import org.example.gpu.render.Window;
+import org.example.gpu.gameProcess.trest;
 import org.joml.Vector3f;
 
 import java.awt.*;
@@ -53,15 +54,15 @@ public class PlayerPart {
 
 
 
-    public boolean reset = false;
 
 
-    private org.example.gpu.Window window;
+
+    private Window window;
     private ModelRendering rendering;
 
     private float birthTime = 0;
 
-    public PlayerPart(org.example.gpu.Window window) {
+    public PlayerPart(Window window) {
 
         this.window = window;
         xy.setLocation(Player.playerHeadXY());
@@ -129,64 +130,58 @@ public class PlayerPart {
         return size;
     }
 
-    public void setReset(boolean reset) {
-        this.reset = reset;
-    }
 
-    public boolean isReset() {
-        return reset;
-    }
+
 
     private float tMouse = 1;
     static float stepRad = 0.1f;
     private float[] pointWatch = new float[]{0, 0};
+    protected int radDir = 0;
+    protected double difRad = 0;
+    protected float TargetRadian = 0;
+    protected float targetOpposite = 0;
 
 
-    void setRadian() {
+    void setRadian(Point2D point2D) {
         float xTarget;
         float yTarget;
-if(callBack){
-    xTarget = (float) (Player.playerHeadXY().getX() - xy.getX());
-    yTarget = (float) (Player.playerHeadXY().getY() - xy.getY());
-}else if(appleIsNear){
-    xTarget = (float) (Apple.getXy()[0] - xy.getX());
-    yTarget = (float) (Apple.getXy()[1] - xy.getY());
-}else {
-    xTarget = (float) (pointWatch[0] - xy.getX());
-    yTarget = (float) (pointWatch[1] - xy.getY());
-}
+        if(point2D != null){
+            xTarget = (float) (point2D.getX() - xy.getX());
+            yTarget = (float) (point2D.getY() - xy.getY());
+        }else {
+            xTarget = (float) (pointWatch[0] - xy.getX());
+            yTarget = (float) (pointWatch[1] - xy.getY());
+        }
 
-
-        float TargetRadian = 0;
         // 1143 372 900 600
         TargetRadian = (float) Math.atan2(xTarget, yTarget);
         if (TargetRadian < 0) {
             TargetRadian += 6.28;
 
         }
-        float halfNear = (tMouse + 3.14f) % 6.28f;
-
+       targetOpposite = (tMouse + 3.14f) % 6.28f;
         tMouse = (float) ((tMouse + 6.28) % 6.28);
+        difRad = Math.abs((TargetRadian - tMouse) % 6.28);
 
-        double dif = Math.abs((TargetRadian - tMouse) % 6.28);
-        if (dif > 3.14) {
-            dif = Math.abs((Math.max(TargetRadian, tMouse) - 3.14) - (Math.min(TargetRadian, tMouse) + 3.14));
+        if (difRad > 3.14) {
+            difRad = Math.abs((Math.max(TargetRadian, tMouse) - 3.14) - (Math.min(TargetRadian, tMouse) + 3.14));
 
+        }
+        if (TargetRadian > tMouse && TargetRadian > targetOpposite && targetOpposite >= 3.14) {          // уменьшение
+            radDir = -1;
+        } else if (TargetRadian < tMouse && TargetRadian < targetOpposite && targetOpposite >= 3.14) {                          // уменьшение
+            radDir = -1;
+        } else if (TargetRadian < tMouse && TargetRadian > targetOpposite) {                          // уменьшение
+            radDir = -1;
+        }else {
+            radDir = 1;
         }
 
 
-        stepRad = (float) dif / (15/(step/2));
 
-
-        if (appleIsNear ||callBack) {
-            if (TargetRadian > tMouse && TargetRadian > halfNear && halfNear >= 3.14) {          // уменьшение
-                stepRad *= -1;
-            } else if (TargetRadian < tMouse && TargetRadian < halfNear && halfNear >= 3.14) {                          // уменьшение
-                stepRad *= -1;
-            } else if (TargetRadian < tMouse && TargetRadian > halfNear) {                          // уменьшение
-                stepRad *= -1;
-            }
-            tMouse += stepRad;
+        stepRad = (float) difRad / (15/(step/2));
+        if (point2D!=null) {
+            tMouse += stepRad*radDir;
         } else {
             if (Math.random() > 0.5) {
                 if (isLost){
@@ -272,20 +267,27 @@ if(callBack){
                         callBack = true;
                         appleIsNear = false;
                         isEmpty = false;
+                        setRadian(null);
                     } else {
                         appleIsNear = true;
+                        setRadian(Apple.getPoint2D());
                     }
 
                 }else {
+                    setRadian(null);
                     appleIsNear = false;
                 }
             }else {
                 if(xy.distance(Player.playerHeadXY())<100){
                     callBack = true;
+                    setRadian(Player.playerHeadXY());
+                }else {
+                    setRadian(null);
                 }
                 step = Player.maxStep/2;
+
             }
-            setRadian();
+
         }else{
             step = 2 * Player.step;
             if(xy.distance(Player.playerHeadXY())<size){
@@ -294,9 +296,15 @@ if(callBack){
                     rendering.getModels().remove(0);
                     xy.setLocation(xyArray.get(0)[0],xyArray.get(0)[1]);
                     Player.player.grow();
+                    if(!isEmpty){
+                        Player.player.grow();
+                        Player.player.eatTheApple();
+                        isEmpty = true;
+                    }
                 }else {
 
                     if (!isEmpty) {
+                        Player.player.grow();
                         Player.player.eatTheApple();
                     }else {
                         Player.player.grow();
@@ -306,7 +314,8 @@ if(callBack){
                     return;
                 }
             }
-            setRadian();
+
+            setRadian(Player.playerHeadXY());
         }
         move(pointWatch[0],pointWatch[1]);
         checkForAbsorb();

@@ -1,7 +1,7 @@
 package org.example.Buffs;
 
 import org.example.Player.Player;
-import org.example.gpu.Window;
+import org.example.gpu.render.Window;
 
 import java.awt.*;
 

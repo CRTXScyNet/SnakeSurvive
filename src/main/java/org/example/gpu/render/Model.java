@@ -60,7 +60,7 @@ public class Model implements Cleaner.Cleanable {
     private int width;
     private int heigth;
 
-    public Model(org.example.gpu.Window window, int scale, Color color) {
+    public Model(Window window, int scale, Color color) {
         this.color = color;
         this.width = window.width;
         this.heigth = window.height;
@@ -92,28 +92,7 @@ public class Model implements Cleaner.Cleanable {
 
     }
 
-    public void update(Window window) {
 
-//        if (glfwGetKey(window.getWindow(), GLFW_KEY_D) != 0) {
-//            movement.getPosition().sub(new Vector3f(-10, 0, 0));
-//        }
-//        if (glfwGetKey(window.getWindow(), GLFW_KEY_A) != 0) {
-//            movement.getPosition().sub(new Vector3f(10, 0, 0));
-//        }
-//        if (glfwGetKey(window.getWindow(), GLFW_KEY_W) != 0) {
-//            movement.getPosition().sub(new Vector3f(0, -10, 0));
-//        }
-//        if (glfwGetKey(window.getWindow(), GLFW_KEY_S) != 0) {
-//            movement.getPosition().sub(new Vector3f(0, 10, 0));
-//        }
-
-//        if (glfwGetKey(window.getWindow(), GLFW_KEY_Q) != 0) {
-//            Point p = MouseInfo.getPointerInfo().getLocation();
-//            p.x = p.x - window.windowPosX-window.width/2;
-//            p.y = (p.y-window.windowPosY-window.height/2);
-//            movement.setPosition(new Vector3f(p.x, -p.y, 0));
-//        }
-    }
 
     public void render() {
 
@@ -151,6 +130,11 @@ public class Model implements Cleaner.Cleanable {
 
     @Override
     public void clean() {
+
+        glDeleteBuffers(i_id);
+        glDeleteBuffers(s_id);
+        glDeleteBuffers(v_id);
+
 //        shader.clean();
 //        texture.clean();
     }

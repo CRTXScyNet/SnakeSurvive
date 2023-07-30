@@ -2,20 +2,19 @@ package org.example.Player;
 
 import org.example.Enemy.Entity;
 import org.example.Painter.Apple;
-import org.example.gpu.Window;
+import org.example.gpu.gameProcess.trest;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
-import org.example.gpu.trest;
+import org.example.gpu.render.Window;
 import org.joml.Vector3f;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
-public class Player extends Entity {
-    private int width;
-    private int height;
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_1;
 
+public class Player extends Entity {
 
     public void moveXy(float[] direct) {
         for (int i = 0; i < xy.size(); i++) {
@@ -36,29 +35,13 @@ public class Player extends Entity {
 
     private Color color = new Color(Color.white.getRGB());
 
-    boolean perviyNah = false;
-
-    private double chance = Math.random() * 0.8 + 0.2;
-
     static float size = 6;
-    static double stepOfSize = 2;
-
-    public static void setStep() {
-        Player.step = (int) (Player.getSize() * stepOfSize);
-    }
 
     public static float maxStepStat = 2f;
     public static float maxStep = maxStepStat;
     public static final float minStep = 1f;
     public static float step = 1f;
 
-
-    public void setDelay() {
-        if (delay < 100) {
-            delay += 1;
-//            this.delay = (int) delayDouble;
-        }
-    }
 
     private int reverseCount = 100;
     private int reverse = reverseCount;
@@ -72,14 +55,11 @@ public class Player extends Entity {
     }
 
     public static ArrayList<Player> players = new ArrayList<>();
-    public boolean isGrow = false;
-    public boolean isShorter = false;
     public boolean reset = false;
     public Color mainColor = new Color(0, 100, 100);
     public Color takenAppleColor = new Color(200, 0, 0);
 
     static boolean speedBoost = false;
-    public static boolean absorb = false;
     public static ArrayList<float[]> absorbArray = new ArrayList<>();
     private static Window window;
     private ModelRendering rendering;
@@ -116,11 +96,12 @@ public class Player extends Entity {
         part = new PlayerPart(window);
     }
 
+
     public void throwPart() {
-//        if(countOfApples>0) {
-        part.spawn();
-        minusCell();
-//        }
+        if (countOfApples < xy.size() && xy.size() > 1) {
+            part.spawn();
+            minusCell();
+        }
     }
 
     public void takePartBack() {
@@ -152,6 +133,10 @@ public class Player extends Entity {
 
 
     public void grow() {
+        if (xy.size() >= maxSize) {
+            return;
+        }
+
         for (int i = 0; i < 1; i++) {
             addCircle();
         }
@@ -160,7 +145,7 @@ public class Player extends Entity {
 
     public void minusCell() {
         try {
-            if (getXy().size() > 3) {
+            if (getXy().size() > 1) {
                 rendering.getModels().remove(getXy().size() - 1);
                 getXy().remove(getXy().size() - 1);
 
@@ -176,12 +161,9 @@ public class Player extends Entity {
         speedBoostTime = 0;
         maxStep = maxStepStat;
         step = 0.1f;
-        delayDouble = delayStat;
-        delay = (int) delayStat;
-        delayCount = 0;
         xy.clear();
         xy.add(new float[]{0, 0});
-        rendering.clear();
+        rendering.clear(true);
         rendering.addModel(new Model(window, (int) (size * 30), color));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) 0, (float) 0, 0));
 //        move(width/2,height/2);
@@ -189,7 +171,6 @@ public class Player extends Entity {
             addCircle();
         }
         part.reset();
-
     }
 
     public void setAppleCount() {
@@ -206,7 +187,7 @@ public class Player extends Entity {
 
     public void cutTheTail() {
         int i = Player.countOfApples;
-        int s = xy.size() / 2;
+        int s = xy.size() - (xy.size() - Player.countOfApples) / 2 - 1;
         for (int j = xy.size() - 1; j >= 0; j--) {
             if (xy.size() > 5) {
                 if (j > i - 1 && j > s) {
@@ -252,6 +233,10 @@ public class Player extends Entity {
     boolean canIncreaseSpeed = false;
 
     public void eatTheApple() {
+        if (countOfApples >= 40) {
+            return;
+        }
+
         countOfApples++;
         if (xy.size() < countOfApples) {
             grow();
@@ -284,79 +269,73 @@ public class Player extends Entity {
             setTime(-trest.eatenPlayerTimelast);
         } else {
             setTime(trest.mainTime);
+            hold();
         }
         moveCheck();
         part.update();
     }
 
-    void setRadian(Point Target) {
-
-        float xTarget = Target.x - xy.get(0)[0];
-        float yTarget = Target.y - xy.get(0)[1];
-
-        float TargetRadian = 0;
-        // 1143 372 900 600
+    protected int radDir = 0;
+    protected double difRad = 1;
+    protected float TargetRadian = 0;
+    protected float targetOpposite = 0;
+    void setRadian(Point2D Target) {
+        float xTarget;
+        float yTarget;
+        if (Target != null) {
+            xTarget = (float) Target.getX() - xy.get(0)[0];
+            yTarget = (float) Target.getY() - xy.get(0)[1];
+        } else {
+            xTarget = (float) 0 - xy.get(0)[0];
+            yTarget = (float) 0 - xy.get(0)[1];
+        }
         TargetRadian = (float) Math.atan2(xTarget, yTarget);
         if (TargetRadian < 0) {
             TargetRadian += 6.28;
 
         }
-        float halfNear = (tMouse + 3.14f) % 6.28f;
-
-//        pointWatch[0] = (float) (step * Math.sin(tMouse) + xy.get(0)[0]);
-//        pointWatch[1] = (float) (step * Math.cos(tMouse) + xy.get(0)[1]);
+         targetOpposite = (tMouse + 3.14f) % 6.28f;
 
         tMouse = (float) ((tMouse + 6.28) % 6.28);
-
-        double dif = Math.abs((TargetRadian - tMouse) % 6.28);
-        if (dif > 3.14) {
-            dif = Math.abs((Math.max(TargetRadian, tMouse) - 3.14) - (Math.min(TargetRadian, tMouse) + 3.14));
-
+        difRad = Math.abs((TargetRadian - tMouse) % 6.28);
+        if (difRad > 3.14) {
+            difRad = Math.abs((Math.max(TargetRadian, tMouse) - 3.14) - (Math.min(TargetRadian, tMouse) + 3.14));
+        }
+        if (TargetRadian > tMouse && TargetRadian > targetOpposite && targetOpposite >= 3.14) {          // уменьшение
+            radDir = -1;
+        } else if (TargetRadian < tMouse && TargetRadian < targetOpposite && targetOpposite >= 3.14) {                          // уменьшение
+            radDir = -1;
+        } else if (TargetRadian < tMouse && TargetRadian > targetOpposite) {                          // уменьшение
+            radDir = -1;
+        }else {
+            radDir = 1;
         }
 
 
-        if (!trest.mouseControl) {
-//            stepRad = step / 30;
-            stepRad = (float) Math.abs(dif) / (20 / (step / 2));
+
+
+        if (Target == null) {
+            stepRad = (float) Math.abs(difRad) / (20 / (step / 2));
         } else {
-            stepRad = (float) Math.abs(dif) / (15 / (step / 2));
+            stepRad = (float) Math.abs(difRad) / (15 / (step / 2));
         }
         maxCount = (int) (3.14 / stepRad);
 
-        if (TargetRadian > tMouse && TargetRadian > halfNear && halfNear >= 3.14) {          // уменьшение
-            stepRad *= -1;
-//            tMouse -= stepRad;
-//System.out.println("-");
-        } else if (TargetRadian < tMouse && TargetRadian < halfNear && halfNear >= 3.14) {                          // уменьшение
-            stepRad *= -1;
-//            tMouse -= stepRad;
-//            System.out.print("-");
-        } else if (TargetRadian < tMouse && TargetRadian > halfNear) {                          // уменьшение
-            stepRad *= -1;
-//            tMouse -= stepRad;
-//            System.out.print("-");
-        }
 
-//        if(trest.mouseControl){
-        tMouse += stepRad;
-//        }
-//        System.out.println();
+        tMouse += stepRad*radDir;
+
         if (tMouse > 6.28) {
             tMouse -= 6.28;
-//            System.out.println("tMouse > 6.28");
+
         } else if (tMouse < 0) {
-//            System.out.println("tMouse<0");
+
             tMouse += 6.28;
         }
-        if (trest.mouseControl) {
-
-
-            if ((stepRadLast > 0 && stepRad < 0) || (stepRadLast < 0 && stepRad > 0)) {
+        if (Target != null) {
+            if ((stepRadLast > 0 && radDir < 0) || (stepRadLast < 0 && radDir > 0)) {
                 count = 0;
             }
-
-
-            if (dif > 0.05) {
+            if (difRad > 0.05) {
                 if (count < maxCount) {
                     canIncreaseSpeed = true;
                     count++;
@@ -374,31 +353,25 @@ public class Player extends Entity {
             }
         }
 
-        stepRadLast = stepRad;
-
-
+        stepRadLast = radDir;
     }
 
     public void increaseSpeed() {
-        maxStep += 0.1;
-
+        maxStep += 0.05;
     }
 
     public void decreaseSpeed() {
-        maxStep -= 0.1;
-
+        maxStep -= 0.05;
     }
 
     static double delayStat = 15;
-    private double delayDouble = delayStat;
-    private int delay = (int) delayDouble;
-    private int delayCount = 0;
+
 
     static double timerStat = 500;
     static double timer = timerStat;
     double timeTo = trest.getMainTime();
-    double dif = 0;
-   public static float speedBoostTime = 0;
+    double timeToGrow = 0;
+    public static float speedBoostTime = 0;
     static float speedBoostTimer = 0;
 
     public static void addSpeedTime(float time) {
@@ -411,20 +384,20 @@ public class Player extends Entity {
 
     public void moveCheck() {
         try {
-            dif += trest.getMainTime() - timeTo;
+            timeToGrow += trest.getMainTime() - timeTo;
             speedBoostTimer = (float) (trest.getMainTime() - timeTo);
             timeTo = trest.getMainTime();
-            if (countOfApples<50 && dif >= 100.0 / countOfApples) {
+            if (/*countOfApples<30 && */timeToGrow >= 10/*100.0 / countOfApples*/) {
                 grow();
-                dif = 0;
+                timeToGrow = 0;
             }
 
 
             try {
-                if (speedBoostTime <= 0 || step < maxStep ) {
+                if (speedBoostTime <= 0 || step < maxStep) {
                     speedBoost = false;
                 }
-                if (speedBoostTime > 0 && !speedBoost && step <= maxStep*1.5) {
+                if (speedBoostTime > 0 && !speedBoost && step <= maxStep * 1.5) {
                     step *= 1.2f;
                 }
 
@@ -455,12 +428,16 @@ public class Player extends Entity {
                     xTarget = 0;
                     yTarget = 0;
                 }
+                if (trest.mouseControl) {
+                    setRadian(new Point(xTarget, yTarget));
+                } else {
+                    setRadian(null);
+                }
 
-                setRadian(new Point(xTarget, yTarget));
 //            selfStep = Math.random()*(step+ Math.sqrt(Math.pow(Math.abs(xTarget - x), 2) + Math.pow(Math.abs(yTarget - y), 2)) / 50);
                 try {
-                    pointWatch[0] = (float) (step * Math.sin(tMouse) + xy.get(0)[0]);
-                    pointWatch[1] = (float) (step * Math.cos(tMouse) + xy.get(0)[1]);
+                    pointWatch[0] = (float) ((step + secStep) * Math.sin(tMouse) + xy.get(0)[0]);
+                    pointWatch[1] = (float) ((step + secStep) * Math.cos(tMouse) + xy.get(0)[1]);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -481,28 +458,7 @@ public class Player extends Entity {
     public void move(float x, float y) {
 
         try {
-            if (!trest.isEnd) {
-                checkForAbsorb();
-            }
-//            if (!trest.mouseControl) {
-////                float headDistance = (float) Math.sqrt(Math.pow(xy.get(0)[0], 2) + Math.pow(xy.get(0)[1], 2));
-////
-////                if (headDistance < 30) {
-////                    xy.set(0, new float[]{xy.get(0)[0] + (xy.get(0)[0] / 10), xy.get(0)[1] + (xy.get(0)[1] / 10)});
-////                }
-//
-////                if (headDistance > 30) {
-////                    xy.set(0, new float[]{xy.get(0)[0] - (xy.get(0)[0] / 1000), xy.get(0)[1] - (xy.get(0)[1] / 1000)});
-////                }
-//
-//
-//                for (int i = 1; i < xy.size(); i++) {
-//                    float distance = (float) Math.sqrt(Math.pow(xy.get(i)[0], 2) + Math.pow(xy.get(i)[1], 2));
-//                    if (distance !=0 && distance < 10) {
-//                        xy.set(i, new float[]{xy.get(i)[0] - (xy.get(i)[0] * (step / (distance))), xy.get(i)[1] - (xy.get(i)[1] * (step / (distance)))});
-//                    }
-//                }
-//            }
+
             boolean stop = false;
             if (step <= size / 2) {
                 xy.set(0, new float[]{x, y});
@@ -533,8 +489,6 @@ public class Player extends Entity {
                 float xyAngle = (float) Math.atan((xy.get(0)[1] - y) / (xy.get(0)[0] - x));
 
                 for (int j = 1; j < stepPartCount + 1; j++) {
-
-
                     double changeX = (stepPart * j) * Math.cos(xyAngle);
                     double changeY = (stepPart * j) * Math.sin(xyAngle);
                     if (x - xy.get(0)[0] < 0) {
@@ -568,18 +522,21 @@ public class Player extends Entity {
             if (stop) {
                 step *= 0.99;
             }
+            if (!trest.isEnd) {
+                checkForAbsorb();
+            }
             if (trest.mouseControl) {
                 float maxDistance = 80;
                 float distance = (float) playerHeadXY().distance(0, 0);
 //                if (distance > maxDistance) {
-                    float angle = (float) Math.atan((-y) / (-x));
-                    double translocationX = distance/5 * Math.cos(angle);
-                    double translocationY = distance/5 * Math.sin(angle);
-                    if (-x < 0) {
-                        direction = new float[]{(float) +translocationX, (float) +translocationY};
-                    } else {
-                        direction = new float[]{(float) -translocationX, (float) -translocationY};
-                    }
+                float angle = (float) Math.atan((-y) / (-x));
+                double translocationX = distance / 5 * Math.cos(angle);
+                double translocationY = distance / 5 * Math.sin(angle);
+                if (-x < 0) {
+                    direction = new float[]{(float) +translocationX, (float) +translocationY};
+                } else {
+                    direction = new float[]{(float) -translocationX, (float) -translocationY};
+                }
 //                } else {
 //                    direction = new float[]{x / 20, y / 20};
 //                }
@@ -599,13 +556,13 @@ public class Player extends Entity {
             }
             maxSpeedRender.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy.get(0)[0], (float) xy.get(0)[1], 0));
             maxSpeedRender.getModels().get(0).getMovement().setRotation(-tMouse);
-            speedScale = ((step - (maxStep - 0.2f)) / 0.2f);
-            if(speedScale<0){
+            speedScale = ((step - (maxStep - maxStep * 0.1f)) / 0.2f);
+            if (speedScale < 0) {
                 speedScale = 0;
             }
-            if (speedScale>1){
-                curSpeed+=1*0.01;
-            }else {
+            if (speedScale > 1) {
+                curSpeed += 1 * 0.01;
+            } else {
                 curSpeed += speedScale * 0.01;
             }
             maxSpeedRender.setTime(trest.getMainTime());
@@ -727,7 +684,26 @@ public class Player extends Entity {
 
     }
 
+    private float secStep = 0;
 
-    public static int maxSize = 160;
+    public void hold() {
+        if (!trest.mouseControl) {
+            if (window.getInput().isMouseButtonDown(GLFW_MOUSE_BUTTON_1)) {
+                if (step < maxStep * 2) {
+                    step += 0.01;
+//                    secStep+=0.01;
+                }
+            }
+        } else {
+//            if(secStep>0){
+//                step-=0.1;
+//                secStep-=0.01;
+//            }
+        }
+
+    }
+
+
+    public static int maxSize = 70;
 
 }

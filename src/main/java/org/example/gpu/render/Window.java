@@ -1,4 +1,4 @@
-package org.example.gpu;
+package org.example.gpu.render;
 
 import org.example.gpu.io.Input;
 import org.lwjgl.glfw.GLFWVidMode;
