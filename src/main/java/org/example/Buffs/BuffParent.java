@@ -1,11 +1,13 @@
 package org.example.Buffs;
 
+import org.example.Painter.Pointer;
 import org.example.Player.Player;
 import org.example.Sound.LWJGLSound;
 import org.example.gpu.render.Window;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
 import org.example.gpu.gameProcess.trest;
+import org.example.time.ShortTimer;
 import org.joml.Vector3f;
 
 import java.awt.*;
@@ -18,7 +20,7 @@ public class BuffParent {
 
     protected Point2D xy = new Point2D.Float(0,0);
     protected ModelRendering renderingBuff;
-    protected ModelRendering renderingBuffPointer;
+
 
     protected float beginTime;
     protected float existingTimer = 0;
@@ -35,12 +37,15 @@ public class BuffParent {
 
     protected static float size = 10;
     protected float timerForShow = 0.5f;
+private Pointer pointer;
     protected float timeOfEnd = 0;
     protected boolean eaten = false;
     protected boolean isExist = false;
     protected boolean closing = false;
     protected boolean isShowing = false;
     protected boolean soundExist = false;
+    protected float mainTime = 0;
+
 
 
 
@@ -50,7 +55,6 @@ public class BuffParent {
     protected LWJGLSound pickUpSound = null;
 
     public BuffParent(Window window) {
-
         chance = 0.5;
         this.window = window;
 
@@ -67,8 +71,8 @@ public class BuffParent {
 this.color = color;
 
         renderingBuff = new ModelRendering(window,   null, buffShader);
+pointer = new Pointer(0.5f,window,buffPointerShader,color,80,300,15);
 
-        renderingBuffPointer = new ModelRendering(window,  null, buffPointerShader);
     }
 
     public void addSome() {
@@ -82,7 +86,7 @@ this.color = color;
         renderingBuff.addModel(new Model(window, (int) (size * 50),color));
         renderingBuff.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy.getX(), (float) xy.getY(), 0));
 
-        renderingBuffPointer.addModel(new Model(window, 15,color));
+
         closing = false;
         isExist = true;
     }
@@ -103,6 +107,7 @@ this.color = color;
     }
 
     public void update() {
+        mainTime = trest.getMainTime();
         if(constantSound != null) {
             constantSound.update((float) xy.getX(), (float) xy.getY());
             if (isExist || isShowing){
@@ -112,8 +117,8 @@ this.color = color;
 
         if (!isShowing) {
             if (isExist) {
-                if (!eaten && xy.distance(Player.playerHeadXY()) < size * 2) {
-                    timeOfEnd = trest.getMainTime();
+                if (!eaten && xy.distance(Player.player.getHeadXY()) < size * 2) {
+                    timeOfEnd = mainTime;
                     closing = true;
                     buffOnn();
 
@@ -122,27 +127,29 @@ this.color = color;
                 if (!eaten) {
 
                     setPointerPosition();
-                    existingTimer = trest.getMainTime() - beginTime;
+                    existingTimer = mainTime - beginTime;
                     renderingBuff.setTime(existingTimer);
-                    renderingBuffPointer.setTime(existingTimer);
+
+
                     if (existingTimer >= canExistTime && !closing) {
-                        timeOfEnd = trest.getMainTime();
+                        timeOfEnd = mainTime;
                         closing = true;
                     }
 
                 } else {
 
-                    buffTimer = trest.getMainTime() - catchTime;
+                    buffTimer = mainTime - catchTime;
                     if (buffTimer >= buffCanExistTime/* && !remove*/) {
                         buffOff();
                     }
                 }
                 if (closing) {
                     if (!eaten) {
-                        float timer = trest.getMainTime() - timeOfEnd;
+                        float timer = mainTime - timeOfEnd;
                         float secTime = -(timerForShow - timer) * 1.1f / timerForShow - 0.1f;
                         renderingBuff.setTime(secTime);
-                        renderingBuffPointer.setTime(secTime);
+
+                        pointer.update(xy,false,mainTime);
                         if(constantSound != null) {
                             constantSound.fadeOut(timer, timerForShow);
                         }
@@ -154,10 +161,11 @@ this.color = color;
                             }
                         }
                     } else {
-                        float timer = trest.getMainTime() - catchTime;
+                        float timer = mainTime - catchTime;
                         float secTime = -(timerForShow - timer) * 1.1f / timerForShow - 0.1f;
                         renderingBuff.setTime(secTime);
-                        renderingBuffPointer.setTime(secTime);
+
+                        pointer.update(xy,false,mainTime);
                         if(constantSound != null) {
                             constantSound.fadeOut(timer, timerForShow);
                         }
@@ -168,15 +176,18 @@ this.color = color;
                             }
                         }
                     }
+                }else {
+                    pointer.update(xy,true,mainTime);
                 }
             }
         }else {
 
             setPointerPosition();
-            float timer = trest.getMainTime() - beginTime;
+            float timer = mainTime - beginTime;
             float secTime = -(timer) * 1.1f / timerForShow - 0.1f;
             renderingBuff.setTime(secTime);
-            renderingBuffPointer.setTime(secTime);
+
+            pointer.update(xy,true,mainTime);
             if(constantSound != null) {
                 constantSound.appearIn(timer, timerForShow);
             }
@@ -206,8 +217,7 @@ this.color = color;
         }
         double pointWatchX = (80 * Math.sin(TargetRadian));
         double pointWatchY = (80 * Math.cos(TargetRadian));
-        renderingBuffPointer.getModels().get(0).getMovement().setPosition(new Vector3f((float) pointWatchX, (float) pointWatchY, 0));
-        renderingBuffPointer.getModels().get(0).getMovement().setRotation((float) -TargetRadian);
+
 
     }
 
@@ -216,7 +226,7 @@ this.color = color;
         if(pickUpSound != null){
             pickUpSound.play();
         }
-        catchTime = trest.getMainTime();
+        catchTime = mainTime;
 
 
     }
@@ -231,7 +241,7 @@ this.color = color;
             constantSound.stop();
         }
         renderingBuff.clear(false);
-        renderingBuffPointer.clear(false);
+
 
     }
 
@@ -253,9 +263,7 @@ this.color = color;
 
     public void reset() {
         renderingBuff.clear(true);
-        renderingBuffPointer.clear(true);
         ModelRendering.removeModelRender(renderingBuff);
-        ModelRendering.removeModelRender(renderingBuffPointer);
         if(constantSound != null) {
             constantSound.delete();
         }
@@ -264,5 +272,6 @@ this.color = color;
         }
         eaten = false;
         isExist = false;
+        pointer.remove();
     }
 }

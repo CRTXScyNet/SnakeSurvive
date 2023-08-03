@@ -9,10 +9,12 @@ import org.example.Enemy.Enemy;
 import org.example.Main;
 import org.example.Painter.Apple;
 import org.example.Player.GluePart;
+import org.example.Player.Phantom;
 import org.example.Player.Player;
 import org.example.Sound.LWJGLSound;
 import org.example.Sound.MainSoundsController;
-import org.example.gpu.Timer;
+import org.example.time.ShortTimer;
+import org.example.time.Timer;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
 import org.example.gpu.render.Window;
@@ -38,38 +40,31 @@ public class trest {
     static int height = 500;
     public static int xMouse;
     public static int yMouse;
-    public static int countOfApples = 0;
     public static ArrayList<ModelRendering> background = new ArrayList<>();
     public static ArrayList<ModelRendering> background2 = new ArrayList<>();
     public static ArrayList<ModelRendering> background3 = new ArrayList<>();
     public static ArrayList<BuffParent> buffs = new ArrayList<>();
     public static ArrayList<WormHole> holes = new ArrayList<>();
     public static HashMap<Point, Point> toTargets = new HashMap<>();
-    public static ArrayList<Enemy> absorbedEnemies = new ArrayList<>();
+    public static ArrayList<Phantom> bosses = new ArrayList<>();
 
     public static float half;
-    public static boolean reset = false;
+
     static boolean isPaused = false;
     public static boolean isEnd = false;
-    public static boolean enemyEaten = false;
-    public static boolean eaten = false;
-    static boolean screenMove = false;
+
     public static boolean enemyScared = false;
-    static boolean appleSpawned = false;
-    public static boolean appleVisible = false;
+
     public static boolean ringWayIsReady = false;
     public static boolean exit = false;
     public static boolean stageChanging = false;
 
-    public static float eatenTime = 0;
-    public static float eatenTimelast = 0;
     public static float eatenPlayerTime = 0;
     public static float eatenPlayerTimelast = 0;
     public static float mainTime = 0;
     static float[] direction = new float[2];
-    public static float appleDistance = 0;
+
     float[] a = new float[2];
-    static double collisionWithApple = Math.pow(Apple.getAppleSize() + Player.getSize(), 2);
     static double radius1;
     private static int outLeft;
     private static int fromLeft;
@@ -79,11 +74,12 @@ public class trest {
     private static int fromUp;
     private static int outDown;
     private static int fromDown;
-    private int eatenDelayStat = 50;
-    private int eatenDelay = eatenDelayStat;
-    private static int expansePart = 1;
+
+
     static public Apple apple;
     static public Player player;
+    static public Phantom phantom;
+
     //    static MainSound mainSound = null;
     static MainSoundsController mainSound = null;
     static LWJGLSound deathSound = null;
@@ -115,16 +111,7 @@ public class trest {
                 groundCount = 0f;
 
                 passiveEnemyCount = 100f;
-                if (roundCount != 0) {
-                    holesCount = 4f+roundCount;
-                    groundCount = 1f + roundCount * 0.1f;
-                    passiveEnemyCount = 100 + roundCount * 10;
-                    activeEnemyCount = 50 + roundCount * 5;
-                    gluePartsCount = 20f + roundCount;
-                    cutTheTailBufCount = 1+roundCount*0.2f;
-                    fearCount = 1+roundCount*0.2f;
-                    speedBufCount = roundCount*2;
-                }
+
                 super.setStage();
             }
 
@@ -171,16 +158,7 @@ public class trest {
                 clear();
                 groundCount = 0f;
                 activeEnemyCount = 50;
-                if (roundCount != 0) {
-                    holesCount = 4f+roundCount;
-                    groundCount = 1f + roundCount * 0.1f;
-                    passiveEnemyCount = 100 + roundCount * (10 * 1.2f);
-                    activeEnemyCount = 50 + roundCount * (5 * 1.2f);
-                    gluePartsCount = 20f + roundCount * 1.2f;
-                    cutTheTailBufCount = 1+roundCount*0.2f;
-                    fearCount = 1+roundCount*0.2f;
-                    speedBufCount = roundCount*2;
-                }
+
                 super.setStage();
             }
 
@@ -228,16 +206,7 @@ public class trest {
                 groundCount = 0.5f;
                 passiveEnemyCount = 80;
                 activeEnemyCount = 40;
-                if (roundCount != 0) {
-                    holesCount = 5f+roundCount;
-                    groundCount = 1f + roundCount * 0.1f;
-                    passiveEnemyCount = 100 + roundCount * (10 * 1.3f);
-                    activeEnemyCount = 50 + roundCount * (5 * 1.3f);
-                    gluePartsCount = 20f + roundCount * 1.3f;
-                    cutTheTailBufCount = 1+roundCount*0.2f;
-                    fearCount = 1+roundCount*0.2f;
-                    speedBufCount = roundCount*2;
-                }
+
                 super.setStage();
             }
 
@@ -285,16 +254,7 @@ public class trest {
                 passiveEnemyCount = 100;
                 activeEnemyCount = 50;
                 gluePartsCount = 20f;
-                if (roundCount != 0) {
-                    holesCount = 5f+roundCount;
-                    groundCount = 1f + roundCount * 0.1f;
-                    passiveEnemyCount = 100 + roundCount * (10 * 1.4f);
-                    activeEnemyCount = 50 + roundCount * (5 * 1.4f);
-                    gluePartsCount = 20f + roundCount * 1.4f;
-                    cutTheTailBufCount = 1+roundCount;
-                    fearCount = 1+roundCount;
-                    speedBufCount = roundCount;
-                }
+
                 super.setStage();
             }
 
@@ -320,7 +280,7 @@ public class trest {
             }
 
             public Stage getNextStage() {
-                roundCount++;
+
                 return FIRST_STAGE;
             }
 
@@ -336,14 +296,44 @@ public class trest {
 
 
         };
-        static int roundCount = 0;
+        public static int roundCount = -1;
         public void reset(){
             stage = Stage.FIRST_STAGE;
-            roundCount = 0;
+            roundCount = -1;
             stage.setStage();
         }
 
         public void setStage() {
+
+            if (!stage.isBoss()){
+                roundCount++;
+                if (roundCount > 0) {
+                    holesCount = roundCount;
+                    groundCount = 1f + roundCount * 0.1f;
+
+                    passiveEnemyCount = 100 + roundCount * (10 * 1.4f);
+                    activeEnemyCount = roundCount * (5);
+                    gluePartsCount =roundCount*5;
+                    cutTheTailBufCount = 0;
+                    fearCount = 0;
+                    speedBufCount = roundCount;
+                    if(roundCount>4){
+                        cutTheTailBufCount = 3;
+                        fearCount = 4;
+                    }
+                    if(groundCount>2){
+                        groundCount=2;
+                    }
+                    if(speedBufCount>10){
+                        speedBufCount=10;
+                    }
+
+
+
+                }
+            }else {
+                groundCount = 0f;
+            }
             stage.timer();
             stageStopWatch = 0;
             setScale();
@@ -455,6 +445,7 @@ public class trest {
         deathSound.setCastomVolume(0.1f);
 
 
+
         loop(window);
 
 
@@ -476,11 +467,10 @@ public class trest {
 
         float stageTimer = 0;
 
-        expansePart = 1;
 
         stage.setStage();
-        stage.timer();
-        System.out.println(stage.name() + " stated!");
+
+//        ShortTimer timer = new ShortTimer(5);
         while (!window.shouldClose()) {
             boolean canRender = false;
             double time2 = Timer.getTime();
@@ -493,13 +483,18 @@ public class trest {
             if (!isPaused) {
                 mainTime += (float) time2 - (float) time;
             }
+//            timer.start(false,mainTime);
+//            timer.update(mainTime);
             if (!isPaused && !isEnd) {
                 if (mainSound != null) {
                     mainSound.play();
                 }
                 if (addingEntity >= 1) {
+                    if(!stage.isBoss()){
+                        addSomeEntity(window);
+                    }else{
 
-                    addSomeEntity(window);
+                    }
                     addingEntity = 0;
                 }
                 if (stageStopWatch < Stage.stageTimer) {
@@ -507,11 +502,25 @@ public class trest {
                     stageChanging = false;
                 } else {
                     if(stage.isBoss()){
-                        stageChanging = true;
-                        stage = stage.getNextStage();
-                        stage.setStage();
-                        GluePart.clearParts();
+                        if(bosses.size()!=0){
+                            if (Phantom.phantoms.size() == 0){
+                                bosses.clear();
+                            }
+                        }else {
+                            stageChanging = true;
+                            stage = stage.getNextStage();
+                            stage.setStage();
+                            GluePart.clearParts();
+                        }
+
                     }else {
+
+                        if(Phantom.phantoms.size()==0){
+                            for (int i = 0; i < Stage.roundCount+1; i++) {
+                                bosses.add(new Phantom(window,Player.player.getXy().size()*3));
+                            }
+
+                        }
                         stageChanging = true;
 //                        clearStage();
                         stage = stage.getNextStage();
@@ -694,13 +703,13 @@ public class trest {
             new GluePart(window);
 //                        }
 
-            expansePart *= 2;
+
         }
     }
 
     public void clearEnemies() {
         for (int i = 0; i < Enemy.enemies.size(); i++) {
-            if (Enemy.enemies.get(i).enemyHead.distance(Player.playerHeadXY()) > 450) {
+            if (Enemy.enemies.get(i).enemyHead.distance(Player.player.getHeadXY()) > 450) {
                 Enemy.enemies.get(i).removeEnemy();
                 i--;
                 if (Enemy.enemies.size() == 0) {
@@ -992,6 +1001,7 @@ public class trest {
         }
         buffs.clear();
         GluePart.clear();
+        Phantom.clear();
     }
 
     public static void playgroundScale() {
@@ -1027,8 +1037,11 @@ public class trest {
         fromDown = (int) (height * playGroundScale) / Enemy.step * Enemy.step;
         playGroundHeight = fromDown;
         // Создаем сущности
-        apple = new Apple(window);
         player = new Player(window);
+        apple = new Apple(window);
+
+
+
 
 
         //Вычисляем пути врагов после проигрыша
@@ -1085,6 +1098,10 @@ public class trest {
                 moveEntity();
                 a = Apple.getXy();
                 apple.update();
+
+                for (int i = 0; i < Phantom.phantoms.size(); i++) {
+                    Phantom.phantoms.get(i).update();
+                }
                 player.update();
                 for (int i = 0; i < Enemy.enemies.size(); i++) {
                     Enemy.enemies.get(i).update();
@@ -1144,6 +1161,10 @@ public class trest {
         apple.moveXy(direction);
         player.moveXy(direction);
 
+        for(Phantom phantom1 : Phantom.phantoms){
+            phantom1.moveXy(direction);
+        }
+
 
         for (Enemy enemy : Enemy.enemies) {
             if (enemy.getXy().size() == 0) {
@@ -1186,7 +1207,7 @@ public class trest {
             isEnd = true;                         // TODO
             mouseControl = false;
             Player.speedBoostTime = 0;
-            Player.step = Player.minStep;
+            Player.player.step = Player.player.minStep;
             for (Enemy enemy1 : Enemy.enemies) {
                 enemy1.setCurrentDelay(0);
             }

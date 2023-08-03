@@ -55,8 +55,8 @@ public static void fear(){
                 if (phantomDistance < maxDistance) {
                     changed = true;
                     float phantomAngle = (float) Math.atan((-enemyPhantomPoint.getY()) / (-enemyPhantomPoint.getX()));
-                    double phantomTranslocationX = (phantomDistance + (Player.step*3*(1-distance/maxDistance))) * Math.cos(phantomAngle);
-                    double phantomTranslocationY = (phantomDistance + (Player.step*3*(1-distance/maxDistance))) * Math.sin(phantomAngle);
+                    double phantomTranslocationX = (phantomDistance + (Player.player.step*3*(1-distance/maxDistance))) * Math.cos(phantomAngle);
+                    double phantomTranslocationY = (phantomDistance + (Player.player.step*3*(1-distance/maxDistance))) * Math.sin(phantomAngle);
                     if (-enemyPhantomPoint.getX() < 0) {
                         enemy.getPhantomXY().set(i, new float[]{+(float) phantomTranslocationX, +(float) phantomTranslocationY});
                         enemy.getXy().set(i,enemy.getPhantomXY().get(i));
@@ -83,8 +83,8 @@ public static void fear(){
                 if (distance < maxDistance) {
 
                     float angle = (float) Math.atan((-enemyPoint.getY()) / (-enemyPoint.getX()));
-                    double translocationX = (distance + (Player.step*3*(1-distance/maxDistance))) * Math.cos(angle);
-                    double translocationY = (distance + (Player.step*3*(1-distance/maxDistance))) * Math.sin(angle);
+                    double translocationX = (distance + (Player.player.step*3*(1-distance/maxDistance))) * Math.cos(angle);
+                    double translocationY = (distance + (Player.player.step*3*(1-distance/maxDistance))) * Math.sin(angle);
                     if (-enemyPoint.getX() < 0) {
                         glue.getXy().set(i, new float[]{+(float) translocationX, +(float) translocationY});
                     } else {

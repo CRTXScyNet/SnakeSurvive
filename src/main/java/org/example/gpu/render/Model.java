@@ -46,12 +46,12 @@ public class Model implements Cleaner.Cleanable {
     }
 
 
-    public int getScale() {
+    public float getScale() {
         return scale;
     }
 
 
-    private int scale = 0;
+    private float scale = 0;
 
     public Movement getMovement() {
         return movement;
@@ -60,7 +60,7 @@ public class Model implements Cleaner.Cleanable {
     private int width;
     private int heigth;
 
-    public Model(Window window, int scale, Color color) {
+    public Model(Window window, float scale, Color color) {
         this.color = color;
         this.width = window.width;
         this.heigth = window.height;

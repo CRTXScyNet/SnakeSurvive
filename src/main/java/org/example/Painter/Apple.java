@@ -6,6 +6,7 @@ import org.example.gpu.render.Window;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
 import org.example.gpu.gameProcess.trest;
+import org.example.time.ShortTimer;
 import org.joml.Vector3f;
 
 import java.awt.*;
@@ -38,11 +39,15 @@ public class Apple {
     public static boolean appleVisible = false;
 
     public static boolean eaten = false;
+    private ShortTimer pointerTimer = new ShortTimer(1);
+    private Pointer pointer;
 
     private ModelRendering rendering;
     private ModelRendering renderingPoiner;
+    private float mainTime = 0;
 
     public Apple(Window window) {
+
         apple = this;
         this.window = window;
         xy = new float[]{(int) (Math.random() * trest.playGroundWidth / 2 - (trest.playGroundWidth / 4)), (int) (Math.random() * trest.playGroundHeight / 2 - (trest.playGroundHeight / 4))};
@@ -52,6 +57,7 @@ public class Apple {
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy[0], (float) xy[1], 0));
         renderingPoiner = new ModelRendering(window, null, "applePointer");
         renderingPoiner.addModel(new Model(window, 30, color));
+        pointer = new Pointer(1f,window,"applePointer",color,150,200,30);
         point2D.setLocation(xy[0],xy[1]);
         soundInit();
     }
@@ -69,14 +75,16 @@ public class Apple {
     }
 
     public void update() {
+        mainTime = trest.mainTime;
         for(LWJGLSound sound : eatSound){
             sound.update(xy[0],xy[1]);
         }
         if (appleSpawned && !appleVisible) {
             if (eatenTimelast > 0) {
-                eatenTimelast -= (trest.mainTime - eatenTime);
+
+                eatenTimelast -= (mainTime - eatenTime);
                 setTime(-eatenTimelast);
-                eatenTime = trest.mainTime;
+                eatenTime = mainTime;
 
             } else {
                 appleVisible = true;
@@ -91,30 +99,34 @@ public class Apple {
 
             appleSpawned = false;
             appleVisible = false;
-            eatenTime = trest.mainTime;
+            eatenTime = mainTime;
             eatenDelay = 0;
         }
 
         if (eaten) {
             if (eatenTimelast > 0) {
-                eatenTimelast += trest.mainTime - eatenTime;
+                eatenTimelast += mainTime - eatenTime;
                 apple.setTime(-eatenTimelast);
-                eatenTime = trest.mainTime;
+                eatenTime = mainTime;
+                //todo
             } else {
-                eatenTimelast = trest.mainTime - eatenTime;
+
+                eatenTimelast = mainTime - eatenTime;
                 apple.setTime(-eatenTimelast);
             }
             if (eatenDelay >= eatenDelayStat) {
                 apple.setXy();
                 eaten = false;
             }
+        }else {
+
         }
         if (eatenDelay >= eatenDelayStat) {
-            eatenTime = trest.mainTime;
+            eatenTime = mainTime;
             appleSpawned = true;
         }
         if (appleVisible) {
-            apple.setTime(trest.mainTime);
+            apple.setTime(mainTime);
         }
     }
 
@@ -122,22 +134,68 @@ public class Apple {
 
     public void setTime(float time) {
         rendering.setTime(time);
-        if (appleVisible) {
-            float buf = (float) (1 - (Player.playerHeadXY().distance(xy[0], xy[1]) / (window.width)));
-            if (Player.playerHeadXY().distance(xy[0], xy[1]) >= window.width) {
+
+        float buf = (float) (1 - (Player.player.getHeadXY().distance(xy[0], xy[1]) / (window.width)));
+        if (Player.player.getHeadXY().distance(xy[0], xy[1]) >= window.width) {
+            pointerTime += 0.01;
+        } else {
+            if (buf < 0.8) {
                 pointerTime += 0.01;
+            } else if (buf > 0.9) {
+                pointerTime += 0.05;
             } else {
-                if (buf < 0.8) {
-                    pointerTime += 0.01;
-                } else if (buf > 0.9) {
-                    pointerTime += 0.05;
-                } else {
-                    pointerTime += (buf-0.8)/2;
+                pointerTime += (buf-0.8)/2;
+            }
+        }
+
+
+        if (appleVisible) {
+            if(point2D.distance(0,0)>300){
+                if(pointerTimer.isStopped()&& !pointerTimer.isIncrease()){
+                    pointerTimer.reset();
+                }
+                pointerTimer.start(true,mainTime);
+                time = pointerTimer.update(mainTime);
+                if(pointerTimer.isStopped()){
+                    renderingPoiner.setTime(pointerTime);
+                }else {
+                    renderingPoiner.setTime(-time);
+//                    System.out.println("vis " + time);
+                }
+
+
+            }else {
+                if(pointerTimer.isStopped()&& pointerTimer.isIncrease()){
+                    pointerTimer.reset();
+                }
+                pointerTimer.start(false,mainTime);
+                time = pointerTimer.update(mainTime);
+                if(pointerTimer.isStopped()){
+                    if(pointerTimer.isIncrease()){
+                        time = 1;
+                    }else {
+                        time = 0;
+                    }
+                }
+//                System.out.println("invis " + time);
+                renderingPoiner.setTime(-time);
+            }
+
+        }else {
+            if(pointerTimer.isStopped()&& pointerTimer.isIncrease()){
+                pointerTimer.reset();
+            }
+            pointerTimer.start(false,mainTime);
+            time = pointerTimer.update(mainTime);
+            if(pointerTimer.isStopped()){
+                if(pointerTimer.isIncrease()){
+                    time = 1;
+                }else {
+                    time = 0;
                 }
             }
-            renderingPoiner.setTime(pointerTime/*(float)(Player.playerHeadXY().distance(xy[0],xy[1])/(window.width*3))*/);
-        } else {
-            renderingPoiner.setTime(time);
+//            System.out.println("invis " + time);
+            renderingPoiner.setTime(-time);
         }
     }
 

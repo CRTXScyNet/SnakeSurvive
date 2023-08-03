@@ -25,7 +25,7 @@ public class CutTheTail extends BuffParent{
     @Override
     public void buffOnn() {
         super.buffOnn();
-        Player.players.get(0).cutTheTail();
+        Player.player.cutTheTail();
     }
 
     @Override

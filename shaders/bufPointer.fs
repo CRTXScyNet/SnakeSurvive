@@ -46,9 +46,9 @@ vec4 color2 = vec4( 1, 1, 1, (abs(uv.y) <= 0.015/abs(uv.x)  ? 1:0));
 //}else{
 //color = vec4(0,1,0,0);
 //}
-if(t <0){
-    t *= -1;
-        color.a *= sin(t);
+if(t <=0){
+    t = -t;
+        color *= sin(t);
 }else{
 //color*=abs(sin(t))+0.2;
 }

@@ -1,4 +1,4 @@
-package org.example.gpu;
+package org.example.time;
 
 public class Timer {
     public  static double getTime(){

@@ -83,7 +83,7 @@ public boolean close = false;
         if (!changePosition) {
 
             if (isPull) {
-                if (Player.playerHeadXY().distance(new Point2D.Float(xy[0], xy[1])) < 200) {
+                if (Player.player.getHeadXY().distance(new Point2D.Float(xy[0], xy[1])) < 200) {
                     isNear = true;
                 }
                 for (GluePart part: GluePart.glueParts){
@@ -148,10 +148,9 @@ if(suddenExpose){
 
     public void pullPlayer() {
         boolean stillNear = false;
-        for (int j = Player.xy.size() - 1; j >= 0; j--) {
+        for (int j = Player.player.xy.size() - 1; j >= 0; j--) {
 
-            float distance = (float) Math.sqrt(Math.pow(xy[0] - Player.xy.get(j)[0], 2) + Math.pow(xy[1] - Player.xy.get(j)[1], 2));
-//                float distanceDif = distance;
+            float distance = (float) Math.sqrt(Math.pow(xy[0] - Player.player.xy.get(j)[0], 2) + Math.pow(xy[1] - Player.player.xy.get(j)[1], 2));
             float angle;
             if (distance> 10 && distance < 200) {
                 if(j == 0){
@@ -161,13 +160,13 @@ if(suddenExpose){
                 }
                 MainSoundsController.setPitchChange(true);
                 stillNear = true;
-                angle = (float) Math.atan((xy[1] - Player.xy.get(j)[1]) / (xy[0] - Player.xy.get(j)[0]));
+                angle = (float) Math.atan((xy[1] - Player.player.xy.get(j)[1]) / (xy[0] - Player.player.xy.get(j)[0]));
                 double translocationX = (distance - ((100 - distance / 10) * 0.012)) * Math.cos(angle);
                 double translocationY = (distance - ((100 - distance / 10) * 0.012)) * Math.sin(angle);
-                if (xy[0] - Player.xy.get(j)[0] < 0) {
-                    Player.xy.set(j, new float[]{xy[0] + (float) translocationX, xy[1] + (float) translocationY});
+                if (xy[0] - Player.player.xy.get(j)[0] < 0) {
+                    Player.player.xy.set(j, new float[]{xy[0] + (float) translocationX, xy[1] + (float) translocationY});
                 } else {
-                    Player.xy.set(j, new float[]{xy[0] - (float) translocationX, xy[1] - (float) translocationY});
+                    Player.player.xy.set(j, new float[]{xy[0] - (float) translocationX, xy[1] - (float) translocationY});
                 }
             }
 

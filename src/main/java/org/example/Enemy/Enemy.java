@@ -355,7 +355,7 @@ public void update(){
                 for (int j = 0; j < Player.player.getXy().size(); j++) {
                     float dest = (float) Math.sqrt(Math.pow(Player.player.getXy().get(j)[0] - ePoint[0], 2) + Math.pow(Player.player.getXy().get(j)[1] - ePoint[1], 2));
 
-                    if (dest <= getSize() + Player.getSize() - 1) {
+                    if (dest <= getSize() + Player.player.getSize() - 1) {
                         if (!trest.isEnd && !trest.immortal) {
 trest.end();
                             isBreak = true;
@@ -432,7 +432,7 @@ public static void resetAngryTimer(){
         }
         if(!isActive&&!trest.isEnd){
             if (isNearby&&isScared) {
-                delay = (int)(size*stepOfSize/(Player.step/2));
+                delay = (int)(size*stepOfSize/(Player.player.step/2));
             } else {
                 delay = (int) delayStat;
             }
@@ -440,7 +440,7 @@ public static void resetAngryTimer(){
             if (isNearby&&isScared) {
                 if(bufDelay == 0){
                     bufDelay = delayDouble;
-                    delayDouble = (int)(size*stepOfSize/(Player.step/2));
+                    delayDouble = (int)(size*stepOfSize/(Player.player.step/2));
                     delay = (int)delayDouble;
                 }
             } else {
@@ -597,7 +597,7 @@ move((float)next.getX(),(float)next.getY());
 
     public boolean isTeleport() {
 
-        return Math.pow(xy.get(0)[0]- Player.playerHeadXY().getX(), 2) + Math.pow(xy.get(0)[1] - Player.playerHeadXY().getY(), 2) < Math.pow(30, 2);
+        return Math.pow(xy.get(0)[0]- Player.player.getHeadXY().getX(), 2) + Math.pow(xy.get(0)[1] - Player.player.getHeadXY().getY(), 2) < Math.pow(30, 2);
     }
 
 //    public void setLines() {

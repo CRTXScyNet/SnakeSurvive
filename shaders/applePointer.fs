@@ -44,9 +44,9 @@ vec4 color2 = vec4(1,1,1,(pow((abs(uv.y+0.5))/1.5 ,2) >= abs(uv.x) && (length(uv
 //}else{
 //color = vec4(0,1,0,0);
 //}
-if(t <0){
-    t *= -1;
-    color.a -= t*1000;
+if(t <= 0){
+    t = -t;
+    color.a *= t;
     //color = vec4(0.5/length(uv)*0.1/(t*10),0.5/length(uv)*0.1/(t*10),0.5/length(uv)*0.1/(t*10),(0.1/length(uv)*0.1));
 }else{
 

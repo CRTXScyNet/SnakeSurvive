@@ -1,7 +1,7 @@
 package org.example.Player;
 
 import org.example.Sound.MainSoundsController;
-import org.example.gpu.Timer;
+import org.example.time.Timer;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
 import org.example.gpu.render.Window;
@@ -12,7 +12,7 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
-public class GluePart {
+public class GluePart  extends PlayerParent{
     private int width;
     private int height;
     public static int maxAmountOfGlueParts = 100;
@@ -22,6 +22,7 @@ public class GluePart {
     private static boolean thertyn = false;
     private static boolean twentyn = false;
     private static boolean ten = false;
+
 
     public static void calcMaxSize() {
 
@@ -67,7 +68,7 @@ int count = 0;
     }
     public static void clearParts() {
             for (int i = glueParts.size() - 1; i >= 0; i--) {
-                if (glueParts.get(i).gluePartHeadXY().distance(Player.playerHeadXY()) > 450) {
+                if (glueParts.get(i).gluePartHeadXY().distance(Player.player.getHeadXY()) > 450) {
                     glueParts.get(i).clearPart();
                     if (glueParts.size() <= maxAmountOfGlueParts) {
                         return;
@@ -80,7 +81,7 @@ int count = 0;
     public static void refresh() {
         if (glueParts.size() > maxAmountOfGlueParts) {
             for (int i = glueParts.size() - 1; i >= 0; i--) {
-                if (glueParts.get(i).gluePartHeadXY().distance(Player.playerHeadXY()) > 600) {
+                if (glueParts.get(i).gluePartHeadXY().distance(Player.player.getHeadXY()) > 600) {
                     glueParts.get(i).clearPart();
                     if (glueParts.size() <= maxAmountOfGlueParts) {
                         return;
@@ -93,37 +94,8 @@ int count = 0;
         calcMaxSize();
     }
 
-    public void moveXy(float[] direct) {
-        for (int i = 0; i < xy.size(); i++) {
-            xy.set(i, new float[]{xy.get(i)[0] - direct[0], xy.get(i)[1] - direct[1]});
-        }
-        for (int i = 0; i < rendering.getModels().size(); i++) {
-            rendering.getModels().get(i).getMovement().setPosition(new Vector3f((float) xy.get(i)[0], (float) xy.get(i)[1], 0));
-        }
-    }
 
-    public ArrayList<float[]> xy = new ArrayList<>();
-
-//    public static Point2D playerHeadXY() {
-//        return new Point2D.Float(xy.get(0)[0], xy.get(0)[1]);
-//    }
-
-    private float[] direction = null;
-
-    private Color color = new Color(Color.white.getRGB());
-
-    boolean perviyNah = false;
-
-    private double chance = Math.random() * 0.8 + 0.2;
-
-    static float size = 8;
-    static double stepOfSize = 2;
-
-    public static void setStep() {
-        Player.step = (int) (Player.getSize() * stepOfSize);
-    }
-
-    public static float maxStepStat = Player.maxStep / 2;
+    public static float maxStepStat = Player.player.maxStep / 2;
     public float maxStep = maxStepStat;
     public static final float minStep = 1f;
     public float step = 1f;
@@ -144,25 +116,19 @@ int count = 0;
     public static int gluePartForSpawn = 0;
 
 
-    private Window window;
-    private ModelRendering rendering;
+
     private float ignoreTime = 5;
     private float birthTime = 0;
 
 
     public GluePart(Window window) {
-
-
-        this.window = window;
+super(window);
         xy.add(getRandomPoint());
-        size = Player.size;
+        size = Player.player.size;
         tMouse = (float) Math.random() * 6.28f;
         color = new Color(0, 200, 200);
         glueParts.add(this);
-
-        rendering = new ModelRendering(window, null, "gluePart");
-        rendering.addModel(new Model(window, (int) (size * 30), color));
-        rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy.get(0)[0], (float) xy.get(0)[1], 0));
+renderInit(color,"gluePart",null);
         birthTime = Timer.getFloatTime();
         rendering.setTime(birthTime + trest.getMainTime());
 
@@ -175,7 +141,7 @@ int count = 0;
 
         this.window = window;
         this.xy.add(xy.get(0));
-        size = Player.size;
+        size = Player.player.size;
         tMouse = (float) Math.random() * 6.28f;
         color = new Color(0, 200, 200);
         glueParts.add(this);
@@ -249,7 +215,7 @@ int count = 0;
 
         float x = (int) (Math.random() * trest.playGroundWidth - (trest.playGroundWidth / 2));
         float y = (int) (Math.random() * trest.playGroundHeight - (trest.playGroundHeight / 2));
-        if (Player.playerHeadXY().distance(x, y) < 500) {
+        if (Player.player.getHeadXY().distance(x, y) < 500) {
             return getRandomPoint();
         }
         return new float[]{x, y};
@@ -259,60 +225,23 @@ int count = 0;
         return color;
     }
 
-    public static double getSize() {
-        return size;
-    }
 
 
 
 
 
-    private float tMouse = 1;
-    static float stepRad = 0.1f;
-    private float[] pointWatch = new float[]{0, 0};
+
+
     private float stepRadLast = 0;
     private int count = 0;
     private int maxCount = 500;
     boolean difDir = false;
     boolean canIncreaseSpeed = false;
-    protected int radDir = 0;
-    protected double difRad = 0;
-    protected float TargetRadian = 0;
-    protected float targetOpposite = 0;
-
-    void setRadian(Point2D Target) {
-
-        float xTarget = (float) Target.getX() - xy.get(0)[0];
-        float yTarget = (float) Target.getY() - xy.get(0)[1];
 
 
-        // 1143 372 900 600
-        TargetRadian = (float) Math.atan2(xTarget, yTarget);
-        if (TargetRadian < 0) {
-            TargetRadian += 6.28;
+    protected  void setRadian(Point2D target) {
 
-        }
-        targetOpposite = (tMouse + 3.14f) % 6.28f;
-
-        pointWatch[0] = (float) (step * Math.sin(tMouse) + xy.get(0)[0]);
-        pointWatch[1] = (float) (step * Math.cos(tMouse) + xy.get(0)[1]);
-
-        tMouse = (float) ((tMouse + 6.28) % 6.28);
-
-         difRad = Math.abs((TargetRadian - tMouse) % 6.28);
-        if (difRad > 3.14) {
-            difRad = Math.abs((Math.max(TargetRadian, tMouse) - 3.14) - (Math.min(TargetRadian, tMouse) + 3.14));
-
-        }
-        if (TargetRadian > tMouse && TargetRadian > targetOpposite && targetOpposite >= 3.14) {          // уменьшение
-            radDir = -1;
-        } else if (TargetRadian < tMouse && TargetRadian < targetOpposite && targetOpposite >= 3.14) {                          // уменьшение
-            radDir = -1;
-        } else if (TargetRadian < tMouse && TargetRadian > targetOpposite) {                          // уменьшение
-            radDir = -1;
-        }else {
-            radDir = 1;
-        }
+        super.setRadian(target);
 
 
         if (trest.isEnd) {
@@ -407,7 +336,7 @@ int count = 0;
             }
         }
         rendering.setTime(birthTime + trest.getMainTime());
-        maxStep = (float) (Player.maxStep / xy.size() / 1.5);
+        maxStep = (float) (Player.player.maxStep / xy.size() / 1.5);
 
         try {
             gluePartIsNear = false;
@@ -418,7 +347,7 @@ int count = 0;
 
             if (canSee) {
                 if (!trest.isEnd) {
-                    for (float[] d : Player.players.get(0).getXy()) {
+                    for (float[] d : Player.selfList.get(0).getXy()) {
                         if (!playerIsNear && gluePartHeadXY().distance(new Point2D.Float(d[0], d[1])) < 100) {
                             playerIsNear = true;
                             MainSoundsController.glue_part_bool = true;
@@ -436,15 +365,15 @@ int count = 0;
 
                     }
 
-                    if (playerIsNear && nearest != null && nearest.distance(gluePartHeadXY()) < Player.size) {
+                    if (playerIsNear && nearest != null && nearest.distance(gluePartHeadXY()) < Player.player.size) {
                         if (xy.size() > 1) {
-                            Player.players.get(0).grow();
+                            Player.selfList.get(0).grow();
                             xy.remove(0);
                             rendering.getModels().remove(0);
 
                             return;
                         } else {
-                            Player.players.get(0).grow();
+                            Player.selfList.get(0).grow();
                             clearPart();
                             return;
                         }
@@ -452,7 +381,7 @@ int count = 0;
 
 
                     if (!playerIsNear && Player.player.part.isAlive) {
-                        for (float[] d : Player.player.part.xyArray) {
+                        for (float[] d : Player.player.part.xy) {
                             if (!playerPartIsNear && gluePartHeadXY().distance(new Point2D.Float(d[0], d[1])) < 300) {
                                 playerPartIsNear = true;
                             }
@@ -469,7 +398,7 @@ int count = 0;
 
                         }
 
-                        if (playerPartIsNear && nearest != null && nearest.distance(gluePartHeadXY()) < Player.size) {
+                        if (playerPartIsNear && nearest != null && nearest.distance(gluePartHeadXY()) < Player.player.size) {
                             if (xy.size() > 1) {
                                 Player.player.part.addCircle();
                                 xy.remove(0);
@@ -511,7 +440,7 @@ int count = 0;
             }
 
             if (!trest.isEnd) {
-                if (gluePartIsNear && nearest != null && part != null && nearest.distance(gluePartHeadXY()) < Player.size) {
+                if (gluePartIsNear && nearest != null && part != null && nearest.distance(gluePartHeadXY()) < Player.player.size) {
                     if (xy.size() > 1) {
                         part.absorbCircle(xy.get(0));
                         xy.remove(0);
@@ -597,91 +526,11 @@ int count = 0;
         glueParts.remove(this);
     }
 
-    public void move(float x, float y) {
-
-        try {
-            xy.set(0, new float[]{x, y});
-            for (int i = 0; i < xy.size() - 1; i++) {
-                float distance = (float) Math.sqrt(Math.pow(xy.get(i + 1)[0] - xy.get(i)[0], 2) + Math.pow(xy.get(i + 1)[1] - xy.get(i)[1], 2));
-                float distanceDif = (size - distance) / 2;
-                float angle;
-                if (distance > size) {
-                    angle = (float) Math.atan((xy.get(i)[1] - xy.get(i + 1)[1]) / (xy.get(i)[0] - xy.get(i + 1)[0]));
-                    if (xy.get(i)[0] - xy.get(i + 1)[0] < 0) {
-                        xy.set(i + 1, new float[]{xy.get(i)[0] + (float) (size * Math.cos(angle)), xy.get(i)[1] + (float) (size * Math.sin(angle))});
-                    } else {
-                        xy.set(i + 1, new float[]{xy.get(i)[0] - (float) (size * Math.cos(angle)), xy.get(i)[1] - (float) (size * Math.sin(angle))});
-                    }
-                }
-
-            }
 
 
-            //place for physics  TODO
 
 
-//
-            for (int i = 0; i < rendering.getModels().size(); i++) {
-                rendering.getModels().get(i).getMovement().setPosition(new Vector3f(xy.get(i)[0], xy.get(i)[1], 0));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
 
-        }
-//xy.add(0,new int[]{x,y});
-//xy.remove(xy.size()-1);
-    }
-
-    public void makePhysics() {
-        for (int i = 0; i < xy.size(); i++) {
-            for (int j = 1; j < xy.size(); j++) {
-                if (j == i) {
-                    continue;
-                }
-                float distance = (float) Math.sqrt(Math.pow(xy.get(i)[0] - xy.get(j)[0], 2) + Math.pow(xy.get(i)[1] - xy.get(j)[1], 2));
-                float distanceDif = size - distance;
-                float angle;
-                if (distance != 0 && distance < size - 0.5) {
-                    if (i == 0 && trest.mouseControl && step > minStep) {
-                        step *= 0.99;
-                    }
-                    angle = (float) Math.atan((xy.get(i)[1] - xy.get(j)[1]) / (xy.get(i)[0] - xy.get(j)[0]));
-                    if (xy.get(i)[0] - xy.get(j)[0] < 0) {
-                        xy.set(i, new float[]{xy.get(j)[0] - (float) ((size - distanceDif) * Math.cos(angle)), xy.get(j)[1] - (float) ((size - distanceDif) * Math.sin(angle))});
-                        xy.set(j, new float[]{xy.get(i)[0] + (float) ((size) * Math.cos(angle)), xy.get(i)[1] + (float) ((size) * Math.sin(angle))});
-                    } else {
-                        xy.set(i, new float[]{xy.get(j)[0] + (float) ((size - distanceDif) * Math.cos(angle)), xy.get(j)[1] + (float) ((size - distanceDif) * Math.sin(angle))});
-
-                        xy.set(j, new float[]{xy.get(i)[0] - (float) ((size) * Math.cos(angle)), xy.get(i)[1] - (float) ((size) * Math.sin(angle))});
-
-                    }
-                    deepPhysic(j);
-                }
-
-            }
-
-        }
-    }
-
-    public void deepPhysic(int i) {
-        for (int j = xy.size() - 1; j > 0; j--) {
-            if (j == i) {
-                continue;
-            }
-            float distance = (float) Math.sqrt(Math.pow(xy.get(i)[0] - xy.get(j)[0], 2) + Math.pow(xy.get(i)[1] - xy.get(j)[1], 2));
-            float distanceDif = size - distance;
-            float angle;
-            if (distance != 0 && distance < size - 0.5) {
-                angle = (float) Math.atan((xy.get(i)[1] - xy.get(j)[1]) / (xy.get(i)[0] - xy.get(j)[0]));
-                if (xy.get(i)[0] - xy.get(j)[0] < 0) {
-                    xy.set(j, new float[]{xy.get(i)[0] + (float) ((size) * Math.cos(angle)), xy.get(i)[1] + (float) ((size) * Math.sin(angle))});
-                } else {
-                    xy.set(j, new float[]{xy.get(i)[0] - (float) ((size) * Math.cos(angle)), xy.get(i)[1] - (float) ((size) * Math.sin(angle))});
-                }
-            }
-
-        }
-    }
 
 
 }

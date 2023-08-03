@@ -1,6 +1,5 @@
 package org.example.Player;
 
-import org.example.Enemy.Entity;
 import org.example.Painter.Apple;
 import org.example.gpu.gameProcess.trest;
 import org.example.gpu.render.Model;
@@ -14,84 +13,42 @@ import java.util.ArrayList;
 
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_1;
 
-public class Player extends Entity {
-
-    public void moveXy(float[] direct) {
-        for (int i = 0; i < xy.size(); i++) {
-            xy.set(i, new float[]{xy.get(i)[0] - direct[0], xy.get(i)[1] - direct[1]});
-        }
-        for (int i = 0; i < rendering.getModels().size(); i++) {
-            rendering.getModels().get(i).getMovement().setPosition(new Vector3f((float) xy.get(i)[0], (float) xy.get(i)[1], 0));
-        }
-    }
-
-    public static ArrayList<float[]> xy = new ArrayList<>();
-
-    public static Point2D playerHeadXY() {
-        return new Point2D.Float(xy.get(0)[0], xy.get(0)[1]);
-    }
+public class Player extends PlayerParent {
 
     private float[] direction = new float[2];
-
-    private Color color = new Color(Color.white.getRGB());
-
-    static float size = 6;
-
-    public static float maxStepStat = 2f;
-    public static float maxStep = maxStepStat;
-    public static final float minStep = 1f;
-    public static float step = 1f;
-
-
-    private int reverseCount = 100;
-    private int reverse = reverseCount;
-
-    private boolean isMove = false;
-    public static int snakeLength = 5;
+    public static ArrayList<Player> selfList = new ArrayList<>();
 
 
     public float[] getDirection() {
         return direction;
     }
 
-    public static ArrayList<Player> players = new ArrayList<>();
-    public boolean reset = false;
+
     public Color mainColor = new Color(0, 100, 100);
     public Color takenAppleColor = new Color(200, 0, 0);
 
     static boolean speedBoost = false;
     public static ArrayList<float[]> absorbArray = new ArrayList<>();
-    private static Window window;
-    private ModelRendering rendering;
+
+
     private ModelRendering maxSpeedRender;
     public static Player player;
     public PlayerPart part;
 
     public Player(Window window) {
-
-
-//        xy.add(new int[]{(int)(Math.random()*imahe.getWidth()*playGround[0])+(int)(imahe.getWidth()*playGround[1]),(int)(Math.random()*imahe.getHeight()*playGround[0])+(int)(imahe.getHeight()*playGround[1])});
-
-//        Point co = getRandomPoint();
-//        xy.add(new double[]{co.x,co.y});
-        Player.window = window;
-        xy.add(new float[]{0, 0});
-
+        super(window);
         color = mainColor;
-        players.add(this);
-
-        rendering = new ModelRendering(window, this, "player");
-        rendering.addModel(new Model(window, (int) (size * 30), color));
-        rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) 0, (float) 0, 0));
+        xy.add(new float[]{0, 0});
+        selfList.add(this);
+        renderInit(color, "player", null);
         maxSpeedRender = new ModelRendering(window, null, "speedIndicate");
         maxSpeedRender.addModel(new Model(window, 30, color));
         maxSpeedRender.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy.get(0)[0], (float) xy.get(0)[1], 0));
         maxSpeedRender.getModels().get(0).getMovement().setRotation(-tMouse);
+        setMaxLength(70);
+        setLength(5);
 
 
-        for (int i = 0; i < snakeLength - 1; i++) {
-            addCircle();
-        }
         player = this;
         part = new PlayerPart(window);
     }
@@ -114,26 +71,13 @@ public class Player extends Entity {
         return this.part;
     }
 
-    //TODO проверить SetPhantom
-    public ArrayList<float[]> getXy() {
-        return xy;
-    }
-
-
     public void addCircle() {
-        if (xy.size() < maxSize) {
-            float x = xy.get(xy.size() - 1)[0];
-            float y = xy.get(xy.size() - 1)[1];
-            xy.add(new float[]{x, y});
-
-            rendering.addModel(new Model(window, (int) (size * 30), color));
-            rendering.getModels().get(xy.size() - 1).getMovement().setPosition(new Vector3f((float) x, (float) y, 0));
+        if (xy.size() < maxLength) {
+            super.addCircle();
         }
     }
-
-
     public void grow() {
-        if (xy.size() >= maxSize) {
+        if (xy.size() >= maxLength) {
             return;
         }
 
@@ -157,17 +101,17 @@ public class Player extends Entity {
     }
 
     public void reset() {
+        super.reset();
+        xy.add(new float[]{0, 0});
+        if (rendering != null) {
+            rendering.addModel(new Model(window, (int) (size * 30), color));
+        }
         countOfApples = 0;
         speedBoostTime = 0;
         maxStep = maxStepStat;
         step = 0.1f;
-        xy.clear();
-        xy.add(new float[]{0, 0});
-        rendering.clear(true);
-        rendering.addModel(new Model(window, (int) (size * 30), color));
-        rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) 0, (float) 0, 0));
 //        move(width/2,height/2);
-        for (int i = 0; i < snakeLength - 1; i++) {
+        for (int i = 0; i < length - 1; i++) {
             addCircle();
         }
         part.reset();
@@ -200,36 +144,13 @@ public class Player extends Entity {
             }
         }
     }
-
-
-    public Color getColor() {
-        return color;
-    }
-
-    public static double getSize() {
-        return size;
-    }
-
-    public void setReset(boolean reset) {
-        this.reset = reset;
-    }
-
-    public boolean isReset() {
-        return reset;
-    }
-
-    public float gettMouse() {
+    public float getMouse() {
         return tMouse;
     }
-
-    private float tMouse = 1;
-    static float stepRad = 0.1f;
-    private float[] pointWatch = new float[]{0, 0};
     private float stepRadLast = 0;
     private int count = 0;
     private int maxCount = 500;
     public static int countOfApples = 0;
-    boolean difDir = false;
     boolean canIncreaseSpeed = false;
 
     public void eatTheApple() {
@@ -250,7 +171,9 @@ public class Player extends Entity {
 
     public void lostTheApple() {
         countOfApples--;
-
+if(countOfApples<0){
+    trest.end();
+}
         grow();
 
         decreaseSpeed();
@@ -275,46 +198,10 @@ public class Player extends Entity {
         part.update();
     }
 
-    protected int radDir = 0;
-    protected double difRad = 1;
-    protected float TargetRadian = 0;
-    protected float targetOpposite = 0;
-    void setRadian(Point2D Target) {
-        float xTarget;
-        float yTarget;
-        if (Target != null) {
-            xTarget = (float) Target.getX() - xy.get(0)[0];
-            yTarget = (float) Target.getY() - xy.get(0)[1];
-        } else {
-            xTarget = (float) 0 - xy.get(0)[0];
-            yTarget = (float) 0 - xy.get(0)[1];
-        }
-        TargetRadian = (float) Math.atan2(xTarget, yTarget);
-        if (TargetRadian < 0) {
-            TargetRadian += 6.28;
+    protected void setRadian(Point2D target) {
+        super.setRadian(target);
 
-        }
-         targetOpposite = (tMouse + 3.14f) % 6.28f;
-
-        tMouse = (float) ((tMouse + 6.28) % 6.28);
-        difRad = Math.abs((TargetRadian - tMouse) % 6.28);
-        if (difRad > 3.14) {
-            difRad = Math.abs((Math.max(TargetRadian, tMouse) - 3.14) - (Math.min(TargetRadian, tMouse) + 3.14));
-        }
-        if (TargetRadian > tMouse && TargetRadian > targetOpposite && targetOpposite >= 3.14) {          // уменьшение
-            radDir = -1;
-        } else if (TargetRadian < tMouse && TargetRadian < targetOpposite && targetOpposite >= 3.14) {                          // уменьшение
-            radDir = -1;
-        } else if (TargetRadian < tMouse && TargetRadian > targetOpposite) {                          // уменьшение
-            radDir = -1;
-        }else {
-            radDir = 1;
-        }
-
-
-
-
-        if (Target == null) {
+        if (target == null) {
             stepRad = (float) Math.abs(difRad) / (20 / (step / 2));
         } else {
             stepRad = (float) Math.abs(difRad) / (15 / (step / 2));
@@ -322,7 +209,7 @@ public class Player extends Entity {
         maxCount = (int) (3.14 / stepRad);
 
 
-        tMouse += stepRad*radDir;
+        tMouse += stepRad * radDir;
 
         if (tMouse > 6.28) {
             tMouse -= 6.28;
@@ -331,7 +218,7 @@ public class Player extends Entity {
 
             tMouse += 6.28;
         }
-        if (Target != null) {
+        if (target != null) {
             if ((stepRadLast > 0 && radDir < 0) || (stepRadLast < 0 && radDir > 0)) {
                 count = 0;
             }
@@ -355,7 +242,6 @@ public class Player extends Entity {
 
         stepRadLast = radDir;
     }
-
     public void increaseSpeed() {
         maxStep += 0.05;
     }
@@ -363,12 +249,6 @@ public class Player extends Entity {
     public void decreaseSpeed() {
         maxStep -= 0.05;
     }
-
-    static double delayStat = 15;
-
-
-    static double timerStat = 500;
-    static double timer = timerStat;
     double timeTo = trest.getMainTime();
     double timeToGrow = 0;
     public static float speedBoostTime = 0;
@@ -378,17 +258,15 @@ public class Player extends Entity {
         speedBoostTime += time;
     }
 
-    public void setTime(float time) {
-        rendering.setTime(time);
-    }
-
     public void moveCheck() {
         try {
             timeToGrow += trest.getMainTime() - timeTo;
             speedBoostTimer = (float) (trest.getMainTime() - timeTo);
             timeTo = trest.getMainTime();
             if (/*countOfApples<30 && */timeToGrow >= 10/*100.0 / countOfApples*/) {
-                grow();
+                if (!trest.isEnd) {
+                    grow();
+                }
                 timeToGrow = 0;
             }
 
@@ -442,7 +320,7 @@ public class Player extends Entity {
                     e.printStackTrace();
                 }
 
-                move(pointWatch[0], pointWatch[1]);
+                moveWithPhysics(pointWatch[0], pointWatch[1]);
 
 
             } catch (Exception e) {
@@ -454,80 +332,17 @@ public class Player extends Entity {
         }
     }
 
-
-    public void move(float x, float y) {
+    @Override
+    public void moveWithPhysics(float x, float y) {
 
         try {
-
-            boolean stop = false;
-            if (step <= size / 2) {
-                xy.set(0, new float[]{x, y});
-                for (int i = 0; i < xy.size() - 1; i++) {
-                    float distance = (float) Math.sqrt(Math.pow(xy.get(i + 1)[0] - xy.get(i)[0], 2) + Math.pow(xy.get(i + 1)[1] - xy.get(i)[1], 2));
-                    float distanceDif = (size - distance) / 2;
-                    float angle;
-                    if (distance > size) {
-                        angle = (float) Math.atan((xy.get(i)[1] - xy.get(i + 1)[1]) / (xy.get(i)[0] - xy.get(i + 1)[0]));
-                        if (xy.get(i)[0] - xy.get(i + 1)[0] < 0) {
-                            xy.set(i + 1, new float[]{xy.get(i)[0] + (float) (size * Math.cos(angle)), xy.get(i)[1] + (float) (size * Math.sin(angle))});
-                        } else {
-                            xy.set(i + 1, new float[]{xy.get(i)[0] - (float) (size * Math.cos(angle)), xy.get(i)[1] - (float) (size * Math.sin(angle))});
-                        }
-                    }
-                    if (!stop) {
-                        stop = deepPhysic();
-                    } else {
-                        deepPhysic();
-                    }
-                }
-            } else {
-                float[] xyBuff = new float[]{xy.get(0)[0], xy.get(0)[1]};
-
-                int stepPartCount = (int) Math.ceil(((step / (size / 2))));
-                float stepPart = step / stepPartCount;
-
-                float xyAngle = (float) Math.atan((xy.get(0)[1] - y) / (xy.get(0)[0] - x));
-
-                for (int j = 1; j < stepPartCount + 1; j++) {
-                    double changeX = (stepPart * j) * Math.cos(xyAngle);
-                    double changeY = (stepPart * j) * Math.sin(xyAngle);
-                    if (x - xy.get(0)[0] < 0) {
-                        xy.set(0, new float[]{xyBuff[0] - (float) changeX, xyBuff[1] - (float) changeY});
-                    } else {
-                        xy.set(0, new float[]{xyBuff[0] + (float) changeX, xyBuff[1] + (float) changeY});
-                    }
-
-                    for (int i = 0; i < xy.size() - 1; i++) {
-                        float distance = (float) Math.sqrt(Math.pow(xy.get(i + 1)[0] - xy.get(i)[0], 2) + Math.pow(xy.get(i + 1)[1] - xy.get(i)[1], 2));
-                        float distanceDif = (size - distance) / 2;
-                        float angle;
-                        if (distance > size) {
-                            angle = (float) Math.atan((xy.get(i)[1] - xy.get(i + 1)[1]) / (xy.get(i)[0] - xy.get(i + 1)[0]));
-
-                            if (xy.get(i)[0] - xy.get(i + 1)[0] < 0) {
-                                xy.set(i + 1, new float[]{xy.get(i)[0] + (float) (size * Math.cos(angle)), xy.get(i)[1] + (float) (size * Math.sin(angle))});
-                            } else {
-                                xy.set(i + 1, new float[]{xy.get(i)[0] - (float) (size * Math.cos(angle)), xy.get(i)[1] - (float) (size * Math.sin(angle))});
-                            }
-                        }
-                        if (!stop) {
-                            stop = deepPhysic();
-                        } else {
-                            deepPhysic();
-                        }
-                    }
-
-                }
-            }
-            if (stop) {
-                step *= 0.99;
-            }
+            super.moveWithPhysics(x, y);
             if (!trest.isEnd) {
                 checkForAbsorb();
             }
             if (trest.mouseControl) {
                 float maxDistance = 80;
-                float distance = (float) playerHeadXY().distance(0, 0);
+                float distance = (float) getHeadXY().distance(0, 0);
 //                if (distance > maxDistance) {
                 float angle = (float) Math.atan((-y) / (-x));
                 double translocationX = distance / 5 * Math.cos(angle);
@@ -544,16 +359,7 @@ public class Player extends Entity {
                 direction = new float[]{0, 0};
             }
 
-            //place for physics  TODO
 
-//            for (int i = 0; i < 1; i++) {
-//                makePhysics();
-//            }
-
-
-            for (int i = 0; i < rendering.getModels().size(); i++) {
-                rendering.getModels().get(i).getMovement().setPosition(new Vector3f(xy.get(i)[0], xy.get(i)[1], 0));
-            }
             maxSpeedRender.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy.get(0)[0], (float) xy.get(0)[1], 0));
             maxSpeedRender.getModels().get(0).getMovement().setRotation(-tMouse);
             speedScale = ((step - (maxStep - maxStep * 0.1f)) / 0.2f);
@@ -568,9 +374,7 @@ public class Player extends Entity {
             maxSpeedRender.setTime(trest.getMainTime());
             maxSpeedRender.setSpeedScale(speedScale);
             maxSpeedRender.setSpeed(curSpeed);
-            if (step == maxStep) {
-                System.out.println("MAXXX");
-            }
+
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -598,14 +402,12 @@ public class Player extends Entity {
                     }
                     angle = (float) Math.atan((xy.get(i)[1] - xy.get(j)[1]) / (xy.get(i)[0] - xy.get(j)[0]));
                     if (xy.get(i)[0] - xy.get(j)[0] < 0) {
-//                        xy.set(i, new float[]{xy.get(j)[0] - (float) ((size - distanceDif) * Math.cos(angle)), xy.get(j)[1] - (float) ((size - distanceDif) * Math.sin(angle))});
                         xy.set(j, new float[]{xy.get(i)[0] + (float) ((size) * Math.cos(angle)), xy.get(i)[1] + (float) ((size) * Math.sin(angle))});
 
                     } else {
-//                        xy.set(i, new float[]{xy.get(j)[0] + (float) ((size - distanceDif) * Math.cos(angle)), xy.get(j)[1] + (float) ((size - distanceDif) * Math.sin(angle))});
 
                         xy.set(j, new float[]{xy.get(i)[0] - (float) ((size) * Math.cos(angle)), xy.get(i)[1] - (float) ((size) * Math.sin(angle))});
-                        ;
+
                     }
 
                 }
@@ -614,48 +416,15 @@ public class Player extends Entity {
 
         }
     }
-
-    public boolean deepPhysic() {
-        boolean stop = false;
-        for (int j = xy.size() - 1; j > 0; j--) {
-
-            float distance = (float) Math.sqrt(Math.pow(xy.get(0)[0] - xy.get(j)[0], 2) + Math.pow(xy.get(0)[1] - xy.get(j)[1], 2));
-            float distanceDif = size - distance;
-            float angle;
-            if (distance != 0 && distance < size) {
-                if (trest.mouseControl && step > minStep && j != 1) {
-
-                    stop = true;
-                }
-                angle = (float) Math.atan((xy.get(0)[1] - xy.get(j)[1]) / (xy.get(0)[0] - xy.get(j)[0]));
-//                if(Math.sqrt(Math.pow(xy.get(1)[0] - xy.get(j)[0], 2) + Math.pow(xy.get(1)[1] - xy.get(j)[1], 2))>size*2) {
-                if (xy.get(0)[0] - xy.get(j)[0] < 0) {
-                    xy.set(j, new float[]{xy.get(0)[0] + (float) ((size) * Math.cos(angle)), xy.get(0)[1] + (float) ((size) * Math.sin(angle))});
-                } else {
-                    xy.set(j, new float[]{xy.get(0)[0] - (float) ((size) * Math.cos(angle)), xy.get(0)[1] - (float) ((size) * Math.sin(angle))});
-                }
-//                }else if(Math.sqrt(Math.pow(xy.get(1)[0] - xy.get(j)[0], 2) + Math.pow(xy.get(1)[1] - xy.get(j)[1], 2))<=size*2&& j!=1) {
-//                    if (xy.get(0)[0] - xy.get(j)[0] < 0) {
-//                        xy.set(j, new float[]{xy.get(0)[0] - (float) ((size) * Math.cos(angle)), xy.get(0)[1] - (float) ((size*2) * Math.sin(angle))});
-//                    } else {
-//                        xy.set(j, new float[]{xy.get(0)[0] - (float) ((size) + Math.cos(angle)), xy.get(0)[1] + (float) ((size*2) * Math.sin(angle))});
-//                    }
-//                }
-            }
-
-        }
-        return stop;
-    }
-
     public void checkForAbsorb() {
 
         for (GluePart part : GluePart.glueParts) {
-            if (part.gluePartHeadXY().distance(playerHeadXY()) < 200 && part.getXy().size() > 1) {
+            if (part.gluePartHeadXY().distance(getHeadXY()) < 200 && part.getXy().size() > 1) {
                 boolean eat = false;
                 for (int i = 1; i < part.xy.size(); i++) {
                     Point2D partPoint = new Point2D.Float(part.xy.get(i)[0], part.xy.get(i)[1]);
 
-                    if (playerHeadXY().distance(partPoint) < size) {
+                    if (getHeadXY().distance(partPoint) < size) {
                         //Добавляем ячейку игроку
                         //Создаем новую часть игрока с координатами откушеной части
 
@@ -703,7 +472,5 @@ public class Player extends Entity {
 
     }
 
-
-    public static int maxSize = 70;
 
 }

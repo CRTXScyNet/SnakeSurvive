@@ -1,48 +1,41 @@
 package org.example.Player;
 
 import org.example.Painter.Apple;
-import org.example.gpu.Timer;
-import org.example.gpu.render.Model;
-import org.example.gpu.render.ModelRendering;
-import org.example.gpu.render.Window;
 import org.example.gpu.gameProcess.trest;
+import org.example.gpu.render.Model;
+import org.example.gpu.render.Window;
+import org.example.time.Timer;
 import org.joml.Vector3f;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
-public class PlayerPart {
-    private int width;
-    private int height;
+public class PlayerPart extends PlayerParent {
 
 
     public void moveXy(float[] direct) {
 
-        for (int i = 0; i < xyArray.size(); i++) {
-            xyArray.set(i, new float[]{xyArray.get(i)[0] - direct[0], xyArray.get(i)[1] - direct[1]});
+        for (int i = 0; i < xy.size(); i++) {
+            xy.set(i, new float[]{xy.get(i)[0] - direct[0], xy.get(i)[1] - direct[1]});
         }
         for (int i = 0; i < rendering.getModels().size(); i++) {
-            rendering.getModels().get(i).getMovement().setPosition(new Vector3f((float) xyArray.get(i)[0], (float) xyArray.get(i)[1], 0));
+            rendering.getModels().get(i).getMovement().setPosition(new Vector3f((float) xy.get(i)[0], (float) xy.get(i)[1], 0));
         }
-        xy = new Point2D.Float((float) xy.getX() - direct[0], (float) xy.getY() - direct[1]);
+        partHead = new Point2D.Float((float) partHead.getX() - direct[0], (float) partHead.getY() - direct[1]);
 
 
-
-        rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy.getX(), (float) xy.getY(), 0));
+        rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) partHead.getX(), (float) partHead.getY(), 0));
 
     }
 
-    public Point2D xy = new Point2D.Float();
-    public ArrayList<float[]> xyArray = new ArrayList<>();
+    public Point2D partHead = new Point2D.Float();
 
-    private Color color = new Color(Color.white.getRGB());
+
     public Color mainColor = new Color(0, 100, 100);
     public Color takenAppleColor = new Color(200, 0, 0);
-    static float size = 8;
 
-    public float step = 1.1f * Player.step;
-
+public boolean readyTuCut = false;
     public void setDelay() {
         if (delay < 100) {
             delay += 1;
@@ -51,41 +44,22 @@ public class PlayerPart {
     }
 
 
-
-
-
-
-
-
-    private Window window;
-    private ModelRendering rendering;
-
     private float birthTime = 0;
 
     public PlayerPart(Window window) {
-
+        super(window);
         this.window = window;
-        xy.setLocation(Player.playerHeadXY());
-        size = Player.size;
-        tMouse = Player.player.gettMouse();
+        partHead.setLocation(Player.player.getHeadXY());
+        size = Player.player.size;
+        tMouse = Player.player.getMouse();
         color = new Color(0, 200, 200);
-        rendering = new ModelRendering(window,  null, "gluePart");
+        renderInit(color, "gluePart", null);
         birthTime = Timer.getFloatTime();
         rendering.setTime(birthTime + trest.getMainTime());
     }
 
-    public void addCircle() {
-
-            float x = xyArray.get(xyArray.size() - 1)[0];
-            float y = xyArray.get(xyArray.size() - 1)[1];
-            xyArray.add(new float[]{x, y});
-
-            rendering.addModel(new Model(window, (int) (size * 30), color));
-            rendering.getModels().get(xyArray.size() - 1).getMovement().setPosition(new Vector3f((float) x, (float) y, 0));
-
-    }
-    public Point2D getXy() {
-        return xy;
+    public Point2D getPartHead() {
+        return partHead;
     }
 
 
@@ -94,25 +68,26 @@ public class PlayerPart {
     }
 
 
-
     public void spawn() {
+        readyTuCut = true;
         birthTime = trest.getMainTime();
         isAlive = true;
-        xyArray.add(new float[]{(float) xy.getX(),(float) xy.getX()});
+        xy.add(new float[]{(float) partHead.getX(), (float) partHead.getX()});
         rendering.addModel(new Model(window, (int) (size * 30), color));
-        rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy.getX(), (float) xy.getY(), 0));
+        rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) partHead.getX(), (float) partHead.getY(), 0));
     }
 
     public void remove() {
         rendering.getModels().clear();
-        xyArray.clear();
+        xy.clear();
     }
 
-    public void setXy(Point2D xy) {
-        this.xy.setLocation(xy);
+    public void setPartHead(Point2D partHead) {
+        this.partHead.setLocation(partHead);
     }
 
     public void reset() {
+        readyTuCut = false;
         callBack = false;
         isEmpty = true;
         isAlive = false;
@@ -126,67 +101,18 @@ public class PlayerPart {
         return color;
     }
 
-    public static double getSize() {
-        return size;
-    }
 
+    protected void setRadian(Point2D point2D) {
+        super.setRadian(point2D);
 
-
-
-    private float tMouse = 1;
-    static float stepRad = 0.1f;
-    private float[] pointWatch = new float[]{0, 0};
-    protected int radDir = 0;
-    protected double difRad = 0;
-    protected float TargetRadian = 0;
-    protected float targetOpposite = 0;
-
-
-    void setRadian(Point2D point2D) {
-        float xTarget;
-        float yTarget;
-        if(point2D != null){
-            xTarget = (float) (point2D.getX() - xy.getX());
-            yTarget = (float) (point2D.getY() - xy.getY());
-        }else {
-            xTarget = (float) (pointWatch[0] - xy.getX());
-            yTarget = (float) (pointWatch[1] - xy.getY());
-        }
-
-        // 1143 372 900 600
-        TargetRadian = (float) Math.atan2(xTarget, yTarget);
-        if (TargetRadian < 0) {
-            TargetRadian += 6.28;
-
-        }
-       targetOpposite = (tMouse + 3.14f) % 6.28f;
-        tMouse = (float) ((tMouse + 6.28) % 6.28);
-        difRad = Math.abs((TargetRadian - tMouse) % 6.28);
-
-        if (difRad > 3.14) {
-            difRad = Math.abs((Math.max(TargetRadian, tMouse) - 3.14) - (Math.min(TargetRadian, tMouse) + 3.14));
-
-        }
-        if (TargetRadian > tMouse && TargetRadian > targetOpposite && targetOpposite >= 3.14) {          // уменьшение
-            radDir = -1;
-        } else if (TargetRadian < tMouse && TargetRadian < targetOpposite && targetOpposite >= 3.14) {                          // уменьшение
-            radDir = -1;
-        } else if (TargetRadian < tMouse && TargetRadian > targetOpposite) {                          // уменьшение
-            radDir = -1;
-        }else {
-            radDir = 1;
-        }
-
-
-
-        stepRad = (float) difRad / (15/(step/2));
-        if (point2D!=null) {
-            tMouse += stepRad*radDir;
+        stepRad = (float) difRad / (15 / (step / 2));
+        if (point2D != null) {
+            tMouse += stepRad * radDir;
         } else {
             if (Math.random() > 0.5) {
-                if (isLost){
+                if (isLost) {
                     tMouse += 0.1;
-                }else {
+                } else {
                     tMouse += 0.01;
                 }
             } else {
@@ -205,8 +131,8 @@ public class PlayerPart {
 
             tMouse += 6.28;
         }
-        pointWatch[0] = (float) (step * Math.sin(tMouse) + xy.getX());
-        pointWatch[1] = (float) (step * Math.cos(tMouse) + xy.getY());
+        pointWatch[0] = (float) (step * Math.sin(tMouse) + partHead.getX());
+        pointWatch[1] = (float) (step * Math.cos(tMouse) + partHead.getY());
 
     }
 
@@ -227,9 +153,11 @@ public class PlayerPart {
     public void setTime(float time) {
         rendering.setTime(time);
     }
+
     public void setAppleCount() {
-                rendering.getModels().get(0).setRGB(takenAppleColor);
-        }
+        rendering.getModels().get(0).setRGB(takenAppleColor);
+    }
+
     public void resetAppleCount() {
         rendering.getModels().get(0).setRGB(mainColor);
     }
@@ -237,32 +165,33 @@ public class PlayerPart {
 
     public void update() {
 
-        if(isAlive){
+        if (isAlive) {
             timer = trest.getMainTime() - birthTime;
-            if(Player.playerHeadXY().distance(xy)>300){
+            if (Player.player.getHeadXY().distance(partHead) > 300) {
                 isLost = true;
             }
-            if(timer >=5){
+            if (timer >= 5) {
                 timer = 0;
                 callBack = true;
             }
             moveXy(Player.player.getDirection());
             moveCheck();
-        }else {
+        } else {
             timer = 0;
-            tMouse = Player.player.gettMouse();
-            setXy(Player.playerHeadXY());
+            tMouse = Player.player.getMouse();
+            setPartHead(Player.player.getHeadXY());
         }
     }
+
     private float timer = 0;
 
     public void moveCheck() {
 
-        if(isEmpty && !callBack){
-            if(!isLost) {
-                step = 2 * Player.step;
-                if (xy.distance(Apple.getXy()[0], Apple.getXy()[1]) < 100) {
-                    if (Apple.checkCollision(new float[]{(float) xy.getX(), (float) xy.getY()})) {
+        if (isEmpty && !callBack) {
+            if (!isLost) {
+                step = 2 * Player.player.step;
+                if (partHead.distance(Apple.getXy()[0], Apple.getXy()[1]) < 100) {
+                    if (Apple.checkCollision(new float[]{(float) partHead.getX(), (float) partHead.getY()})) {
                         setAppleCount();
                         callBack = true;
                         appleIsNear = false;
@@ -273,40 +202,40 @@ public class PlayerPart {
                         setRadian(Apple.getPoint2D());
                     }
 
-                }else {
+                } else {
                     setRadian(null);
                     appleIsNear = false;
                 }
-            }else {
-                if(xy.distance(Player.playerHeadXY())<100){
+            } else {
+                if (partHead.distance(Player.player.getHeadXY()) < 100) {
                     callBack = true;
-                    setRadian(Player.playerHeadXY());
-                }else {
+                    setRadian(Player.player.getHeadXY());
+                } else {
                     setRadian(null);
                 }
-                step = Player.maxStep/2;
+                step = Player.player.maxStep / 2;
 
             }
 
-        }else{
-            step = 2 * Player.step;
-            if(xy.distance(Player.playerHeadXY())<size){
-                if(xyArray.size()>1){
-                    xyArray.remove(0);
+        } else {
+            step = 2 * Player.player.step;
+            if (partHead.distance(Player.player.getHeadXY()) < size) {
+                if (xy.size() > 1) {
+                    xy.remove(0);
                     rendering.getModels().remove(0);
-                    xy.setLocation(xyArray.get(0)[0],xyArray.get(0)[1]);
+                    partHead.setLocation(xy.get(0)[0], xy.get(0)[1]);
                     Player.player.grow();
-                    if(!isEmpty){
+                    if (!isEmpty) {
                         Player.player.grow();
                         Player.player.eatTheApple();
                         isEmpty = true;
                     }
-                }else {
+                } else {
 
                     if (!isEmpty) {
                         Player.player.grow();
                         Player.player.eatTheApple();
-                    }else {
+                    } else {
                         Player.player.grow();
                     }
 
@@ -315,9 +244,9 @@ public class PlayerPart {
                 }
             }
 
-            setRadian(Player.playerHeadXY());
+            setRadian(Player.player.getHeadXY());
         }
-        move(pointWatch[0],pointWatch[1]);
+        move(pointWatch[0], pointWatch[1]);
         checkForAbsorb();
     }
 
@@ -325,27 +254,26 @@ public class PlayerPart {
     public void move(float x, float y) {
 
         try {
-            xy.setLocation(x, y);
-            xyArray.set(0,new float[]{(float)xy.getX(),(float)xy.getY()});
-            for (int i = 0; i < xyArray.size() - 1; i++) {
-                float distance = (float) Math.sqrt(Math.pow(xyArray.get(i + 1)[0] - xyArray.get(i)[0], 2) + Math.pow(xyArray.get(i + 1)[1] - xyArray.get(i)[1], 2));
+            partHead.setLocation(x, y);
+            xy.set(0, new float[]{(float) partHead.getX(), (float) partHead.getY()});
+            for (int i = 0; i < xy.size() - 1; i++) {
+                float distance = (float) Math.sqrt(Math.pow(xy.get(i + 1)[0] - xy.get(i)[0], 2) + Math.pow(xy.get(i + 1)[1] - xy.get(i)[1], 2));
                 float distanceDif = (size - distance) / 2;
                 float angle;
                 if (distance > size) {
-                    angle = (float) Math.atan((xyArray.get(i)[1] - xyArray.get(i + 1)[1]) / (xyArray.get(i)[0] - xyArray.get(i + 1)[0]));
-                    if (xyArray.get(i)[0] - xyArray.get(i + 1)[0] < 0) {
-                        xyArray.set(i + 1, new float[]{xyArray.get(i)[0] + (float) (size * Math.cos(angle)), xyArray.get(i)[1] + (float) (size * Math.sin(angle))});
+                    angle = (float) Math.atan((xy.get(i)[1] - xy.get(i + 1)[1]) / (xy.get(i)[0] - xy.get(i + 1)[0]));
+                    if (xy.get(i)[0] - xy.get(i + 1)[0] < 0) {
+                        xy.set(i + 1, new float[]{xy.get(i)[0] + (float) (size * Math.cos(angle)), xy.get(i)[1] + (float) (size * Math.sin(angle))});
                     } else {
-                        xyArray.set(i + 1, new float[]{xyArray.get(i)[0] - (float) (size * Math.cos(angle)), xyArray.get(i)[1] - (float) (size * Math.sin(angle))});
+                        xy.set(i + 1, new float[]{xy.get(i)[0] - (float) (size * Math.cos(angle)), xy.get(i)[1] - (float) (size * Math.sin(angle))});
                     }
                 }
 
             }
 
 
-
             for (int i = 0; i < rendering.getModels().size(); i++) {
-                rendering.getModels().get(i).getMovement().setPosition(new Vector3f(xyArray.get(i)[0], xyArray.get(i)[1], 0));
+                rendering.getModels().get(i).getMovement().setPosition(new Vector3f(xy.get(i)[0], xy.get(i)[1], 0));
             }
 
         } catch (Exception e) {
@@ -355,21 +283,22 @@ public class PlayerPart {
 //xy.add(0,new int[]{x,y});
 //xy.remove(xy.size()-1);
     }
+
     public void checkForAbsorb() {
 
         for (GluePart part : GluePart.glueParts) {
-            if (part.gluePartHeadXY().distance(xy) < 200 && part.getXy().size() > 1) {
+            if (part.gluePartHeadXY().distance(partHead) < 200 && part.getXy().size() > 1) {
                 boolean eat = false;
                 for (int i = 1; i < part.xy.size(); i++) {
                     Point2D partPoint = new Point2D.Float(part.xy.get(i)[0], part.xy.get(i)[1]);
 
-                    if (xy.distance(partPoint) < size) {
+                    if (partHead.distance(partPoint) < size) {
                         //Добавляем ячейку игроку
                         //Создаем новую часть игрока с координатами откушеной части
 
                         addCircle();
                         ArrayList<float[]> newPart = new ArrayList<>();
-                        if(part.xy.size()-1 != i) {
+                        if (part.xy.size() - 1 != i) {
                             for (int j = i; j < part.xy.size(); j++) {
                                 newPart.add(new float[]{part.xy.get(j)[0], part.xy.get(j)[1]});
                                 part.minusCell(j);
@@ -378,8 +307,8 @@ public class PlayerPart {
                             }
                             newPart.remove(0);
                             new GluePart(window, newPart);
-                        }else{
-                            part.minusCell(part.xy.size()-1);
+                        } else {
+                            part.minusCell(part.xy.size() - 1);
 
                         }
 
