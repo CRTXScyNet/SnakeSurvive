@@ -371,6 +371,9 @@ if(countOfApples<0){
             } else {
                 curSpeed += speedScale * 0.01;
             }
+            if(trest.isEnd){
+                speedScale = 0;
+            }
             maxSpeedRender.setTime(trest.getMainTime());
             maxSpeedRender.setSpeedScale(speedScale);
             maxSpeedRender.setSpeed(curSpeed);

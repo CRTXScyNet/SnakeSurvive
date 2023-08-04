@@ -39,7 +39,7 @@ s3 = step(length(uv),.5);
 //if(s >= length(uv)){
 //vec4 color = vec4((0.55-length(uv))*7,(0.55-length(uv))*7,(0.55-length(uv))*7,(0.5-length(uv))*7);
 vec4 color = vec4(0.2/length(uv)*0.1,0.2/length(uv)*0.1,0.2/length(uv)*0.1,(0.1/length(uv)*0.1));
-vec4 color3 = vec4((40-length(ss))*0.015,(40-length(ss))*0.015,(40-length(ss))*0.015,1);
+vec4 screenFadeOut = vec4((40-length(ss))*0.015,(40-length(ss))*0.015,(40-length(ss))*0.015,1);
 //vec4 color2 = vec4(0.2/length(uv2)*0.1,0.2/length(uv2)*0.1,0.2/length(uv2)*0.1,0.2/length(uv2)*0.1);
 //}else{
 //color = vec4(0,1,0,0);
@@ -55,6 +55,6 @@ if(t <0){
 
 
 
-gl_FragColor = (color * selfColor*color3) ;
+gl_FragColor = (color * selfColor*screenFadeOut) ;
 
 }

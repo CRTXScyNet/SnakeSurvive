@@ -11,12 +11,19 @@ public class ShortTimer {
         this.period = period;
     }
     public void start(boolean increase,float startTime){
+
+        if(increase && !isIncrease() && isStopped()){
+            reset();
+        }else if(!increase && isIncrease() && isStopped()){
+            reset();
+        }
         if (!started) {
             started = true;
             this.increase = increase;
             this.startTime = startTime;
 //            System.out.println("START!");
         }
+
     }
     public float update(float curTime){
         if(stopped){

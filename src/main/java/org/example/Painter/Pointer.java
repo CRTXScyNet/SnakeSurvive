@@ -32,6 +32,7 @@ public class Pointer {
         this.window = window;
         rendering = new ModelRendering(window, null, shaderName);
         rendering.addModel(new Model(window, scale, color));
+
         this.posDistance = posDistance;
     }
 
@@ -43,22 +44,16 @@ public class Pointer {
 
         if (visible) {
             if (distance > visibility) {   //Visible
-                if(!timer.isIncrease() && timer.isStopped()){
-                    timer.reset();
-                }
+
                 timer.start(true, mainTime);
                 result = -timer.update(mainTime);
             } else { // Invisible
-                if(timer.isIncrease() && timer.isStopped()){
-                    timer.reset();
-                }
+
                 timer.start(false, mainTime);
                 result = -timer.update(mainTime);
             }
         } else {   //Invisible
-            if(timer.isIncrease() && timer.isStopped()){
-                timer.reset();
-            }
+
             timer.start(false, mainTime);
             result = -timer.update(mainTime);
         }
@@ -100,4 +95,5 @@ public class Pointer {
     public void remove() {
         rendering.clear(true);
     }
+
 }

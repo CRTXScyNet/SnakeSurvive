@@ -1,6 +1,7 @@
 package org.example.Player;
 
 import org.example.Enemy.Entity;
+import org.example.Player.phantom.Phantom;
 import org.example.gpu.gameProcess.trest;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;

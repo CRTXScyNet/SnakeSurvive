@@ -1,6 +1,8 @@
-package org.example.Player;
+package org.example.Player.phantom;
 
 import org.example.Painter.Pointer;
+import org.example.Player.Player;
+import org.example.Player.PlayerParent;
 import org.example.gpu.gameProcess.trest;
 import org.example.gpu.render.ModelRendering;
 import org.example.gpu.render.Window;
@@ -17,19 +19,23 @@ public class Phantom extends PlayerParent {
 
     private ArrayList<Point2D> teleportFrom = new ArrayList<>();
     private ArrayList<Point2D> teleportTo = new ArrayList<>();
-    public ArrayList<Head> Heads = new ArrayList<>();
+    private ArrayList<Head> Heads = new ArrayList<>();
+    private static ArrayList<PhantomPortal> portals = new ArrayList<>();
     private Pointer pointer;
     public boolean isTail = false;
+
     private Color agressive = new Color(150, 100, 0);
     private Color scared = new Color(102, 162, 107);
+    static float time = 0;
 
-    class Head {
+    public class Head {
 
 
         private int position = 1;
         private float radian = 0;
 
 
+        private boolean isAlive = false;
         private float[] nextStep = new float[2];
 
 
@@ -37,6 +43,7 @@ public class Phantom extends PlayerParent {
 
 
         Head(int position) {
+            isAlive = true;
             this.position = position;
 
 
@@ -65,23 +72,34 @@ public class Phantom extends PlayerParent {
         public void setNextStep(float[] nextStep) {
             this.nextStep = nextStep;
         }
+
+        public void setAlive(boolean alive) {
+            isAlive = alive;
+        }
+
+        public boolean isAlive() {
+            return isAlive;
+        }
+
     }
 
 
     public Phantom(Window wind, int length) {
+
         super(wind);
-        minStep = 0.5f;
-        maxStep = 1.5f;
+
+        minStep = 1.5f;
+        maxStep = 2f;
         PlayerParent.playerParents.add(this);
         color = agressive;
-        Point2D point = getRandomPoint();
+        Point2D point = getRandomPoint(true);
         xy.add(new float[]{(float) point.getX(), (float) point.getY()});
         renderInit(color, "player", null);
         this.size = 8;
         setMaxLength(70);
         setLength(length);
         phantoms.add(this);
-        pointer = new Pointer(0.5f,window,"bufPointer",color,150,350,30);
+        pointer = new Pointer(0.5f, window, "bufPointer", color, 150, 350, 30);
 
     }
 
@@ -89,6 +107,8 @@ public class Phantom extends PlayerParent {
         super(wind);
         isTail = true;
         color = agressive;
+
+        maxStep = 1.5f;
         this.teleportTo.addAll(teleportTo);
         this.teleportFrom.addAll(teleportFrom);
         this.xy = xy;
@@ -96,7 +116,7 @@ public class Phantom extends PlayerParent {
         renderInit(color, "player", null);
         Heads.addAll(heads);
         phantoms.add(this);
-        pointer = new Pointer(0.5f,window,"bufPointer",color,150,350,30);
+        pointer = new Pointer(0.5f, window, "bufPointer", color, 150, 350, 30);
 
     }
 
@@ -105,12 +125,13 @@ public class Phantom extends PlayerParent {
         eaten = true;
         reversed = true;
         color = agressive;
+        maxStep = 1.5f;
         this.xy = xy;
         this.size = 8;
         renderInit(color, "player", null);
 
         phantoms.add(this);
-        pointer = new Pointer(0.5f,window,"bufPointer",color,150,350,30);
+        pointer = new Pointer(0.5f, window, "bufPointer", color, 150, 350, 30);
 
     }
 
@@ -174,10 +195,11 @@ public class Phantom extends PlayerParent {
             }
             if (xy.size() == 0) {
                 reset();
-            }else if (Player.player.getHeadXY().distance(xy.get(0)[0], xy.get(0)[1]) > Player.player.getHeadXY().distance(xy.get(xy.size() - 1)[0], xy.get(xy.size() - 1)[1])) {
+            } else if (Player.player.getHeadXY().distance(xy.get(0)[0], xy.get(0)[1]) > Player.player.getHeadXY().distance(xy.get(xy.size() - 1)[0], xy.get(xy.size() - 1)[1])) {
                 Collections.reverse(xy);
             }
             reversed = true;
+            Heads.forEach(r -> r.setAlive(false));
             Heads.clear();
         } else {
 
@@ -195,7 +217,7 @@ public class Phantom extends PlayerParent {
             rendering.getModels().remove(pos);
             if (xy.size() == 0) {
                 reset();
-            }else if (Player.player.getHeadXY().distance(xy.get(0)[0], xy.get(0)[1]) > Player.player.getHeadXY().distance(xy.get(xy.size() - 1)[0], xy.get(xy.size() - 1)[1])) {
+            } else if (Player.player.getHeadXY().distance(xy.get(0)[0], xy.get(0)[1]) > Player.player.getHeadXY().distance(xy.get(xy.size() - 1)[0], xy.get(xy.size() - 1)[1])) {
                 Collections.reverse(xy);
             }
 
@@ -245,21 +267,23 @@ public class Phantom extends PlayerParent {
         new Phantom(window, newXy, newHeads, newTeleportFrom, newTeleportTo);
     }
 
-    public Point2D getRandomPoint() {
+    public Point2D getRandomPoint(boolean spawn) {
         double x = (-((double) window.width / 2) + ((Math.random() * ((double) window.width))));
-        double y = (-((double) window.height / 2) + ((Math.random() * ((double) window.height))));
-        if (Math.pow(Math.abs(x), 2) + Math.pow(Math.abs(y), 2) <= Math.pow(450, 2)) {
-            return getRandomPoint();
-        }                    //TODO
+        double y = (-((double) window.width / 2) + ((Math.random() * ((double) window.width))));
+        if(spawn) {
+            if (Math.pow(Math.abs(x), 2) + Math.pow(Math.abs(y), 2) <= Math.pow(450, 2)) {
+                return getRandomPoint(true);
+            }                    //TODO
+        }
         return new Point2D.Double(x, y);
     }
 
     public void update() {
-        if (xy.size()==0){
+        if (xy.size() == 0) {
             reset();
             return;
         }
-        pointer.update(getHeadXY(),true, trest.mainTime);
+        pointer.update(getHeadXY(), true, trest.mainTime);
         moveCheck();
 
     }
@@ -340,7 +364,12 @@ public class Phantom extends PlayerParent {
 
             }
         }
-        distance = (float) getHeadXY().distance(Player.player.getHeadXY());
+        if (target != null) {
+            distance = (float) getHeadXY().distance(target);
+        }else {
+            distance = (float) getHeadXY().distance(Player.player.getHeadXY());
+        }
+
         wiggle();
         if (target != null) {
             super.setRadian(target);
@@ -395,7 +424,7 @@ public class Phantom extends PlayerParent {
     public void moveCheck() {
         if (step > minStep) {
             if (!canIncreaseSpeed) {
-                step *= 0.99;                                              //TODO
+                step *= 0.999;                                              //TODO
             } else {
                 step *= 0.999;
             }
@@ -406,21 +435,27 @@ public class Phantom extends PlayerParent {
         float distance = 0;
         float secDistance = 0;
         for (int i = 0; i < Player.player.getXy().size(); i++) {
-            if(distance == 0){
-                distance = (float)getHeadXY().distance(Player.player.getXy().get(i)[0],Player.player.getXy().get(i)[1]);
+            if (distance == 0) {
+                distance = (float) getHeadXY().distance(Player.player.getXy().get(i)[0], Player.player.getXy().get(i)[1]);
                 position = i;
-            }else {
-                secDistance = (float)getHeadXY().distance(Player.player.getXy().get(i)[0],Player.player.getXy().get(i)[1]);
-                if(secDistance<distance){
-                    distance=secDistance;
+            } else {
+                secDistance = (float) getHeadXY().distance(Player.player.getXy().get(i)[0], Player.player.getXy().get(i)[1]);
+                if (secDistance < distance) {
+                    distance = secDistance;
                     position = i;
                 }
             }
         }
-        Point2D nearPlayer =new Point2D.Float(Player.player.getXy().get(position)[0],Player.player.getXy().get(position)[1]);
+        Point2D nearPlayer = new Point2D.Float(Player.player.getXy().get(position)[0], Player.player.getXy().get(position)[1]);
         if (xy.size() > Player.player.xy.size()) {
             pointer.setColor(agressive);
             rendering.setRGB(agressive);
+            if(maxStep != 2){
+                maxStep = 2f;
+            }
+            if(minStep != 1f){
+                minStep = 1f;
+            }
             if (Player.player.getPart().readyTuCut) {
                 for (int j = 1; j < xy.size() - 1; j++) {
 
@@ -434,12 +469,14 @@ public class Phantom extends PlayerParent {
             }
             for (int i = 0; i < Player.player.getXy().size(); i++) {
                 if (getHeadXY().distance(Player.player.getXy().get(i)[0], Player.player.getXy().get(i)[1]) < size) {
-                    Point2D point = getRandomPoint();
+                    Point2D point = getRandomPoint(false);
                     if (xy.size() > 1) {
                         Point2D point2D = new Point2D.Float(Player.player.getXy().get(i)[0], Player.player.getXy().get(i)[1]);
                         teleportFrom.add(point2D);
                         teleportTo.add(point);
                         Head head = new Head(1);
+                        portals.add(new PhantomPortal(point2D,window,head,color,true));
+                        portals.add(new PhantomPortal(point,window,head,color,false));
                         head.setDirection(tMouse);
                         Heads.add(head);
                     }
@@ -451,12 +488,17 @@ public class Phantom extends PlayerParent {
             }
 
 
-
             target.setLocation(nearPlayer);
 
         } else {
             pointer.setColor(scared);
             rendering.setRGB(scared);
+            if(minStep != 1f){
+                minStep = 1f;
+            }
+            if(maxStep != 1.5){
+                maxStep = 1.5f;
+            }
             eaten = false;
             for (int i = 0; i < xy.size(); i++) {
                 if (Player.player.getHeadXY().distance(xy.get(i)[0], xy.get(i)[1]) < size) {
@@ -472,23 +514,24 @@ public class Phantom extends PlayerParent {
                     target.setLocation(nearPlayer);
                 } else {
 
-                    target.setLocation((xy.get(0)[0]-nearPlayer.getX()) * 2, (xy.get(0)[1]-nearPlayer.getY()) * 2);
+                    target.setLocation((xy.get(0)[0] - nearPlayer.getX()) * 2, (xy.get(0)[1] - nearPlayer.getY()) * 2);
                 }
             }
-            if (reversed) {
+
                 die();
-            }
+
         }
         if (Heads.size() != 0) {
             for (int i = 0; i < Heads.size(); i++) {
                 int pos = Heads.get(i).getPosition();
                 Point2D from = teleportFrom.get(i);
                 Point2D to = teleportTo.get(i);
-                if (from.distance(xy.get(pos)[0], xy.get(pos)[1]) < size) {
+                if (from.distance(xy.get(pos)[0], xy.get(pos)[1]) < size/3) {
                     xy.set(pos, new float[]{(float) to.getX(), (float) to.getY()});
                     if (pos != xy.size() - 1) {
                         Heads.get(i).setPosition(++pos);
                     } else {
+                        Heads.get(i).setAlive(false);
                         Heads.remove(i);
                         teleportTo.remove(i);
                         teleportFrom.remove(i);
@@ -510,14 +553,14 @@ public class Phantom extends PlayerParent {
     }
 
     public void move(float x, float y) {
-        int count = xy.size();
+        int count = xy.size()-1;
         if (Heads.size() > 0) {
             count = getSecond().getPosition() - 1;
         }
         if (!eaten) {
             xy.set(0, new float[]{x, y});
         }
-        for (int i = 0; i < count - 1; i++) {
+        for (int i = 0; i < count; i++) {
             float distance = (float) Math.sqrt(Math.pow(xy.get(i + 1)[0] - xy.get(i)[0], 2) + Math.pow(xy.get(i + 1)[1] - xy.get(i)[1], 2));
             float distanceDif = (size - distance) / 2;
             float angle;
@@ -578,8 +621,6 @@ public class Phantom extends PlayerParent {
 
     public static void clear() {
         for (int i = 0; i < phantoms.size(); i++) {
-
-
             phantoms.get(i).xy.clear();
             phantoms.get(i).rendering.clear(true);
             ModelRendering.selfList.remove(phantoms.get(i).rendering);
@@ -587,6 +628,11 @@ public class Phantom extends PlayerParent {
             i--;
         }
         phantoms.clear();
+        for (int i = 0; i < portals.size(); i++) {
+            portals.get(i).remove();
+            portals.remove(i);
+            i--;
+        }
     }
 
     public void reset() {
@@ -597,5 +643,28 @@ public class Phantom extends PlayerParent {
         ModelRendering.selfList.remove(rendering);
         phantoms.remove(this);
         pointer.remove();
+    }
+    public static void updateAll(){
+        time = trest.getMainTime();
+        for (int i = 0; i < phantoms.size(); i++) {
+            phantoms.get(i).update();
+        }
+        for (int i = 0; i < portals.size(); i++) {
+            portals.get(i).update(time);
+            if(portals.get(i).closed()){
+                portals.get(i).remove();
+                portals.remove(i);
+//                System.out.println("Portal deleted");
+                i--;
+            }
+        }
+    }
+    public static void moveXyAll(float[] direct){
+        for(Phantom phantom1 : phantoms){
+            phantom1.moveXy(direct);
+        }
+        for (PhantomPortal portal : portals) {
+            portal.moveXY(direct);
+        }
     }
 }

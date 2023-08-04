@@ -9,11 +9,10 @@ import org.example.Enemy.Enemy;
 import org.example.Main;
 import org.example.Painter.Apple;
 import org.example.Player.GluePart;
-import org.example.Player.Phantom;
+import org.example.Player.phantom.Phantom;
 import org.example.Player.Player;
 import org.example.Sound.LWJGLSound;
 import org.example.Sound.MainSoundsController;
-import org.example.time.ShortTimer;
 import org.example.time.Timer;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
@@ -903,10 +902,10 @@ public class trest {
                 Player.player.lostTheApple();
 
             }
-            if (window.getInput().isKeyPressed(GLFW_KEY_MINUS)) {
-                Player.player.lostTheApple();
-
-            }
+//            if (window.getInput().isKeyPressed(GLFW_KEY_MINUS)) {
+//                Player.player.lostTheApple();
+//
+//            }
             if (window.getInput().isKeyPressed(GLFW_KEY_SPACE)) {
                 immortal = !immortal;
 
@@ -1099,9 +1098,7 @@ public class trest {
                 a = Apple.getXy();
                 apple.update();
 
-                for (int i = 0; i < Phantom.phantoms.size(); i++) {
-                    Phantom.phantoms.get(i).update();
-                }
+                Phantom.updateAll();
                 player.update();
                 for (int i = 0; i < Enemy.enemies.size(); i++) {
                     Enemy.enemies.get(i).update();
@@ -1161,9 +1158,7 @@ public class trest {
         apple.moveXy(direction);
         player.moveXy(direction);
 
-        for(Phantom phantom1 : Phantom.phantoms){
-            phantom1.moveXy(direction);
-        }
+        Phantom.moveXyAll(direction);
 
 
         for (Enemy enemy : Enemy.enemies) {
