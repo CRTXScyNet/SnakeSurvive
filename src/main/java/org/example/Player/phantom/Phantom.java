@@ -3,6 +3,7 @@ package org.example.Player.phantom;
 import org.example.Painter.Pointer;
 import org.example.Player.Player;
 import org.example.Player.PlayerParent;
+import org.example.Sound.MainSoundsController;
 import org.example.gpu.gameProcess.trest;
 import org.example.gpu.render.ModelRendering;
 import org.example.gpu.render.Window;
@@ -17,8 +18,7 @@ public class Phantom extends PlayerParent {
     public static ArrayList<Phantom> phantoms = new ArrayList<>();
     private Color mainColor = new Color(0, 100, 100);
 
-    private ArrayList<Point2D> teleportFrom = new ArrayList<>();
-    private ArrayList<Point2D> teleportTo = new ArrayList<>();
+
     private ArrayList<Head> Heads = new ArrayList<>();
     private static ArrayList<PhantomPortal> portals = new ArrayList<>();
     private Pointer pointer;
@@ -35,6 +35,9 @@ public class Phantom extends PlayerParent {
         private float radian = 0;
 
 
+
+        private PhantomPortal portalIn;
+private PhantomPortal portalOut;
         private boolean isAlive = false;
         private float[] nextStep = new float[2];
 
@@ -80,6 +83,21 @@ public class Phantom extends PlayerParent {
         public boolean isAlive() {
             return isAlive;
         }
+        public PhantomPortal getPortalIn() {
+            return portalIn;
+        }
+
+        public void setPortalIn(PhantomPortal portalIn) {
+            this.portalIn = portalIn;
+        }
+
+        public PhantomPortal getPortalOut() {
+            return portalOut;
+        }
+
+        public void setPortalOut(PhantomPortal portalOut) {
+            this.portalOut = portalOut;
+        }
 
     }
 
@@ -103,14 +121,12 @@ public class Phantom extends PlayerParent {
 
     }
 
-    public Phantom(Window wind, ArrayList<float[]> xy, ArrayList<Head> heads, ArrayList<Point2D> teleportFrom, ArrayList<Point2D> teleportTo) {
+    public Phantom(Window wind, ArrayList<float[]> xy, ArrayList<Head> heads) {
         super(wind);
         isTail = true;
         color = agressive;
 
         maxStep = 1.5f;
-        this.teleportTo.addAll(teleportTo);
-        this.teleportFrom.addAll(teleportFrom);
         this.xy = xy;
         this.size = 8;
         renderInit(color, "player", null);
@@ -119,7 +135,7 @@ public class Phantom extends PlayerParent {
         pointer = new Pointer(0.5f, window, "bufPointer", color, 150, 350, 30);
 
     }
-
+private final float constStep = maxStepStat;
     public Phantom(Window wind, ArrayList<float[]> xy) {
         super(wind);
         eaten = true;
@@ -132,6 +148,7 @@ public class Phantom extends PlayerParent {
 
         phantoms.add(this);
         pointer = new Pointer(0.5f, window, "bufPointer", color, 150, 350, 30);
+        maxStepStat = constStep + trest.stage.ordinal()/**0.1f*/;
 
     }
 
@@ -173,7 +190,9 @@ public class Phantom extends PlayerParent {
     boolean reversed = false;
 
     public void prepareToEat(int pos) {
-
+        if (Player.player.step < Player.player.maxStep * 2){
+        Player.player.step += 0.1;
+    }
         if (Heads.size() > 0) {
             for (Head head : Heads) {
                 ArrayList<float[]> anotherXY = new ArrayList<>();
@@ -242,29 +261,30 @@ public class Phantom extends PlayerParent {
 //            Heads.remove(getHead(pos));
 //        }
         ArrayList<Head> newHeads = new ArrayList<>();
-        ArrayList<Point2D> newTeleportFrom = new ArrayList<>();
-        ArrayList<Point2D> newTeleportTo = new ArrayList<>();
+
         if (Heads.size() > 0) {
             for (int i = 0; i < Heads.size(); i++) {
                 if (Heads.get(i).position > pos) {
 
                     newHeads.add(Heads.get(i));
-                    newTeleportFrom.add(this.teleportFrom.get(i));
-                    newTeleportTo.add(this.teleportTo.get(i));
                 }
             }
-            this.teleportFrom.removeAll(newTeleportFrom);
-            this.teleportTo.removeAll(newTeleportTo);
+
             Heads.removeAll(newHeads);
         }
+        if(getHead(xy.size()-1)!=null){
+            Heads.get(Heads.size()-1).setAlive(false);
+            Heads.remove(Heads.size()-1);
+        }
+        rendering.getModels().remove(pos);
+        xy.remove(pos);
 
         for (int i = 0; i < newHeads.size(); i++) {
-            newHeads.get(i).setPosition(newHeads.get(i).getPosition() - pos);
-
+            newHeads.get(i).setPosition(newHeads.get(i).getPosition() - (pos+1));
         }
 
 
-        new Phantom(window, newXy, newHeads, newTeleportFrom, newTeleportTo);
+        new Phantom(window, newXy, newHeads);
     }
 
     public Point2D getRandomPoint(boolean spawn) {
@@ -291,15 +311,6 @@ public class Phantom extends PlayerParent {
     @Override
     public void moveXy(float[] direct) {
         super.moveXy(direct);
-        for (Point2D point2D : teleportTo) {
-            double[] a = new double[]{point2D.getX(), point2D.getY()};
-            point2D.setLocation(a[0] - direct[0], a[1] - direct[1]);
-        }
-
-        for (Point2D point2D : teleportFrom) {
-            float[] a = new float[]{(float) point2D.getX(), (float) point2D.getY()};
-            point2D.setLocation(a[0] - direct[0], a[1] - direct[1]);
-        }
 
     }
 
@@ -346,7 +357,7 @@ public class Phantom extends PlayerParent {
             for (int i = 0; i < Heads.size(); i++) {
                 int pos = Heads.get(i).getPosition();
                 float dir = Heads.get(i).getDirection();
-                super.setRadian(teleportFrom.get(i), new Point2D.Float(xy.get(pos)[0], xy.get(pos)[1]), dir);
+                super.setRadian(Heads.get(i).getPortalIn().getXy(), new Point2D.Float(xy.get(pos)[0], xy.get(pos)[1]), dir);
 
                 if (dir > 6.28) {
                     dir -= 6.28;
@@ -409,8 +420,8 @@ public class Phantom extends PlayerParent {
             float angle;
             if (distance < 30) {
                 angle = (float) Math.atan((p[1] - xy.get(j)[1]) / (p[0] - xy.get(j)[0]));
-                double translocationX = (distance - 5) * Math.cos(angle);
-                double translocationY = (distance - 5) * Math.sin(angle);
+                double translocationX = (distance - 5-Player.player.step) * Math.cos(angle);
+                double translocationY = (distance - 5-Player.player.step) * Math.sin(angle);
                 if (p[0] - xy.get(j)[0] < 0) {
                     xy.set(j, new float[]{p[0] + (float) translocationX, p[1] + (float) translocationY});
                 } else {
@@ -447,11 +458,12 @@ public class Phantom extends PlayerParent {
             }
         }
         Point2D nearPlayer = new Point2D.Float(Player.player.getXy().get(position)[0], Player.player.getXy().get(position)[1]);
-        if (xy.size() > Player.player.xy.size()) {
+        if (xy.size() > (trest.isEnd ? Player.player.getXy().size()/2:Player.countOfApples)) {
+                MainSoundsController.white_snakes_hunting_bool = true;
             pointer.setColor(agressive);
             rendering.setRGB(agressive);
-            if(maxStep != 2){
-                maxStep = 2f;
+            if(maxStep != maxStepStat){
+                maxStep = maxStepStat;
             }
             if(minStep != 1f){
                 minStep = 1f;
@@ -470,18 +482,25 @@ public class Phantom extends PlayerParent {
             for (int i = 0; i < Player.player.getXy().size(); i++) {
                 if (getHeadXY().distance(Player.player.getXy().get(i)[0], Player.player.getXy().get(i)[1]) < size) {
                     Point2D point = getRandomPoint(false);
+                    Point2D point2D = new Point2D.Float(Player.player.getXy().get(i)[0], Player.player.getXy().get(i)[1]);
                     if (xy.size() > 1) {
-                        Point2D point2D = new Point2D.Float(Player.player.getXy().get(i)[0], Player.player.getXy().get(i)[1]);
-                        teleportFrom.add(point2D);
-                        teleportTo.add(point);
                         Head head = new Head(1);
-                        portals.add(new PhantomPortal(point2D,window,head,color,true));
-                        portals.add(new PhantomPortal(point,window,head,color,false));
+                        head.setPortalIn(new PhantomPortal(point2D,window,head,color,true));
+                        head.setPortalOut(new PhantomPortal(point,window,head,color,false));
+                        portals.add(head.getPortalIn());
+                        portals.add(head.getPortalOut());
                         head.setDirection(tMouse);
                         Heads.add(head);
+                    }else {
+                        Head head = new Head(0);
+                        head.setPortalIn(new PhantomPortal(point2D,window,head,color,true));
+                        head.setPortalOut(new PhantomPortal(point,window,head,color,false));
+                        portals.add(head.getPortalIn());
+                        portals.add(head.getPortalOut());
+                        head.setAlive(false);
                     }
                     xy.set(0, new float[]{(float) point.getX(), (float) point.getY()});
-                    Player.player.minusCell();
+//                    Player.player.minusCell();
                     Player.player.lostTheApple();
                     break;
                 }
@@ -524,8 +543,14 @@ public class Phantom extends PlayerParent {
         if (Heads.size() != 0) {
             for (int i = 0; i < Heads.size(); i++) {
                 int pos = Heads.get(i).getPosition();
-                Point2D from = teleportFrom.get(i);
-                Point2D to = teleportTo.get(i);
+                Point2D from = Heads.get(i).getPortalIn().getXy();
+                Point2D to = Heads.get(i).getPortalOut().getXy();
+                if(xy.size()-1<pos){
+                    Heads.get(i).setAlive(false);
+                    Heads.remove(i);
+                    i--;
+                    continue;
+                }
                 if (from.distance(xy.get(pos)[0], xy.get(pos)[1]) < size/3) {
                     xy.set(pos, new float[]{(float) to.getX(), (float) to.getY()});
                     if (pos != xy.size() - 1) {
@@ -533,8 +558,7 @@ public class Phantom extends PlayerParent {
                     } else {
                         Heads.get(i).setAlive(false);
                         Heads.remove(i);
-                        teleportTo.remove(i);
-                        teleportFrom.remove(i);
+
                         i--;
                     }
 

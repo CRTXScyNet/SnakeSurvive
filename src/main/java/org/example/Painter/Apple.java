@@ -22,29 +22,38 @@ public class Apple {
     private int width;
     private int height;
     private static int size = 10;
-    private int eatenDelayStat = 50;
-    private int eatenDelay = eatenDelayStat;
+
     private static float[] xy = new float[]{};
 
 
 
     private  static Point2D point2D = new Point2D.Float();
-    public static float eatenTime = 0;
-    public static float eatenTimelast = 0;
+
     static double collisionWithApple = Math.pow(Apple.getAppleSize() * 2, 2);
     public static Apple apple;
 
     private Window window;
-    public static boolean appleSpawned = false;
+    /**
+     * Яблоко поменяло свое положение, но уже не видно змеям.
+     */
+    public static boolean appleSpawned = true;
+    /**
+     * Яблоко видно змеям.
+     */
     public static boolean appleVisible = false;
-
+    /**
+     * Яблоко съедено
+     */
     public static boolean eaten = false;
-    private ShortTimer pointerTimer = new ShortTimer(1);
-    private Pointer pointer;
+
+    private ShortTimer appleTimer = new ShortTimer(1);
+    private ShortTimer pointerTimer = new ShortTimer(0.5f);
+
 
     private ModelRendering rendering;
     private ModelRendering renderingPoiner;
     private float mainTime = 0;
+    private float appleFade = 0;
 
     public Apple(Window window) {
 
@@ -57,13 +66,13 @@ public class Apple {
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy[0], (float) xy[1], 0));
         renderingPoiner = new ModelRendering(window, null, "applePointer");
         renderingPoiner.addModel(new Model(window, 30, color));
-        pointer = new Pointer(1f,window,"applePointer",color,150,200,30);
+//        pointer = new Pointer(1f,window,"applePointer",color,150,200,30);
         point2D.setLocation(xy[0],xy[1]);
         soundInit();
     }
 
     public static boolean checkCollision(float[] xy) {
-        if (!eaten && Math.pow(Math.abs(xy[0] - Apple.xy[0]), 2) + Math.pow(Math.abs(xy[1] - Apple.xy[1]), 2) <= collisionWithApple) {
+        if (!eaten && appleVisible && Math.pow(Math.abs(xy[0] - Apple.xy[0]), 2) + Math.pow(Math.abs(xy[1] - Apple.xy[1]), 2) <= collisionWithApple) {
             int d = (int)Math.round(Math.random()*(ac-1));
             eatSound.get(d).play();
             eaten = true;
@@ -75,63 +84,44 @@ public class Apple {
     }
 
     public void update() {
+
         mainTime = trest.mainTime;
         for(LWJGLSound sound : eatSound){
             sound.update(xy[0],xy[1]);
         }
+        if(trest.stage.isBoss()){
+            eaten = true;
+        }
         if (appleSpawned && !appleVisible) {
-            if (eatenTimelast > 0) {
-
-                eatenTimelast -= (mainTime - eatenTime);
-                setTime(-eatenTimelast);
-                eatenTime = mainTime;
-
+            if (appleFade<1) {
+                apple.setTime(appleFade);
+                appleTimer.start(true,mainTime);
             } else {
                 appleVisible = true;
-//                                    appleSpawned = false;
             }
         }
-        if (eatenDelay < eatenDelayStat) {
-            eatenDelay++;
-        }
-
         if (eaten && appleVisible) {
-
             appleSpawned = false;
             appleVisible = false;
-            eatenTime = mainTime;
-            eatenDelay = 0;
+            appleTimer.start(false,mainTime);
         }
-
         if (eaten) {
-            if (eatenTimelast > 0) {
-                eatenTimelast += mainTime - eatenTime;
-                apple.setTime(-eatenTimelast);
-                eatenTime = mainTime;
-                //todo
-            } else {
-
-                eatenTimelast = mainTime - eatenTime;
-                apple.setTime(-eatenTimelast);
-            }
-            if (eatenDelay >= eatenDelayStat) {
+            apple.setTime(appleFade*2f);
+            if (appleFade<=0 && !trest.stage.isBoss()) {
                 apple.setXy();
                 eaten = false;
+                appleSpawned = true;
             }
-        }else {
-
         }
-        if (eatenDelay >= eatenDelayStat) {
-            eatenTime = mainTime;
-            appleSpawned = true;
-        }
-        if (appleVisible) {
-            apple.setTime(mainTime);
+       appleFade = appleTimer.update(mainTime);
+//        System.out.println(appleFade);
+        if(appleVisible) {
+            apple.setTime(appleFade);
         }
     }
 
     private float pointerTime = 0;
-
+private boolean isArrive = false;
     public void setTime(float time) {
         rendering.setTime(time);
 
@@ -151,24 +141,27 @@ public class Apple {
 
         if (appleVisible) {
             if(point2D.distance(0,0)>300){
-                if(pointerTimer.isStopped()&& !pointerTimer.isIncrease()){
-                    pointerTimer.reset();
-                }
+
                 pointerTimer.start(true,mainTime);
                 time = pointerTimer.update(mainTime);
+                if(pointerTimer.isStopped()&&isArrive){
+                    pointerTime = 1;
+                    isArrive = false;
+                }
                 if(pointerTimer.isStopped()){
                     renderingPoiner.setTime(pointerTime);
                 }else {
                     renderingPoiner.setTime(-time);
+                    isArrive = true;
+
 //                    System.out.println("vis " + time);
                 }
 
 
             }else {
-                if(pointerTimer.isStopped()&& pointerTimer.isIncrease()){
-                    pointerTimer.reset();
-                }
+
                 pointerTimer.start(false,mainTime);
+
                 time = pointerTimer.update(mainTime);
                 if(pointerTimer.isStopped()){
                     if(pointerTimer.isIncrease()){
@@ -178,23 +171,22 @@ public class Apple {
                     }
                 }
 //                System.out.println("invis " + time);
-                renderingPoiner.setTime(-time);
+                renderingPoiner.setTime(time);
             }
 
         }else {
-            if(pointerTimer.isStopped()&& pointerTimer.isIncrease()){
-                pointerTimer.reset();
-            }
-            pointerTimer.start(false,mainTime);
-            time = pointerTimer.update(mainTime);
-            if(pointerTimer.isStopped()){
-                if(pointerTimer.isIncrease()){
-                    time = 1;
-                }else {
-                    time = 0;
+
+                pointerTimer.start(false, mainTime);
+                time = pointerTimer.update(mainTime);
+                if (pointerTimer.isStopped()) {
+                    if (pointerTimer.isIncrease()) {
+                        time = 1;
+                    } else {
+                        time = 0;
+                    }
                 }
-            }
-//            System.out.println("invis " + time);
+//                System.out.println("invis " + time);
+
             renderingPoiner.setTime(-time);
         }
     }

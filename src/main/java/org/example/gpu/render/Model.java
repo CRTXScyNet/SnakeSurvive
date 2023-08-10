@@ -49,7 +49,7 @@ public class Model implements Cleaner.Cleanable {
     public float getScale() {
         return scale;
     }
-
+private float time = 0;
 
     private float scale = 0;
 
@@ -92,8 +92,12 @@ public class Model implements Cleaner.Cleanable {
 
     }
 
-
-
+public void setTime(float t){
+        time = t;
+}
+    public float getTime(){
+        return time;
+    }
     public void render() {
 
 //        texture.bind(0);

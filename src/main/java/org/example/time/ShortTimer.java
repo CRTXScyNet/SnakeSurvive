@@ -2,13 +2,19 @@ package org.example.time;
 
 public class ShortTimer {
     private float startTime = 0;
-    private float period;
+    private float periodUp;
+    private float periodDown;
     private float curPeriod = 0;
     private boolean increase = true;
     private boolean started = false;
     private boolean stopped = false;
     public ShortTimer(float period) {
-        this.period = period;
+        this.periodUp = period;
+        this.periodDown = period;
+    }
+    public ShortTimer(float periodUp,float periodDown) {
+        this.periodUp = periodUp;
+        this.periodDown = periodDown;
     }
     public void start(boolean increase,float startTime){
 
@@ -25,6 +31,11 @@ public class ShortTimer {
         }
 
     }
+
+    public float getCurPeriod() {
+        return curPeriod;
+    }
+
     public float update(float curTime){
         if(stopped){
             if(increase){
@@ -38,10 +49,10 @@ public class ShortTimer {
         }
         float result = 0;
         if(increase) {
-            if (curPeriod == 1) {
+            if (curPeriod >= 1) {
                 result = 1;
             } else{
-                result = (curTime - startTime) / period;
+                result = (curTime - startTime) / periodUp;
         }
 //            System.out.println("Increase " + result);
             if(result>=1){
@@ -49,10 +60,10 @@ public class ShortTimer {
 
             }
         }else {
-            if (curPeriod ==0) {
+            if (curPeriod <=0) {
                 result = 0;
             }else {
-                result = 1 - (curTime - startTime) / period;
+                result = 1 - (curTime - startTime) / periodDown;
             }
 //            System.out.println("Decrease " + result);
             if(result<=0){

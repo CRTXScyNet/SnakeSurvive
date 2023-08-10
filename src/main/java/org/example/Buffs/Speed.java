@@ -14,7 +14,7 @@ public class Speed extends BuffParent {
         renderInit("speed", "bufPointer", color);
 
         setCanExistTime(15);
-        setBuffCanExistTime(5);
+        setBuffCanExistTime(15);
         setChance(0.1);
         soundInit("./sounds/CutTheTailConstSound.ogg",true);
     }

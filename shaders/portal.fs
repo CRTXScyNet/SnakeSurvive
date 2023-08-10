@@ -63,11 +63,11 @@ s4 = step(length(uv),length(abs(1.0))/2);
 
 //    ring*=visibility;
 
-    vec4 ringColor = vec4(ring, ring, 0, visibility);
+    vec4 ringColor = vec4(ring, ring, ring, visibility);
 //    ringColor*=selfColor;
 
 
-    vec4 color = vec4(visibility,visibility, 0, visibility);
+    vec4 color = vec4(visibility,visibility, visibility, visibility);
     vec4 color3 = vec4((40 - length(ss)) * 0.015, (40 - length(ss)) * 0.015, (40 - length(ss)) * 0.015, 1);
 //    color *= selfColor;
 

@@ -5,12 +5,12 @@ import org.joml.Vector3f;
 
 public class Movement {
     private Vector3f position;
-    private Matrix4f projection;
+    private static Matrix4f projection;
     private float rotation = 0;
 
  public Movement(int width,int height){
      position = new Vector3f(0,0,0);
-     projection = new Matrix4f().setOrtho2D(-width/2,width/2,-height/2,height/2);
+     setProjection(width,height);
  }
 
     public void setPosition(Vector3f position) {
@@ -20,8 +20,8 @@ public class Movement {
      this.position.add(position);
     }
 
-    public void setProjection(Matrix4f projection) {
-        this.projection = projection;
+    public static void setProjection(/*Matrix4f projection*/float width, float height) {
+        projection = new Matrix4f().setOrtho2D(-width/2,width/2,-height/2,height/2);
     }
     public void setRotation(float r){
      this.rotation = r;

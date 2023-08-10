@@ -5,6 +5,7 @@ import org.example.gpu.gameProcess.trest;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
 import org.example.gpu.render.Window;
+import org.example.time.ShortTimer;
 import org.joml.Vector3f;
 
 import java.awt.*;
@@ -34,9 +35,56 @@ public class Player extends PlayerParent {
     private ModelRendering maxSpeedRender;
     public static Player player;
     public PlayerPart part;
+    private DyingCell dyingCell;
+    private float mainTime = 0;
+
+    private class DyingCell {
+        private ArrayList<Integer> pos = new ArrayList<>();
+        private ArrayList<ShortTimer> timers = new ArrayList<>();
+        private ModelRendering rendering;
+
+        DyingCell(Window window) {
+            this.pos = pos;
+            rendering = new ModelRendering(window, null, "apple");
+        }
+
+        private void cellDying(int pos) {
+            this.pos.add(pos);
+            rendering.addModel(new Model(window, 250, takenAppleColor));
+            ShortTimer timer = new ShortTimer(0.01f,0.5f);
+            timer.start(true, mainTime);
+            timers.add(timer);
+
+        }
+
+        private void update() {
+            for (int i = 0; i < pos.size(); i++) {
+                if(xy.size()-1<pos.get(i)){
+                    rendering.removeModel(rendering.getModels().get(i));
+                    timers.remove(i);
+                    pos.remove(i);
+                    i--;
+                    continue;
+                }
+                float[] point = xy.get(pos.get(i));
+                rendering.getModels().get(i).getMovement().setPosition(new Vector3f(point[0], point[1], 0));
+                timers.get(i).start(false, mainTime);
+                float time = timers.get(i).update(mainTime);
+                rendering.getModels().get(i).setTime(time * 2f);
+                if (time <= 0) {
+                    rendering.removeModel(rendering.getModels().get(i));
+                    timers.remove(i);
+                    pos.remove(i);
+                    i--;
+                }
+            }
+        }
+
+    }
 
     public Player(Window window) {
         super(window);
+        dyingCell = new DyingCell(window);
         color = mainColor;
         xy.add(new float[]{0, 0});
         selfList.add(this);
@@ -76,6 +124,7 @@ public class Player extends PlayerParent {
             super.addCircle();
         }
     }
+
     public void grow() {
         if (xy.size() >= maxLength) {
             return;
@@ -144,9 +193,11 @@ public class Player extends PlayerParent {
             }
         }
     }
+
     public float getMouse() {
         return tMouse;
     }
+
     private float stepRadLast = 0;
     private int count = 0;
     private int maxCount = 500;
@@ -170,17 +221,22 @@ public class Player extends PlayerParent {
     }
 
     public void lostTheApple() {
-        countOfApples--;
-if(countOfApples<0){
-    trest.end();
-}
-        grow();
-
-        decreaseSpeed();
-        setAppleCount();
+        if (countOfApples == 0) {
+            trest.end();
+            return;
+        }
+        if(countOfApples>0) {
+            countOfApples--;
+            decreaseSpeed();
+            dyingCell.cellDying(countOfApples);
+//            grow();
+            setAppleCount();
+        }
     }
 
     public void update() {
+
+        mainTime = trest.mainTime;
 
         if (Apple.appleVisible) {
             if (Apple.checkCollision(xy.get(0))) {
@@ -188,17 +244,23 @@ if(countOfApples<0){
             }
         }
         if (trest.isEnd) {
-            trest.eatenPlayerTimelast = trest.mainTime - trest.eatenPlayerTime;
+            trest.eatenPlayerTimelast = mainTime - trest.eatenPlayerTime;
             setTime(-trest.eatenPlayerTimelast);
         } else {
-            setTime(trest.mainTime);
+
+            setTime(mainTime);
             hold();
         }
+        dyingCell.update();
         moveCheck();
         part.update();
     }
 
     protected void setRadian(Point2D target) {
+//        if (target != null) {
+//            target.setLocation(target.getX() + xy.get(0)[0],
+//                    target.getY() + xy.get(0)[1]);
+//        }
         super.setRadian(target);
 
         if (target == null) {
@@ -242,6 +304,7 @@ if(countOfApples<0){
 
         stepRadLast = radDir;
     }
+
     public void increaseSpeed() {
         maxStep += 0.05;
     }
@@ -249,6 +312,7 @@ if(countOfApples<0){
     public void decreaseSpeed() {
         maxStep -= 0.05;
     }
+
     double timeTo = trest.getMainTime();
     double timeToGrow = 0;
     public static float speedBoostTime = 0;
@@ -264,7 +328,8 @@ if(countOfApples<0){
             speedBoostTimer = (float) (trest.getMainTime() - timeTo);
             timeTo = trest.getMainTime();
             if (/*countOfApples<30 && */timeToGrow >= 10/*100.0 / countOfApples*/) {
-                if (!trest.isEnd) {
+
+                if (!trest.isEnd && !trest.stage.isBoss()) {
                     grow();
                 }
                 timeToGrow = 0;
@@ -297,8 +362,8 @@ if(countOfApples<0){
                 }
 
 
-                int xTarget;
-                int yTarget;
+                double xTarget;
+                double yTarget;
                 if (trest.mouseControl) {
                     xTarget = trest.xMouse;
                     yTarget = trest.yMouse;
@@ -307,7 +372,7 @@ if(countOfApples<0){
                     yTarget = 0;
                 }
                 if (trest.mouseControl) {
-                    setRadian(new Point(xTarget, yTarget));
+                    setRadian(new Point2D.Double(xTarget, yTarget));
                 } else {
                     setRadian(null);
                 }
@@ -371,7 +436,7 @@ if(countOfApples<0){
             } else {
                 curSpeed += speedScale * 0.01;
             }
-            if(trest.isEnd){
+            if (trest.isEnd) {
                 speedScale = 0;
             }
             maxSpeedRender.setTime(trest.getMainTime());
@@ -419,6 +484,7 @@ if(countOfApples<0){
 
         }
     }
+
     public void checkForAbsorb() {
 
         for (GluePart part : GluePart.glueParts) {

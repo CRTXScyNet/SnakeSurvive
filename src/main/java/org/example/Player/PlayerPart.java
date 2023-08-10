@@ -55,7 +55,7 @@ public boolean readyTuCut = false;
         color = new Color(0, 200, 200);
         renderInit(color, "gluePart", null);
         birthTime = Timer.getFloatTime();
-        rendering.setTime(birthTime + trest.getMainTime());
+        rendering.setTime(10);
     }
 
     public Point2D getPartHead() {
@@ -75,6 +75,7 @@ public boolean readyTuCut = false;
         xy.add(new float[]{(float) partHead.getX(), (float) partHead.getX()});
         rendering.addModel(new Model(window, (int) (size * 30), color));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) partHead.getX(), (float) partHead.getY(), 0));
+        rendering.setTime(1);
     }
 
     public void remove() {
@@ -181,6 +182,7 @@ public boolean readyTuCut = false;
             tMouse = Player.player.getMouse();
             setPartHead(Player.player.getHeadXY());
         }
+
     }
 
     private float timer = 0;
@@ -190,7 +192,7 @@ public boolean readyTuCut = false;
         if (isEmpty && !callBack) {
             if (!isLost) {
                 step = 2 * Player.player.step;
-                if (partHead.distance(Apple.getXy()[0], Apple.getXy()[1]) < 100) {
+                if (partHead.distance(Apple.getXy()[0], Apple.getXy()[1]) < 100&&!Apple.eaten) {
                     if (Apple.checkCollision(new float[]{(float) partHead.getX(), (float) partHead.getY()})) {
                         setAppleCount();
                         callBack = true;

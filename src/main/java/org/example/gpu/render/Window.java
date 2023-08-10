@@ -1,11 +1,11 @@
 package org.example.gpu.render;
 
 import org.example.gpu.io.Input;
-import org.lwjgl.glfw.GLFWVidMode;
-import org.lwjgl.glfw.GLFWWindowSizeCallback;
+import org.lwjgl.glfw.*;
 import org.lwjgl.openal.*;
 import org.lwjgl.opengl.GL;
 
+import java.awt.geom.Point2D;
 import java.io.File;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -15,20 +15,68 @@ import static org.lwjgl.opengl.GL11.*;
 public class Window {
     private long window;
     public int width, height;
-    private boolean fullscreen;
-    private boolean hasResized;
-    public int windowPosX;
+
     public int windowPosY;
-    private GLFWWindowSizeCallback windowSizeCallback;
-    private Input input;
+    public int windowPosX;
     private long audioContext;
     private long audiodevice;
+    private boolean fullscreen;
+    private boolean hasResized;
+    private boolean posChanged;
+    private boolean focus;
+    private Point2D mouse = new Point2D.Float();
+
+    private GLFWWindowSizeCallback windowSizeCallback;
+    private GLFWWindowPosCallback windowPosCallback;
+    private GLFWWindowFocusCallback windowFocusCallback;
+    private GLFWCursorPosCallback cursorPosCallback;
+    private Input input;
+
+
+    public   void setLocalCallBacks(){
+        windowSizeCallback = new GLFWWindowSizeCallback() {
+            @Override
+            public void invoke(long windowArg, int widthArg, int heightArg) {
+                width = widthArg;
+                height = heightArg;
+                hasResized = true;
+            }
+        };
+        glfwSetWindowSizeCallback(window,windowSizeCallback);
+        windowPosCallback = new GLFWWindowPosCallback() {
+            @Override
+            public void invoke(long window, int xpos, int ypos) {
+            windowPosX = xpos;
+            windowPosY = ypos;
+            posChanged = true;
+            }
+        };
+        glfwSetWindowPosCallback(window,windowPosCallback);
+        windowFocusCallback = new GLFWWindowFocusCallback() {
+            @Override
+            public void invoke(long window, boolean focused) {
+                focus = focused;
+//                System.out.println(focus);
+            }
+        };
+        glfwSetWindowFocusCallback(window,windowFocusCallback);
+        cursorPosCallback = new GLFWCursorPosCallback() {
+            @Override
+            public void invoke(long window, double xpos, double ypos) {
+             mouse.setLocation(xpos-width/2f,-(ypos-height/2f));
+            }
+        };
+        glfwSetCursorPosCallback(window,cursorPosCallback);
+    }
 
     public Window(int width, int height) {
 
         setSize(width, height);
         setFullscreen(false);
         hasResized = false;
+        posChanged = false;
+        focus = true;
+
     }
 
     public void createWindow(String tittle) {
@@ -55,8 +103,12 @@ public class Window {
 
 
         }
+        glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_DISABLED);
+
         glfwShowWindow(window);
         glfwMakeContextCurrent(window);
+
+        setLocalCallBacks();
 
         input = new Input(window);
 
@@ -78,6 +130,7 @@ public class Window {
 
         glEnable(GL_TEXTURE_2D);
         glEnable(GL_BLEND);
+
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     }
     public void destroyWindow(){
@@ -89,7 +142,9 @@ public class Window {
         glfwTerminate();
         System.exit(0);
     }
-
+public void cleanUp(){
+        windowSizeCallback.close();
+}
     public void setSize(int width, int height) {
         this.width = width;
         this.height = height;
@@ -102,14 +157,28 @@ public class Window {
     public void setFullscreen(boolean isFullscreen) {
         this.fullscreen = isFullscreen;
     }
+    public Point2D getMouse(){
+        return mouse;
+    }
 
     public void update() {
+        hasResized = false;
+        posChanged = false;
         input.uptade();
         glfwPollEvents();
     }
 
     public long getWindow() {
         return window;
+    }
+    public boolean hasResized(){
+        return hasResized;
+    }
+    public boolean posChanged(){
+        return posChanged;
+    }
+    public boolean isFocus(){
+        return  focus;
     }
 
     public boolean shouldClose() {
