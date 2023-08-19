@@ -9,16 +9,16 @@ import org.example.Enemy.Enemy;
 import org.example.Main;
 import org.example.Painter.Apple;
 import org.example.Player.GluePart;
-import org.example.Player.phantom.Phantom;
 import org.example.Player.Player;
+import org.example.Player.phantom.Phantom;
 import org.example.Sound.LWJGLSound;
 import org.example.Sound.MainSoundsController;
 import org.example.gpu.io.Movement;
-import org.example.time.Timer;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
 import org.example.gpu.render.Window;
 import org.example.obstructions.WormHole;
+import org.example.time.Timer;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFWVidMode;
 
@@ -46,7 +46,7 @@ public class trest {
     public static ArrayList<WormHole> holes = new ArrayList<>();
     public static HashMap<Point, Point> toTargets = new HashMap<>();
     public static ArrayList<Phantom> bosses = new ArrayList<>();
-public static ModelRendering cursorRendering;
+    public static ModelRendering cursorRendering;
     public static float half;
 
     static boolean isPaused = false;
@@ -61,6 +61,7 @@ public static ModelRendering cursorRendering;
     public static float eatenPlayerTime = 0;
     public static float eatenPlayerTimelast = 0;
     public static float mainTime = 0;
+    public static float enemySpawnArea = 0;
     static float[] direction = new float[2];
 
     float[] a = new float[2];
@@ -82,7 +83,7 @@ public static ModelRendering cursorRendering;
     //    static MainSound mainSound = null;
     static MainSoundsController mainSound = null;
     static LWJGLSound deathSound = null;
-    private CutTheTail cutTheTail;
+    public static CutTheTail cutTheTail;
     static boolean hacks = false;
 
     public static float scaleGround = 0;
@@ -104,7 +105,7 @@ public static ModelRendering cursorRendering;
 //    scaleActiveEnemy = 1f;
 //    scaleGlueParts = 2.5f;
 
-   public enum Stage {
+    public enum Stage {
 
         FIRST_STAGE {
             public void setStage() {
@@ -298,7 +299,8 @@ public static ModelRendering cursorRendering;
 
         };
         public static int roundCount = -1;
-        public void reset(){
+
+        public void reset() {
             stage = Stage.FIRST_STAGE;
             roundCount = -1;
             stage.setStage();
@@ -306,58 +308,64 @@ public static ModelRendering cursorRendering;
 
         public void setStage() {
 
-            if (!stage.isBoss()){
-
+            if (!stage.isBoss()) {
                 if (roundCount > 0) {
-                    holesCount = roundCount;
-                    groundCount = 1f + roundCount * 0.1f;
+                    int scale = roundCount;
+                    if(roundCount<10){
+                        scale=10;
+                    }
 
-                    passiveEnemyCount = 100 + roundCount * (10 * 1.4f);
-                    activeEnemyCount = roundCount * (5);
-                    gluePartsCount =roundCount*5;
+                    holesCount = scale;
+                    groundCount = 1f + scale * 0.1f;
+
+                    passiveEnemyCount = 100 + scale * (10/* * 1.4f*/);
+                    activeEnemyCount = scale * (5);
+                    gluePartsCount = scale * 5;
                     cutTheTailBufCount = 0;
                     fearCount = 0;
-                    speedBufCount = roundCount;
-                    fearCount = roundCount*0.5f;
-                    cutTheTailBufCount = cutTheTailBufCount*0.5f;
-                    if(groundCount>2){
-                        groundCount=2;
+                    speedBufCount = scale;
+                    fearCount = scale * 0.5f;
+                    cutTheTailBufCount = cutTheTailBufCount * 0.5f;
+                    if (groundCount > 2) {
+                        groundCount = 2;
                     }
-                    if(speedBufCount>10){
-                        speedBufCount=10;
+                    if (speedBufCount > 10) {
+                        speedBufCount = 10;
                     }
-                    if(cutTheTailBufCount>3){
-                        cutTheTailBufCount=3;
+                    if (cutTheTailBufCount > 3) {
+                        cutTheTailBufCount = 3;
                     }
-                    if(fearCount>4){
-                        fearCount=4;
+                    if (fearCount > 4) {
+                        fearCount = 4;
                     }
-
 
 
                 }
-            }else {
-                if(Phantom.phantoms.size()==0){
-                for (int i = 0; i < /*Stage.roundCount+*/1; i++) {
-                    bosses.add(new Phantom(window,Player.countOfApples*((roundCount+3)*2)));
+            } else {
+                if(Player.getCountOfApples()<=4){
+                    System.out.println("Lose!");
                 }
+                if (Phantom.phantoms.size() == 0) {
+                    for (int i = 0; i < /*Stage.roundCount+*/1; i++) {
+                        bosses.add(new Phantom(window, Player.countOfApples * ((roundCount + 3) * 2)));
+                    }
 
-            }
+                }
                 roundCount++;
                 groundCount = 0f;
             }
             stage.timer();
             stageStopWatch = 0;
             setScale();
-            System.out.println(stage.name() + " round "+roundCount+" stated!");
+            System.out.println(stage.name() + " round " + roundCount + " stated!");
         }
 
         ;
 
         public void setScale() {
-            scaleFear = fearCount/ stageTimer;
-            scaleSpeedBuf = speedBufCount/ stageTimer;
-            scaleCutTheTailBuf = cutTheTailBufCount/ stageTimer;
+            scaleFear = fearCount / stageTimer;
+            scaleSpeedBuf = speedBufCount / stageTimer;
+            scaleCutTheTailBuf = cutTheTailBufCount / stageTimer;
             scaleGround = groundCount / stageTimer;
             scaleHoles = holesCount / stageTimer;
             scalePassiveEnemy = passiveEnemyCount / stageTimer;
@@ -396,15 +404,15 @@ public static ModelRendering cursorRendering;
     }
 
     public static Stage stage = Stage.FIRST_STAGE;
-   public  static Robot robot;
-   public float timer = 0;
+    public static Robot robot;
+    public float timer = 0;
     public float secondTimer = 0;
 
 
     public trest() {
         try {
             robot = new Robot();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         xMouse = 0;
@@ -426,36 +434,39 @@ public static ModelRendering cursorRendering;
         }
         if (Main.hacks) {
             hacks = true;
+        }else {
+            AIM = true;
+            immortal = true;
         }
 //        window.setFullscreen(true);
 
         window.createWindow("what'sup");
-trest.window = window;
+        trest.window = window;
 
         half = (float) window.width / 1.5f;
 
         for (int j = 0; j < 220; j++) {
             Color color = new Color((int) (Math.random() * 100), (int) (Math.random() * 255), (int) (Math.random() * 255));
             background.add(new ModelRendering(window, null, "background"));
-            background.get(j).addModel(new Model(window, (int) (Math.random() * 30 + 20), color));
+            background.get(j).addModel(new Model(window, (int) (Math.random() * 30 + 20), color, true));
         }
         for (int j = 0; j < 200; j++) {
             Color color = new Color((int) (Math.random() * 100), (int) (Math.random() * 255), (int) (Math.random() * 255));
             background2.add(new ModelRendering(window, null, "background"));
-            background2.get(j).addModel(new Model(window, (int) (Math.random() * 40 + 30), color));
+            background2.get(j).addModel(new Model(window, (int) (Math.random() * 40 + 30), color, true));
         }
         for (int j = 0; j < 150; j++) {
             Color color = new Color((int) (Math.random() * 100), (int) (Math.random() * 255), (int) (Math.random() * 255));
             background3.add(new ModelRendering(window, null, "background"));
-            background3.get(j).addModel(new Model(window, (int) (Math.random() * 60 + 40), color));
+            background3.get(j).addModel(new Model(window, (int) (Math.random() * 60 + 40), color, true));
         }
 
         for (ModelRendering rendering : ModelRendering.selfList) {
             rendering.randomPosition();
         }
 
-cursorRendering = new ModelRendering(window,null,"cursor");
-        cursorRendering.addModel(new Model(window,window.width,Color.yellow));
+        cursorRendering = new ModelRendering(window, null, "cursor");
+        cursorRendering.addModel(new Model(window, window.width, Color.yellow, true));
         processInit(window);
 
 
@@ -465,19 +476,19 @@ cursorRendering = new ModelRendering(window,null,"cursor");
         deathSound.setCastomVolume(0.1f);
 
 
-
         loop(window);
 
 
         window.destroyWindow();
+        System.exit(0);
     }
 
     static float stageStopWatch = 0;
 
-    public void loop(org.example.gpu.render.Window window) {
+    public void loop(Window window) {
 
 
-        double frame_cap = 1.0 / 60;
+        double frame_cap = 1.0 / 120;
 
         double frameTime = 0;
         int frames = 0;
@@ -513,23 +524,26 @@ cursorRendering = new ModelRendering(window,null,"cursor");
                     mainSound.play();
                 }
                 if (addingEntity >= 1) {
-                        addSomeEntity(window);
+                    addSomeEntity(window);
                     addingEntity = 0;
 
                 }
                 if (stageStopWatch < Stage.stageTimer) {
                     stageStopWatch += (float) time2 - (float) time;
                     stageChanging = false;
+                    if(!stage.isBoss() && skip){
+                        stageStopWatch = Stage.stageTimer;
+                    }
                 } else {
-                    if(stage.isBoss()){
-                        if(bosses.size()!=0){
-                            if (Phantom.phantoms.size() == 0){
+                    if (stage.isBoss()) {
+                        if (bosses.size() != 0) {
+                            if (Phantom.phantoms.size() == 0) {
                                 cutTheTail.addSomeFinal();
                                 bosses.clear();
 
                             }
-                        }else {
-                            if(!cutTheTail.isExist()) {
+                        } else {
+                            if (!cutTheTail.isExist()&&!TEST) {
                                 stageChanging = true;
                                 stage = stage.getNextStage();
                                 stage.setStage();
@@ -537,7 +551,7 @@ cursorRendering = new ModelRendering(window,null,"cursor");
                             }
                         }
 
-                    }else {
+                    } else if(!TEST){
                         stageChanging = true;
 //                        clearStage();
                         stage = stage.getNextStage();
@@ -557,16 +571,20 @@ cursorRendering = new ModelRendering(window,null,"cursor");
 
             input(window);
 
-            if (processTime >= 1.0 / 120) {
+            if (processTime >= 1.0 / 100) {
+                timer = Timer.getFloatTime();  //TODO       begin of timer
+
                 processCount++;
                 playgroundScale();
                 processTime = 0;
                 process();
                 moveBackground();
-                if(window.hasResized()){
-                    Movement.setProjection(window.width,window.height);
-                    glViewport(0,0,window.width,window.height);
+                if (window.hasResized()) {
+                    Movement.setProjection(window.width, window.height);
+                    glViewport(0, 0, window.width, window.height);
                 }
+                secondTimer += Timer.getFloatTime() - timer;    //TODO             end of timer
+
             }
             window.update();
             mouseCatch();
@@ -577,19 +595,20 @@ cursorRendering = new ModelRendering(window,null,"cursor");
 
 
                 if (frameTime >= 1) {
-                    System.out.println(processCount + " process times");
-                    System.out.println(secondTimer/processCount +" for one circle");
+//                    System.out.println(processCount + " process times");
+//                    System.out.println(secondTimer / processCount + " for one circle");
                     secondTimer = 0;
                     processCount = 0;
                     frameTime = 0;
-                    System.out.println("FPS: " + frames);
+//                    System.out.println("FPS: " + frames);
                     frames = 0;
+
                 }
             }
 
 
             if (canRender) {
-                timer = Timer.getFloatTime();  //TODO       begin of timer
+                Movement.zoomCheck();
                 glClear(GL_COLOR_BUFFER_BIT);
 
                 for (ModelRendering rendering : ModelRendering.selfList) {
@@ -598,7 +617,6 @@ cursorRendering = new ModelRendering(window,null,"cursor");
 
                 window.swapBuffer();
                 frames++;
-                secondTimer +=Timer.getFloatTime()-timer;    //TODO             end of timer
             }
 
 
@@ -606,10 +624,11 @@ cursorRendering = new ModelRendering(window,null,"cursor");
                 exit(window);
         }
     }
-    public void mouseCatch(){
+
+    public void mouseCatch() {
         Point2D mouse = window.getMouse();
-        if (window.isFocus()){
-            if(mouse.getX() !=0 && mouse.getY() != 0){
+        if (window.isFocus()) {
+            if (mouse.getX() != 0 && mouse.getY() != 0) {
 //                mouse.setLocation((float)mouse.getX() - window.windowPosX - window.width / 2,(float)(mouse.getY() - window.windowPosY - window.height / 2));
 //                robot.mouseMove(window.windowPosX + window.width / 2, window.windowPosY + window.height / 2);
             }
@@ -617,12 +636,12 @@ cursorRendering = new ModelRendering(window,null,"cursor");
 
 
 //            System.out.println(mouse);
-        if(mouse.getX()!=0&&mouse.getY()!=0) {
+        if (mouse.getX() != 0 && mouse.getY() != 0) {
 //            System.out.println(mouse);
             xMouse = mouse.getX();
             yMouse = mouse.getY();
 //            if(!isPaused) {
-                cursorRendering.setPosOnShader(mouse);
+            cursorRendering.setPosOnShader(mouse);
 //            }
         }
     }
@@ -659,7 +678,7 @@ cursorRendering = new ModelRendering(window,null,"cursor");
 //            fearCount = 2;
 //        }
 //Player.countOfApples
-            speedBufCount = (int) Math.floor(stageStopWatch * scaleSpeedBuf);
+        speedBufCount = (int) Math.floor(stageStopWatch * scaleSpeedBuf);
         cutTheTailCount = (int) Math.floor(stageStopWatch * scaleCutTheTailBuf);
         holesCount = (int) Math.floor(stageStopWatch * scaleHoles);
         passiveEnemyCount = (int) (scalePassiveEnemy * stageStopWatch);
@@ -713,15 +732,15 @@ cursorRendering = new ModelRendering(window,null,"cursor");
         calculateEntity();
 
 //        if(!stageChanging){
-            for (int i = 0; i < currentSpeedCount; i++) {
-                buffs.add(new Speed(window));
-            }
-            for (int i = 0; i < currentFearCount; i++) {
-                buffs.add(new Fear(window));
-            }
-            for (int i = 0; i < currentCutTheTailCount; i++) {
-                buffs.add(new CutTheTail(window));
-            }
+        for (int i = 0; i < currentSpeedCount; i++) {
+            buffs.add(new Speed(window));
+        }
+        for (int i = 0; i < currentFearCount; i++) {
+            buffs.add(new Fear(window));
+        }
+        for (int i = 0; i < currentCutTheTailCount; i++) {
+            buffs.add(new CutTheTail(window));
+        }
 //        }
         if (!stage.isBoss()) {
             for (int i = 0; i < currentPassiveEnemyCount; i++) {             // 200
@@ -741,7 +760,7 @@ cursorRendering = new ModelRendering(window,null,"cursor");
         for (GluePart part : GluePart.glueParts) {
             count += part.xy.size();
         }
-        if (count < GluePart.maxAmountOfGlueParts * 5 && GluePart.glueParts.size() < GluePart.maxAmountOfGlueParts) {
+        if (count < GluePart.maxAmountOfGlueParts * 2) {
 //                        for (int i = 0; i < 20; i++) {
             new GluePart(window);
 //                        }
@@ -752,7 +771,7 @@ cursorRendering = new ModelRendering(window,null,"cursor");
 
     public void clearEnemies() {
         for (int i = 0; i < Enemy.enemies.size(); i++) {
-            if (Enemy.enemies.get(i).enemyHead.distance(Player.player.getHeadXY()) > 450) {
+            if (Enemy.enemies.get(i).enemyHead.distance(0,0) > trest.enemySpawnArea*0.25) {
                 Enemy.enemies.get(i).removeEnemy();
                 i--;
                 if (Enemy.enemies.size() == 0) {
@@ -764,19 +783,20 @@ cursorRendering = new ModelRendering(window,null,"cursor");
         }
 
     }
-    public void clearStage(){
+
+    public void clearStage() {
 //        if(buffs.size()==0){
 //            return;
 //        }
         for (int i = 0; i < buffs.size(); i++) {
-            if(buffs.get(i).suddenExpose()){
+            if (buffs.get(i).suddenExpose()) {
                 buffs.remove(i);
                 i--;
             }
 
         }
         for (int i = 0; i < holes.size(); i++) {
-            if(holes.get(i).suddenExpose()){
+            if (holes.get(i).suddenExpose()) {
                 holes.remove(i);
                 i--;
             }
@@ -788,7 +808,7 @@ cursorRendering = new ModelRendering(window,null,"cursor");
     }
 
     public void pushAway() {
-        int maxDistance = 600;
+        int maxDistance =(int)(enemySpawnArea);
         for (Enemy enemy : Enemy.enemies) {
 
             boolean changed = false;
@@ -823,21 +843,21 @@ cursorRendering = new ModelRendering(window,null,"cursor");
             }
         }
         for (WormHole enemy : holes) {
-            Point2D point2D = new Point2D.Float(enemy.getXy()[0],enemy.getXy()[1]);
-                float phantomDistance = (float) point2D.distance(0, 0);
-                if (phantomDistance < maxDistance) {
-                    float phantomAngle = (float) Math.atan((-point2D.getY()) / (-point2D.getX()));
-                    float newPosition = phantomDistance + (10);
-                    double phantomTranslocationX = newPosition * Math.cos(phantomAngle);
-                    double phantomTranslocationY = newPosition * Math.sin(phantomAngle);
-                    if (-point2D.getX() < 0) {
-                        enemy.getXy()[0] = (float) phantomTranslocationX;
-                        enemy.getXy()[1] = (float) phantomTranslocationY;
-                    } else {
-                        enemy.getXy()[0] = -(float) phantomTranslocationX;
-                        enemy.getXy()[1] = -(float) phantomTranslocationY;
-                    }
+            Point2D point2D = new Point2D.Float(enemy.getXy()[0], enemy.getXy()[1]);
+            float phantomDistance = (float) point2D.distance(0, 0);
+            if (phantomDistance < maxDistance) {
+                float phantomAngle = (float) Math.atan((-point2D.getY()) / (-point2D.getX()));
+                float newPosition = phantomDistance + (10);
+                double phantomTranslocationX = newPosition * Math.cos(phantomAngle);
+                double phantomTranslocationY = newPosition * Math.sin(phantomAngle);
+                if (-point2D.getX() < 0) {
+                    enemy.getXy()[0] = (float) phantomTranslocationX;
+                    enemy.getXy()[1] = (float) phantomTranslocationY;
+                } else {
+                    enemy.getXy()[0] = -(float) phantomTranslocationX;
+                    enemy.getXy()[1] = -(float) phantomTranslocationY;
                 }
+            }
         }
         for (BuffParent enemy : buffs) {
             float phantomDistance = (float) enemy.getXy().distance(0, 0);
@@ -889,36 +909,28 @@ cursorRendering = new ModelRendering(window,null,"cursor");
         if (glfwGetKey(window.getWindow(), GLFW_KEY_ESCAPE) != 0) {
             exit = true;
         }
-        if(window.isFocus()) {
-            if (window.getInput().isMouseButtonPressed(GLFW_MOUSE_BUTTON_1)) {
-                if (!isEnd && !isPaused) {
+        if (!isEnd && !isPaused) {
+            if (window.isFocus()) {
+                if (window.getInput().isMouseButtonPressed(GLFW_MOUSE_BUTTON_1)) {
                     mouseControl = !mouseControl;
                 }
             }
-        }else {
-            mouseControl = false;
-        }
-        if (window.getInput().isMouseButtonPressed(GLFW_MOUSE_BUTTON_2)) {
-            if (!isEnd && !isPaused) {
-                if (!player.getPart().isAlive()) {
+            if (window.getInput().isMouseButtonPressed(GLFW_MOUSE_BUTTON_2)) {
                     player.throwPart();
-                }
             }
         }
-        if(window.isFocus()) {
+        if (window.isFocus()) {
             if (window.getInput().isKeyPressed(GLFW_KEY_P)) {
                 isPaused = !isPaused;
-                if(isPaused){
-                    glfwSetInputMode(window.getWindow(),GLFW_CURSOR,GLFW_CURSOR_HIDDEN);
-                }else {
-                    glfwSetInputMode(window.getWindow(),GLFW_CURSOR,GLFW_CURSOR_DISABLED);
-                }
             }
-        }else {
+        } else {
             isPaused = true;
         }
-
-
+        if (isPaused) {
+            glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+        } else {
+            glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
         if (window.getInput().isKeyPressed(GLFW_KEY_R)) {
             reset(window);
             isPaused = false;
@@ -928,6 +940,12 @@ cursorRendering = new ModelRendering(window,null,"cursor");
         }
         if (hacks) {
             hacks(window);
+        }else {
+            if (window.getInput().isMouseButtonPressed(GLFW_MOUSE_BUTTON_1)) {
+                AIM = false;
+                immortal = false;
+                System.out.println("AIM: " + AIM);
+            }
         }
 
 
@@ -939,9 +957,9 @@ cursorRendering = new ModelRendering(window,null,"cursor");
         }
         if (!isEnd && !isPaused) {
             if (window.getInput().isMouseButtonPressed(GLFW_MOUSE_BUTTON_2)) {
-                    if (player.getPart().getPartHead().distance(0,0)>100) {
-                        player.takePartBack();
-                    }
+                if (player.getPart().getPartHead().distance(0, 0) > 100) {
+                    player.takePartBack();
+                }
             }
             if (window.getInput().isKeyPressed(GLFW_KEY_1)) {
                 buffs.add(new Speed(window));
@@ -969,29 +987,43 @@ cursorRendering = new ModelRendering(window,null,"cursor");
 //            }
             if (window.getInput().isKeyPressed(GLFW_KEY_SPACE)) {
                 immortal = !immortal;
-
+                System.out.println("immortal: " + immortal);
             }
             if (window.getInput().isKeyPressed(GLFW_KEY_TAB)) {
-                if(stage.isBoss()){
+                if (stage.isBoss()) {
                     stage = stage.getNextStage();
                     stage.setStage();
 
-                }else {
+                } else {
                     stageStopWatch = Stage.stageTimer;
                 }
             }
+
         }
-
-//        if (window.getInput().isKeyPressed(GLFW_KEY_A)) {
-//            sound.play();
-//
-//        }
-//        if (window.getInput().isKeyPressed(GLFW_KEY_S)) {
-//            sound.stop();
-//
-//        }
+        if (window.getInput().isKeyDown(GLFW_KEY_UP)) {
+            Movement.increaseScale();
+            System.out.println("increaseScale");
+        }
+        if (window.getInput().isKeyDown(GLFW_KEY_DOWN)) {
+            Movement.decreaseScale();
+            System.out.println("decreaseScale");
+        }
+        if(window.getInput().isKeyPressed(GLFW_KEY_BACKSPACE)){
+            AIM = !AIM;
+            System.out.println("AIM: " + AIM);
+        }
+        if(window.getInput().isKeyPressed(GLFW_KEY_ENTER)){
+            skip = !skip;
+            System.out.println("skip: " + skip);
+        }
+        if(window.getInput().isKeyPressed(GLFW_KEY_T)){
+            TEST = !TEST;
+            System.out.println("TEST: " + TEST);
+        }
     }
-
+    public static boolean skip = false;
+public static boolean AIM = false;
+    public static boolean TEST = false;
     public static boolean immortal = false;
 
     public void moveBackground() {
@@ -1066,6 +1098,7 @@ cursorRendering = new ModelRendering(window,null,"cursor");
     }
 
     public static void playgroundScale() {
+        enemySpawnArea = window.width/Movement.getScale()*2;
         outLeft = (int) (-width * (playGroundScale / 2)) / Enemy.step * Enemy.step;
         fromLeft = (int) (-width * playGroundScale) / Enemy.step * Enemy.step;
 
@@ -1103,9 +1136,7 @@ cursorRendering = new ModelRendering(window,null,"cursor");
         apple = new Apple(window);
         cutTheTail = new CutTheTail(window);
 
-
-
-
+enemySpawnArea = window.width/Movement.getScale();
         //Вычисляем пути врагов после проигрыша
         radius1 = Math.pow(width / 5f - 2, 2);
         boolean closer;
@@ -1231,7 +1262,7 @@ cursorRendering = new ModelRendering(window,null,"cursor");
             }
 //            float[] mo = moveGround(enemy.getXy().get(0));
 //            if (mo[0] != 0 || mo[1] != 0) {
-                enemy.moveXy();
+            enemy.moveXy();
 //                enemy.reverse();
 //            }
         }
@@ -1241,14 +1272,14 @@ cursorRendering = new ModelRendering(window,null,"cursor");
     }
 
     static float[] moveGround(float[] xy) {
-        if (xy[0] < (outLeft)) {
-            return new float[]{fromLeft, 0};
-        } else if (xy[0] > (outRight)) {
-            return new float[]{fromRight, 0};
-        } else if (xy[1] < (outUp)) {
-            return new float[]{0, fromUp};
-        } else if (xy[1] > (outDown)) {
-            return new float[]{0, fromDown};
+        if (xy[0] < (-enemySpawnArea/2)) {              //Слева
+            return new float[]{-enemySpawnArea, 0};
+        } else if (xy[0] > (enemySpawnArea/2)) {              //Справа
+            return new float[]{enemySpawnArea, 0};
+        } else if (xy[1] < (-enemySpawnArea/2)) {              //Сверху
+            return new float[]{0, -enemySpawnArea};
+        } else if (xy[1] > (enemySpawnArea/2)) {              //Снизу
+            return new float[]{0, enemySpawnArea};
         }
         return new float[2];
     }

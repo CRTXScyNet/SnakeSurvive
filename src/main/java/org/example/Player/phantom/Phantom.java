@@ -35,9 +35,8 @@ public class Phantom extends PlayerParent {
         private float radian = 0;
 
 
-
         private PhantomPortal portalIn;
-private PhantomPortal portalOut;
+        private PhantomPortal portalOut;
         private boolean isAlive = false;
         private float[] nextStep = new float[2];
 
@@ -83,6 +82,7 @@ private PhantomPortal portalOut;
         public boolean isAlive() {
             return isAlive;
         }
+
         public PhantomPortal getPortalIn() {
             return portalIn;
         }
@@ -135,7 +135,9 @@ private PhantomPortal portalOut;
         pointer = new Pointer(0.5f, window, "bufPointer", color, 150, 350, 30);
 
     }
-private final float constStep = maxStepStat;
+
+    private final float constStep = maxStepStat;
+
     public Phantom(Window wind, ArrayList<float[]> xy) {
         super(wind);
         eaten = true;
@@ -190,9 +192,9 @@ private final float constStep = maxStepStat;
     boolean reversed = false;
 
     public void prepareToEat(int pos) {
-        if (Player.player.step < Player.player.maxStep * 2){
-        Player.player.step += 0.1;
-    }
+        if (Player.player.step < Player.player.maxStep * 2) {
+            Player.player.step += 0.1;
+        }
         if (Heads.size() > 0) {
             for (Head head : Heads) {
                 ArrayList<float[]> anotherXY = new ArrayList<>();
@@ -217,9 +219,13 @@ private final float constStep = maxStepStat;
             } else if (Player.player.getHeadXY().distance(xy.get(0)[0], xy.get(0)[1]) > Player.player.getHeadXY().distance(xy.get(xy.size() - 1)[0], xy.get(xy.size() - 1)[1])) {
                 Collections.reverse(xy);
             }
+            if(!reversed){
+                Player.player.cutOneCell();
+            }
             reversed = true;
             Heads.forEach(r -> r.setAlive(false));
             Heads.clear();
+
         } else {
 
             ArrayList<float[]> newXy = new ArrayList<>();
@@ -245,7 +251,11 @@ private final float constStep = maxStepStat;
             if (newXy.size() > 0) {
                 new Phantom(window, newXy);
             }
+            if(!reversed){
+                Player.player.cutOneCell();
+            }
             reversed = true;
+
         }
     }
 
@@ -272,15 +282,15 @@ private final float constStep = maxStepStat;
 
             Heads.removeAll(newHeads);
         }
-        if(getHead(xy.size()-1)!=null){
-            Heads.get(Heads.size()-1).setAlive(false);
-            Heads.remove(Heads.size()-1);
+        if (getHead(xy.size() - 1) != null) {
+            Heads.get(Heads.size() - 1).setAlive(false);
+            Heads.remove(Heads.size() - 1);
         }
         rendering.getModels().remove(pos);
         xy.remove(pos);
 
         for (int i = 0; i < newHeads.size(); i++) {
-            newHeads.get(i).setPosition(newHeads.get(i).getPosition() - (pos+1));
+            newHeads.get(i).setPosition(newHeads.get(i).getPosition() - (pos + 1));
         }
 
 
@@ -290,7 +300,7 @@ private final float constStep = maxStepStat;
     public Point2D getRandomPoint(boolean spawn) {
         double x = (-((double) window.width / 2) + ((Math.random() * ((double) window.width))));
         double y = (-((double) window.width / 2) + ((Math.random() * ((double) window.width))));
-        if(spawn) {
+        if (spawn) {
             if (Math.pow(Math.abs(x), 2) + Math.pow(Math.abs(y), 2) <= Math.pow(450, 2)) {
                 return getRandomPoint(true);
             }                    //TODO
@@ -318,9 +328,11 @@ private final float constStep = maxStepStat;
         this.step = step;
     }
 
-    private final int maxCount = (int) (3.14 / 0.1);
+    private int maxCount = (int) (3.14 / 0.1);
+    private int count = 0;
+
     boolean canIncreaseSpeed = false;
-    private float maxRad = 1.5f;
+    private final float maxRad = 0.15f;
     private float curRad = 0;
     private float distance = 0;
     private boolean changeDir = false;
@@ -329,86 +341,103 @@ private final float constStep = maxStepStat;
     public void wiggle() {
         if (distance > 100) {
             if (changeDir) {
-                curRad += 0.05;
+                curRad += 0.01;
                 if (curRad > maxRad) {
                     changeDir = false;
+//                    System.out.println("Change Dir");
                 }
             } else {
-                curRad -= 0.05;
+                curRad -= 0.01;
                 if (curRad < -maxRad) {
                     changeDir = true;
+//                    System.out.println("Change Dir");
                 }
             }
-            canIncreaseSpeed = true;
         } else {
-            if (curRad > 0) {
-                curRad /= 2;
-            } else {
-                curRad /= 2;
-            }
-            canIncreaseSpeed = false;
+            curRad /= 2;
+
         }
 
     }
 
-    @Override
+
     public void setRadian(Point2D target) {
-        if (Heads.size() > 0) {
-            for (int i = 0; i < Heads.size(); i++) {
-                int pos = Heads.get(i).getPosition();
-                float dir = Heads.get(i).getDirection();
-                super.setRadian(Heads.get(i).getPortalIn().getXy(), new Point2D.Float(xy.get(pos)[0], xy.get(pos)[1]), dir);
+        try {
+            if (Heads.size() > 0) {
+                for (int i = 0; i < Heads.size(); i++) {
+                    int pos = Heads.get(i).getPosition();
+                    float dir = Heads.get(i).getDirection();
+                    super.setRadian(Heads.get(i).getPortalIn().getXy(), new Point2D.Float(xy.get(pos)[0], xy.get(pos)[1]), dir);
 
-                if (dir > 6.28) {
-                    dir -= 6.28;
+                    if (dir > 6.28) {
+                        dir -= 6.28;
 
-                } else if (dir < 0) {
+                    } else if (dir < 0) {
 
-                    dir += 6.28;
+                        dir += 6.28;
+                    }
+                    dir += difRad * radDir / 2;
+                    Heads.get(i).setDirection(dir);
+                    Heads.get(i).setNextStep(new float[]{
+                            (float) ((step) * Math.sin(dir) + xy.get(pos)[0]),
+                            (float) ((step) * Math.cos(dir) + xy.get(pos)[1])
+                    });
                 }
-                dir += 0.3 * radDir;
-                Heads.get(i).setDirection(dir);
-                Heads.get(i).setNextStep(new float[]{
-                        (float) ((step) * Math.sin(dir) + xy.get(pos)[0]),
-                        (float) ((step) * Math.cos(dir) + xy.get(pos)[1])
-                });
 
             }
-        }
-        if (target != null) {
-            distance = (float) getHeadXY().distance(target);
-        }else {
-            distance = (float) getHeadXY().distance(Player.player.getHeadXY());
-        }
+//0.732612
+//0.732612
+//
 
-        wiggle();
-        if (target != null) {
-            super.setRadian(target);
-        }
-        float rad = targetRadian + curRad;
-        super.setRadian(new Point2D.Double((float) ((step) * Math.sin(rad) + xy.get(0)[0])
-                , (float) ((step) * Math.cos(rad) + xy.get(0)[1])));
 
-        tMouse += (stepRad * radDir);
 
-        if (tMouse > 6.28) {
-            tMouse -= 6.28;
 
-        } else if (tMouse < 0) {
+            wiggle();
+            if (target != null) {
+                super.setRadian(target);
+            }
+            stepRad = (float) Math.abs(difRad) / (15 / (step / 2));//0.014808406
+            maxCount = (int) (3.14 / stepRad);
+            stepRad *= radDir;
+            stepRad += curRad;
+            tMouse += stepRad;
 
-            tMouse += 6.28;
-        }
-        if (target != null) {
-            if (canIncreaseSpeed && step < maxStep) {
-                step += Math.abs(stepRad) / 20;
+            if (tMouse > 6.28) {
+                tMouse -= 6.28;
+
+            } else if (tMouse < 0) {
+
+                tMouse += 6.28;
+            }
+            if (target != null) {
+                if ((stepRadLast > 0 && radDir < 0) || (stepRadLast < 0 && radDir > 0)) {
+                    count = 0;
+                }
+                if (difRad > 0.05) {//1.3612639904022217
+                    if (count < maxCount) {
+                        canIncreaseSpeed = true;
+                        count++;
+                        if (step < maxStep) {//0.9998657
+                            step += Math.abs(stepRad);
+                        } else {
+//                            System.out.println("Maximum!");
+                        }
+                        if (count == maxCount) {
+//                            System.out.println("Maximum!");
+                        }
+                    }
+                } else {
+                    canIncreaseSpeed = false;
+                }
             }
 
-
+            stepRadLast = radDir;
+            pointWatch[0] = (float) ((step) * Math.sin(tMouse) + xy.get(0)[0]);
+            pointWatch[1] = (float) ((step) * Math.cos(tMouse) + xy.get(0)[1]);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("SUCKS");
         }
-
-        stepRadLast = radDir;
-        pointWatch[0] = (float) ((step) * Math.sin(tMouse) + xy.get(0)[0]);
-        pointWatch[1] = (float) ((step) * Math.cos(tMouse) + xy.get(0)[1]);
     }
 
     public void die() {
@@ -420,8 +449,8 @@ private final float constStep = maxStepStat;
             float angle;
             if (distance < 30) {
                 angle = (float) Math.atan((p[1] - xy.get(j)[1]) / (p[0] - xy.get(j)[0]));
-                double translocationX = (distance - 5-Player.player.step) * Math.cos(angle);
-                double translocationY = (distance - 5-Player.player.step) * Math.sin(angle);
+                double translocationX = (distance - 5 - Player.player.step) * Math.cos(angle);
+                double translocationY = (distance - 5 - Player.player.step) * Math.sin(angle);
                 if (p[0] - xy.get(j)[0] < 0) {
                     xy.set(j, new float[]{p[0] + (float) translocationX, p[1] + (float) translocationY});
                 } else {
@@ -457,16 +486,17 @@ private final float constStep = maxStepStat;
                 }
             }
         }
+        this.distance = distance;
         Point2D nearPlayer = new Point2D.Float(Player.player.getXy().get(position)[0], Player.player.getXy().get(position)[1]);
-        if (xy.size() > (trest.isEnd ? Player.player.getXy().size()/2:Player.countOfApples)) {
-                MainSoundsController.white_snakes_hunting_bool = true;
+        if (xy.size() > (trest.isEnd ? Player.player.getXy().size() / 2 : Player.countOfApples)) {
+            MainSoundsController.white_snakes_hunting_bool = true;
             pointer.setColor(agressive);
             rendering.setRGB(agressive);
-            if(maxStep != maxStepStat){
-                maxStep = maxStepStat;
+            if (maxStep != Player.player.maxStep*0.7f) {
+                maxStep = Player.player.maxStep*0.7f;
             }
-            if(minStep != 1f){
-                minStep = 1f;
+            if (minStep != Player.player.minStep/2) {
+                minStep = Player.player.minStep/2;
             }
             if (Player.player.getPart().readyTuCut) {
                 for (int j = 1; j < xy.size() - 1; j++) {
@@ -479,31 +509,29 @@ private final float constStep = maxStepStat;
                     }
                 }
             }
-            for (int i = 0; i < Player.player.getXy().size(); i++) {
-                if (getHeadXY().distance(Player.player.getXy().get(i)[0], Player.player.getXy().get(i)[1]) < size) {
-                    Point2D point = getRandomPoint(false);
-                    Point2D point2D = new Point2D.Float(Player.player.getXy().get(i)[0], Player.player.getXy().get(i)[1]);
-                    if (xy.size() > 1) {
-                        Head head = new Head(1);
-                        head.setPortalIn(new PhantomPortal(point2D,window,head,color,true));
-                        head.setPortalOut(new PhantomPortal(point,window,head,color,false));
-                        portals.add(head.getPortalIn());
-                        portals.add(head.getPortalOut());
-                        head.setDirection(tMouse);
-                        Heads.add(head);
-                    }else {
-                        Head head = new Head(0);
-                        head.setPortalIn(new PhantomPortal(point2D,window,head,color,true));
-                        head.setPortalOut(new PhantomPortal(point,window,head,color,false));
-                        portals.add(head.getPortalIn());
-                        portals.add(head.getPortalOut());
-                        head.setAlive(false);
-                    }
-                    xy.set(0, new float[]{(float) point.getX(), (float) point.getY()});
-//                    Player.player.minusCell();
-                    Player.player.lostTheApple();
-                    break;
+            if (distance < size) {
+                Point2D point = getRandomPoint(false);
+                Point2D point2D = new Point2D.Float(Player.player.getXy().get(position)[0], Player.player.getXy().get(position)[1]);
+                if (xy.size() > 1) {
+                    Head head = new Head(1);
+                    head.setPortalIn(new PhantomPortal(point2D, window, head, color, true));
+                    head.setPortalOut(new PhantomPortal(point, window, head, color, false));
+                    portals.add(head.getPortalIn());
+                    portals.add(head.getPortalOut());
+                    head.setDirection(tMouse);
+                    Heads.add(head);
+                } else {
+                    Head head = new Head(0);
+                    head.setPortalIn(new PhantomPortal(point2D, window, head, color, true));
+                    head.setPortalOut(new PhantomPortal(point, window, head, color, false));
+                    portals.add(head.getPortalIn());
+                    portals.add(head.getPortalOut());
+                    head.setAlive(false);
                 }
+                xy.set(0, new float[]{(float) point.getX(), (float) point.getY()});
+//                    Player.player.minusCell();
+                Player.player.lostTheApple();
+
             }
 
 
@@ -512,11 +540,11 @@ private final float constStep = maxStepStat;
         } else {
             pointer.setColor(scared);
             rendering.setRGB(scared);
-            if(minStep != 1f){
-                minStep = 1f;
+            if (maxStep != Player.player.maxStep/2f) {
+                maxStep = Player.player.maxStep/2f;
             }
-            if(maxStep != 1.5){
-                maxStep = 1.5f;
+            if (minStep != Player.player.minStep/2) {
+                minStep = Player.player.minStep/2;
             }
             eaten = false;
             for (int i = 0; i < xy.size(); i++) {
@@ -537,7 +565,7 @@ private final float constStep = maxStepStat;
                 }
             }
 
-                die();
+            die();
 
         }
         if (Heads.size() != 0) {
@@ -545,13 +573,13 @@ private final float constStep = maxStepStat;
                 int pos = Heads.get(i).getPosition();
                 Point2D from = Heads.get(i).getPortalIn().getXy();
                 Point2D to = Heads.get(i).getPortalOut().getXy();
-                if(xy.size()-1<pos){
+                if (xy.size() - 1 < pos) {
                     Heads.get(i).setAlive(false);
                     Heads.remove(i);
                     i--;
                     continue;
                 }
-                if (from.distance(xy.get(pos)[0], xy.get(pos)[1]) < size/3) {
+                if (from.distance(xy.get(pos)[0], xy.get(pos)[1]) < size / 3) {
                     xy.set(pos, new float[]{(float) to.getX(), (float) to.getY()});
                     if (pos != xy.size() - 1) {
                         Heads.get(i).setPosition(++pos);
@@ -577,7 +605,7 @@ private final float constStep = maxStepStat;
     }
 
     public void move(float x, float y) {
-        int count = xy.size()-1;
+        int count = xy.size() - 1;
         if (Heads.size() > 0) {
             count = getSecond().getPosition() - 1;
         }
@@ -668,14 +696,15 @@ private final float constStep = maxStepStat;
         phantoms.remove(this);
         pointer.remove();
     }
-    public static void updateAll(){
+
+    public static void updateAll() {
         time = trest.getMainTime();
         for (int i = 0; i < phantoms.size(); i++) {
             phantoms.get(i).update();
         }
         for (int i = 0; i < portals.size(); i++) {
             portals.get(i).update(time);
-            if(portals.get(i).closed()){
+            if (portals.get(i).closed()) {
                 portals.get(i).remove();
                 portals.remove(i);
 //                System.out.println("Portal deleted");
@@ -683,8 +712,9 @@ private final float constStep = maxStepStat;
             }
         }
     }
-    public static void moveXyAll(float[] direct){
-        for(Phantom phantom1 : phantoms){
+
+    public static void moveXyAll(float[] direct) {
+        for (Phantom phantom1 : phantoms) {
             phantom1.moveXy(direct);
         }
         for (PhantomPortal portal : portals) {

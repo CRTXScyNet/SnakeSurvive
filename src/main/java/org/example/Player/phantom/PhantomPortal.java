@@ -25,10 +25,10 @@ public class PhantomPortal {
         this.window = window;
         if (in) {
             rendering = new ModelRendering(window, null, "portal");
-            rendering.addModel(new Model(window, 50, color));
+            rendering.addModel(new Model(window, 50, color,false));
         } else {
             rendering = new ModelRendering(window, null, "portal");
-            rendering.addModel(new Model(window, 40, color));
+            rendering.addModel(new Model(window, 50, color,false));
         }
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy.getX(), (float) xy.getY(), 0));
         timer = new ShortTimer(0.5f);

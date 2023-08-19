@@ -45,7 +45,7 @@ public class WormHole {
         xy = new float[]{(int) (Math.random() * trest.playGroundWidth- (trest.playGroundWidth/ 2)), (int) (Math.random() * trest.playGroundHeight - (trest.playGroundHeight / 2))};
 //        System.out.printf("Apple x: %s, y: %s ", xy[0],xy[1]);
         rendering = new ModelRendering(window,   null, "wormHole");
-        rendering.addModel(new Model(window, (int) (size * 50),color));
+        rendering.addModel(new Model(window, (int) (size * 50),color,false));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy[0], (float) xy[1], 0));
 
     }
@@ -130,7 +130,7 @@ if(suddenExpose){
     private boolean suddenExpose = false;
     public boolean suddenExpose(){
         suddenExpose = true;
-        if (zero.distance(xy[0],xy[1])>600) {
+        if (zero.distance(xy[0],xy[1])>trest.enemySpawnArea*0.2) {
             reset();
             return true;
         }

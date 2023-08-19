@@ -39,6 +39,8 @@ public class BuffParent {
     protected float timerForShow = 0.5f;
 private Pointer pointer;
     protected float timeOfEnd = 0;
+
+
     protected boolean eaten = false;
     protected boolean isExist = false;
     protected boolean closing = false;
@@ -83,7 +85,7 @@ pointer = new Pointer(0.5f,window,buffPointerShader,color,80,300,15);
         isShowing = true;
 
         xy = new Point2D.Float((float) (Math.random() * trest.playGroundWidth - (trest.playGroundWidth/2)), (float) (Math.random() *trest.playGroundHeight - (trest.playGroundHeight/2)));
-        renderingBuff.addModel(new Model(window, (int) (size * 50),color));
+        renderingBuff.addModel(new Model(window, (int) (size * 50),color,false));
         renderingBuff.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy.getX(), (float) xy.getY(), 0));
 
 
@@ -93,6 +95,10 @@ pointer = new Pointer(0.5f,window,buffPointerShader,color,80,300,15);
 
     public boolean isExist() {
         return isExist;
+    }
+
+    public boolean isEaten() {
+        return eaten;
     }
 
     public void moveXy(float[] direct) {
@@ -200,7 +206,7 @@ pointer = new Pointer(0.5f,window,buffPointerShader,color,80,300,15);
         }
     }
     public boolean suddenExpose(){
-        if (xy.distance(0,0)>450) {
+        if (xy.distance(0,0)>trest.enemySpawnArea*0.2) {
             reset();
             return true;
         }

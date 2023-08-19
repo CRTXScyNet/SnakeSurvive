@@ -147,7 +147,7 @@ renderInit(color,"gluePart",null);
         glueParts.add(this);
         ignoreTime = 0;
         rendering = new ModelRendering(window, null, "gluePart");
-        rendering.addModel(new Model(window, (int) (size * 30), color));
+        rendering.addModel(new Model(window, (int) (size*30), color,false));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) this.xy.get(0)[0], (float) this.xy.get(0)[1], 0));
         birthTime = Timer.getFloatTime();
         rendering.setTime(birthTime + trest.getMainTime());
@@ -166,7 +166,7 @@ renderInit(color,"gluePart",null);
         float x = newXY[0];
         float y = newXY[1];
         xy.add(new float[]{x, y});
-        rendering.addModel(new Model(window, (int) (size * 30), color));
+        rendering.addModel(new Model(window, (int) (size*30), color,false));
         rendering.getModels().get(xy.size() - 1).getMovement().setPosition(new Vector3f((float) x, (float) y, 0));
 
     }
@@ -201,7 +201,7 @@ renderInit(color,"gluePart",null);
         xy.clear();
         xy.add(getRandomPoint());
         rendering.clear(true);
-        rendering.addModel(new Model(window, (int) (size * 30), color));
+        rendering.addModel(new Model(window, (int) (size*30), color,false));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy.get(0)[0], (float) xy.get(0)[1], 0));
         gluePartForSpawn = 0;
 //        move(width/2,height/2);
@@ -213,11 +213,17 @@ renderInit(color,"gluePart",null);
 
     public float[] getRandomPoint() {
 
-        float x = (int) (Math.random() * trest.playGroundWidth - (trest.playGroundWidth / 2));
-        float y = (int) (Math.random() * trest.playGroundHeight - (trest.playGroundHeight / 2));
-        if (Player.player.getHeadXY().distance(x, y) < 500) {
-            return getRandomPoint();
+        float x = (int) (Math.random() * trest.enemySpawnArea - (trest.enemySpawnArea/2));
+        float y = (int) (Math.random() * trest.enemySpawnArea - (trest.enemySpawnArea/2));
+        try{
+            double dist = 0.3 * (trest.enemySpawnArea/2);
+            if (Player.player.getHeadXY().distance(x, y) < dist) {
+                return getRandomPoint();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
+
         return new float[]{x, y};
     }
 

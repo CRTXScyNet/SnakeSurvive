@@ -4,6 +4,7 @@ import org.example.Painter.Apple;
 import org.example.Player.Player;
 import org.example.Sound.MainSoundsController;
 import org.example.gpu.gameProcess.trest;
+import org.example.gpu.io.Movement;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
 import org.example.gpu.render.Window;
@@ -44,7 +45,7 @@ public class Enemy extends Entity {
             color = new Color(150, 150, 255);
         }
         rendering = new ModelRendering(window, this, "enemy");
-        rendering.addModel(new Model(window, (int) (size * 30), color));
+        rendering.addModel(new Model(window, (int) (size*40), color,false));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) co.x, (float) co.y, 0));
         for (int i = 0; i < snakeLength; i++) {
             addCircle();
@@ -52,8 +53,8 @@ public class Enemy extends Entity {
     }
 
     public void moveXy() {
-        float halfX = -window.width / 2f;
-        float halfY = -window.width / 2f;
+        float halfX = -trest.enemySpawnArea / 2f;
+        float halfY = -trest.enemySpawnArea / 2f;
         float x = (float) enemyHead.getX();
         float y = (float) enemyHead.getY();
         if (x < -halfX) {
@@ -238,7 +239,7 @@ public class Enemy extends Entity {
             float yp = phantomXY.get(phantomXY.size() - 1)[1];
             phantomXY.add(new float[]{xp, yp});
             directionOfPhantomXY.add(new float[]{0, 0});
-            rendering.addModel(new Model(window, (int) (size * 30), color));
+            rendering.addModel(new Model(window, (int) (size*40), color,false));
             rendering.getModels().get(xy.size() - 1).getMovement().setPosition(new Vector3f(xp, yp, 0));
         }
     }
@@ -267,7 +268,7 @@ public class Enemy extends Entity {
         setPhantomXY();
         enemyHead.setLocation(xy.get(0)[0], xy.get(0)[1]);
         rendering.clear(true);
-        rendering.addModel(new Model(window, (int) (size * 30), color));
+        rendering.addModel(new Model(window, (int) (size*40), color,false));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) co.x, (float) co.y, 0));
         move(co.x, co.y);
         for (int i = 0; i < snakeLength; i++) {
@@ -277,9 +278,10 @@ public class Enemy extends Entity {
     }
 
     public Point getRandomPoint() {
-        int x =  (int) (-(window.width/2) + ((int) (Math.random() * ((window.width) / (int) (size * stepOfSize))) * (int) (size * stepOfSize)));
-        int y =  (int) (-(window.width/2) + ((int) (Math.random() * ((window.width) / (int) (size * stepOfSize))) * (int) (size * stepOfSize)));
-        if (Math.pow(Math.abs(x), 2) + Math.pow(Math.abs(y), 2) <= Math.pow(450, 2)) {
+        int x = (int) (Math.random() * trest.enemySpawnArea - (trest.enemySpawnArea/2));
+        int y = (int) (Math.random() * trest.enemySpawnArea - (trest.enemySpawnArea/2));
+        double dist = 0.3 * (trest.enemySpawnArea);
+        if (Player.player.getHeadXY().distance(x, y) < dist) {
             return getRandomPoint();
         }
         return new Point(x, y);

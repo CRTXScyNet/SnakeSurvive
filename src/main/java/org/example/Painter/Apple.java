@@ -62,10 +62,10 @@ public class Apple {
         xy = new float[]{(int) (Math.random() * trest.playGroundWidth / 2 - (trest.playGroundWidth / 4)), (int) (Math.random() * trest.playGroundHeight / 2 - (trest.playGroundHeight / 4))};
 //        System.out.printf("Apple x: %s, y: %s ", xy[0],xy[1]);
         rendering = new ModelRendering(window, null, "apple");
-        rendering.addModel(new Model(window, (int) (size * 50), color));
+        rendering.addModel(new Model(window, (int) (size * 50), color,false));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy[0], (float) xy[1], 0));
         renderingPoiner = new ModelRendering(window, null, "applePointer");
-        renderingPoiner.addModel(new Model(window, 30, color));
+        renderingPoiner.addModel(new Model(window, 30, color,true));
 //        pointer = new Pointer(1f,window,"applePointer",color,150,200,30);
         point2D.setLocation(xy[0],xy[1]);
         soundInit();

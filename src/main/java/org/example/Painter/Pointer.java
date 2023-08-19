@@ -31,7 +31,7 @@ public class Pointer {
         timer = new ShortTimer(period);
         this.window = window;
         rendering = new ModelRendering(window, null, shaderName);
-        rendering.addModel(new Model(window, scale, color));
+        rendering.addModel(new Model(window, scale, color,true));
 
         this.posDistance = posDistance;
     }

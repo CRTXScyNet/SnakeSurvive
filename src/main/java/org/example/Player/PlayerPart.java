@@ -73,7 +73,7 @@ public boolean readyTuCut = false;
         birthTime = trest.getMainTime();
         isAlive = true;
         xy.add(new float[]{(float) partHead.getX(), (float) partHead.getX()});
-        rendering.addModel(new Model(window, (int) (size * 30), color));
+        rendering.addModel(new Model(window, (int) (size*30), color,false));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) partHead.getX(), (float) partHead.getY(), 0));
         rendering.setTime(1);
     }
@@ -323,6 +323,8 @@ public boolean readyTuCut = false;
         }
 
     }
-
+    public void setMouse(float t){
+        tMouse = t;
+    }
 
 }

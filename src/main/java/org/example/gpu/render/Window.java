@@ -1,6 +1,7 @@
 package org.example.gpu.render;
 
 import org.example.gpu.io.Input;
+import org.example.gpu.io.Movement;
 import org.lwjgl.glfw.*;
 import org.lwjgl.openal.*;
 import org.lwjgl.opengl.GL;
@@ -30,6 +31,7 @@ public class Window {
     private GLFWWindowPosCallback windowPosCallback;
     private GLFWWindowFocusCallback windowFocusCallback;
     private GLFWCursorPosCallback cursorPosCallback;
+
     private Input input;
 
 
@@ -136,7 +138,7 @@ public class Window {
     public void destroyWindow(){
         alcDestroyContext(audioContext);
         alcCloseDevice(audiodevice);
-
+cleanUp();
         glfwDestroyWindow(window);
 
         glfwTerminate();
@@ -144,6 +146,9 @@ public class Window {
     }
 public void cleanUp(){
         windowSizeCallback.close();
+        windowFocusCallback.close();
+        windowPosCallback.close();
+        cursorPosCallback.close();
 }
     public void setSize(int width, int height) {
         this.width = width;
@@ -165,6 +170,7 @@ public void cleanUp(){
         hasResized = false;
         posChanged = false;
         input.uptade();
+
         glfwPollEvents();
     }
 

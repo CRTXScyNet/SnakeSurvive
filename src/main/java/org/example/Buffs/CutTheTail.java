@@ -44,7 +44,7 @@ public class CutTheTail extends BuffParent{
         isShowing = true;
 
         xy = new Point2D.Float((float) (Math.random() * window.width/4 - (window.width/8)), (float) (Math.random() *window.width/4 - (window.width/8)));
-        renderingBuff.addModel(new Model(window, (int) (size * 50),color));
+        renderingBuff.addModel(new Model(window, (int) (size * 50),color,false));
         renderingBuff.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy.getX(), (float) xy.getY(), 0));
 
 

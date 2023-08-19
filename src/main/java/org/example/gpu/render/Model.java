@@ -60,13 +60,13 @@ private float time = 0;
     private int width;
     private int heigth;
 
-    public Model(Window window, float scale, Color color) {
+    public Model(Window window, float scale, Color color, boolean isInterface) {
         this.color = color;
         this.width = window.width;
         this.heigth = window.height;
 
         this.scale = scale;
-        movement = new Movement(window.width, window.height);
+        movement = new Movement(window.width, window.height,isInterface);
 //        texture = new Texture("./img/2.png");
 
         draw_count = vertices.length;

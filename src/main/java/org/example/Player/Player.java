@@ -1,7 +1,9 @@
 package org.example.Player;
 
 import org.example.Painter.Apple;
+import org.example.Player.phantom.Phantom;
 import org.example.gpu.gameProcess.trest;
+import org.example.gpu.io.Movement;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
 import org.example.gpu.render.Window;
@@ -38,6 +40,7 @@ public class Player extends PlayerParent {
     private DyingCell dyingCell;
     private float mainTime = 0;
 
+
     private class DyingCell {
         private ArrayList<Integer> pos = new ArrayList<>();
         private ArrayList<ShortTimer> timers = new ArrayList<>();
@@ -50,8 +53,8 @@ public class Player extends PlayerParent {
 
         private void cellDying(int pos) {
             this.pos.add(pos);
-            rendering.addModel(new Model(window, 250, takenAppleColor));
-            ShortTimer timer = new ShortTimer(0.01f,0.5f);
+            rendering.addModel(new Model(window, 250, takenAppleColor, false));
+            ShortTimer timer = new ShortTimer(0.01f, 0.5f);
             timer.start(true, mainTime);
             timers.add(timer);
 
@@ -59,7 +62,7 @@ public class Player extends PlayerParent {
 
         private void update() {
             for (int i = 0; i < pos.size(); i++) {
-                if(xy.size()-1<pos.get(i)){
+                if (xy.size() - 1 < pos.get(i)) {
                     rendering.removeModel(rendering.getModels().get(i));
                     timers.remove(i);
                     pos.remove(i);
@@ -90,10 +93,10 @@ public class Player extends PlayerParent {
         selfList.add(this);
         renderInit(color, "player", null);
         maxSpeedRender = new ModelRendering(window, null, "speedIndicate");
-        maxSpeedRender.addModel(new Model(window, 30, color));
+        maxSpeedRender.addModel(new Model(window, 30, color, false));
         maxSpeedRender.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy.get(0)[0], (float) xy.get(0)[1], 0));
         maxSpeedRender.getModels().get(0).getMovement().setRotation(-tMouse);
-        setMaxLength(70);
+        setMaxLength(100);
         setLength(5);
 
 
@@ -103,9 +106,11 @@ public class Player extends PlayerParent {
 
 
     public void throwPart() {
-        if (countOfApples < xy.size() && xy.size() > 1) {
-            part.spawn();
-            minusCell();
+        if (!getPart().isAlive()) {
+            if (countOfApples < xy.size() && xy.size() > 1) {
+                part.spawn();
+                minusCell();
+            }
         }
     }
 
@@ -137,6 +142,9 @@ public class Player extends PlayerParent {
     }
 
     public void minusCell() {
+        if (xy.size() <= countOfApples) {
+            return;
+        }
         try {
             if (getXy().size() > 1) {
                 rendering.getModels().remove(getXy().size() - 1);
@@ -153,7 +161,7 @@ public class Player extends PlayerParent {
         super.reset();
         xy.add(new float[]{0, 0});
         if (rendering != null) {
-            rendering.addModel(new Model(window, (int) (size * 30), color));
+            rendering.addModel(new Model(window, (int) (size * 30), color, false));
         }
         countOfApples = 0;
         speedBoostTime = 0;
@@ -194,18 +202,37 @@ public class Player extends PlayerParent {
         }
     }
 
+    public void cutOneCell() {
+        if (Player.getCountOfApples() >= xy.size()) {
+            return;
+        }
+
+        GluePart part = new GluePart(window);
+        part.setXy(xy.get(xy.size()-1));
+        minusCell();
+
+
+    }
+
     public float getMouse() {
         return tMouse;
     }
 
+
     private float stepRadLast = 0;
     private int count = 0;
     private int maxCount = 500;
+
+
     public static int countOfApples = 0;
     boolean canIncreaseSpeed = false;
 
+    public static int getCountOfApples() {
+        return countOfApples;
+    }
+
     public void eatTheApple() {
-        if (countOfApples >= 40) {
+        if (countOfApples >= maxLength - 1) {
             return;
         }
 
@@ -221,16 +248,28 @@ public class Player extends PlayerParent {
     }
 
     public void lostTheApple() {
+        if (countOfApples < 5 && trest.immortal) {
+            return;
+        }
+
         if (countOfApples == 0) {
             trest.end();
             return;
         }
-        if(countOfApples>0) {
+
+        if (countOfApples > 0) {
             countOfApples--;
             decreaseSpeed();
             dyingCell.cellDying(countOfApples);
 //            grow();
             setAppleCount();
+        }
+    }
+
+    public void twist() {
+        trest.mouseControl = false;
+        if (step < maxStep * 2) {
+            step += 0.05;
         }
     }
 
@@ -241,6 +280,7 @@ public class Player extends PlayerParent {
         if (Apple.appleVisible) {
             if (Apple.checkCollision(xy.get(0))) {
                 eatTheApple();
+
             }
         }
         if (trest.isEnd) {
@@ -256,11 +296,175 @@ public class Player extends PlayerParent {
         part.update();
     }
 
+    private float maxRad = 0.15f;
+    private float curRad = 0;
+    private float distance = 0;
+    private boolean changeDir = false;
+    static boolean isAttack = false;
+    static boolean timeToRun = false;
+    static boolean fightIsOver = true;
+
+    public void wiggle() {
+        if (distance > 50) {
+            if (changeDir) {
+                curRad += 0.01;
+                if (curRad > maxRad) {
+                    changeDir = false;
+//                    System.out.println("Change Dir");
+                }
+            } else {
+                curRad -= 0.01;
+                if (curRad < -maxRad) {
+                    changeDir = true;
+//                    System.out.println("Change Dir");
+                }
+            }
+//            canIncreaseSpeed = true;
+        } else {
+            curRad /= 2;
+//            canIncreaseSpeed = false;
+        }
+
+    }
+
     protected void setRadian(Point2D target) {
 //        if (target != null) {
 //            target.setLocation(target.getX() + xy.get(0)[0],
 //                    target.getY() + xy.get(0)[1]);
 //        }
+        if (trest.AIM) {
+            trest.mouseControl = true;
+            fightIsOver = true;
+            Point2D phantomPoint = null;
+            if (trest.stage.isBoss()) {
+                int position = 0;
+                int phantomNumber = 0;
+                float distance = 0;
+                float secDistance = 0;
+                Point2D head = null;
+                float headDistance = 0;
+                int weakPosition = 0;
+                int weakPhantomNumber = 0;
+                float weakDistance = 0;
+                float weakSecDistance = 0;
+
+                for (int j = 0; j < Phantom.phantoms.size(); j++) {
+                    if (Phantom.phantoms.get(j).getXy().size() <= countOfApples) {
+                        for (int i = 0; i < Phantom.phantoms.get(j).getXy().size(); i++) {
+                            if (weakDistance == 0) {
+                                weakDistance = (float) getHeadXY().distance(Phantom.phantoms.get(j).getXy().get(i)[0], Phantom.phantoms.get(j).getXy().get(i)[1]);
+                                weakPosition = i;
+                                weakPhantomNumber = j;
+                            } else {
+                                weakSecDistance = (float) getHeadXY().distance(Phantom.phantoms.get(j).getXy().get(i)[0], Phantom.phantoms.get(j).getXy().get(i)[1]);
+                                if (weakSecDistance < weakDistance) {
+                                    weakDistance = weakSecDistance;
+                                    weakPosition = i;
+                                    weakPhantomNumber = j;
+                                }
+                            }
+                        }
+                        continue;
+                    }
+                    if (head == null) {
+                        head = Phantom.phantoms.get(j).getHeadXY();
+                        headDistance = (float) head.distance(getHeadXY());
+                    } else if (head.distance(getHeadXY()) > Phantom.phantoms.get(j).getHeadXY().distance(getHeadXY())) {
+                        head = Phantom.phantoms.get(j).getHeadXY();
+                        headDistance = (float) head.distance(getHeadXY());
+                    }
+
+                    for (int i = 0; i < Phantom.phantoms.get(j).getXy().size(); i++) {
+                        if((countOfApples<i+countOfApples/2) && (Phantom.phantoms.get(j).getXy().size() - i - countOfApples/2 > countOfApples || Phantom.phantoms.get(j).getXy().size() - i - countOfApples/2 <= 0)){
+                            continue;
+                        }
+                        if (distance == 0) {
+                            fightIsOver = false;
+                            distance = (float) getHeadXY().distance(Phantom.phantoms.get(j).getXy().get(i)[0], Phantom.phantoms.get(j).getXy().get(i)[1]);
+                            position = i;
+                            phantomNumber = j;
+                        } else {
+                            secDistance = (float) getHeadXY().distance(Phantom.phantoms.get(j).getXy().get(i)[0], Phantom.phantoms.get(j).getXy().get(i)[1]);
+                            if (secDistance < distance) {
+                                distance = secDistance;
+                                position = i;
+                                phantomNumber = j;
+                            }
+                        }
+
+                    }
+                }
+                if (headDistance != 0) {
+                    if (headDistance < size * xy.size() / 2 && headDistance < 300) {
+                        isAttack = false;
+//                    target = new Point2D.Float(xy.get(0)[0] - Phantom.phantoms.get(phantomNumber).getXy().get(position)[0] * 2, xy.get(0)[1] - Phantom.phantoms.get(phantomNumber).getXy().get(position)[1] * 2);
+
+                    } else if (headDistance > size * xy.size()+20) {
+
+                        isAttack = true;
+//                    target = new Point2D.Float(Phantom.phantoms.get(phantomNumber).getXy().get(position)[0], Phantom.phantoms.get(phantomNumber).getXy().get(position)[1]);
+
+                    }
+                    if ((part.isAlive() ||getCountOfApples()==xy.size())&& headDistance < size * xy.size()+20) {
+                        isAttack = false;
+                    }
+                    if (isAttack) {
+                        phantomPoint = new Point2D.Float(Phantom.phantoms.get(phantomNumber).getXy().get(position)[0], Phantom.phantoms.get(phantomNumber).getXy().get(position)[1]);
+                    } else {
+                        phantomPoint = new Point2D.Float(xy.get(0)[0] - Phantom.phantoms.get(phantomNumber).getXy().get(position)[0] * 2, xy.get(0)[1] - Phantom.phantoms.get(phantomNumber).getXy().get(position)[1] * 2);
+
+                    }
+                    if (part.isAlive() || xy.size()==countOfApples) {
+
+                        if (headDistance < size * xy.size() / 2) {
+                            timeToRun = true;
+
+                        } else if (headDistance > size * xy.size()+20) {
+                            timeToRun = false;
+                        }
+                        if (!timeToRun/* && isAttack*/) {
+                            phantomPoint = null;
+                        }
+                    }
+
+                    if (weakDistance != 0 && weakDistance < headDistance && (part.isAlive()||getCountOfApples()==xy.size()) && headDistance > size * xy.size() / 2) {
+                        phantomPoint = new Point2D.Float(Phantom.phantoms.get(weakPhantomNumber).getXy().get(weakPosition)[0], Phantom.phantoms.get(weakPhantomNumber).getXy().get(weakPosition)[1]);
+                    }
+                } else if (weakDistance != 0 && fightIsOver) {
+
+                    phantomPoint = new Point2D.Float(Phantom.phantoms.get(weakPhantomNumber).getXy().get(weakPosition)[0], Phantom.phantoms.get(weakPhantomNumber).getXy().get(weakPosition)[1]);
+                } else {
+                    if (trest.cutTheTail.isExist() && !trest.cutTheTail.isEaten()) {
+                        phantomPoint = trest.cutTheTail.getXy();
+                    }
+                }
+
+            } else {
+                if (Apple.appleVisible) {
+                    phantomPoint = Apple.getPoint2D();
+                } else {
+//                    target = null;
+                    twist();
+                }
+            }
+
+            if (phantomPoint != null) {
+                target = phantomPoint;
+                distance = (float) getHeadXY().distance(target);
+                wiggle();
+            } else {
+
+                twist();
+            }
+            if (target != null && trest.mouseControl) {
+
+            } else {
+
+
+            }
+
+        }
+
         super.setRadian(target);
 
         if (target == null) {
@@ -268,10 +472,58 @@ public class Player extends PlayerParent {
         } else {
             stepRad = (float) Math.abs(difRad) / (15 / (step / 2));
         }
+
         maxCount = (int) (3.14 / stepRad);
+        stepRad *= radDir;
+        if (trest.AIM) {
+//if(changeDir) {
+
+            if (trest.mouseControl) {
+                stepRad += curRad;
+            }
+            if (((trest.stage.isBoss() && !fightIsOver) || !trest.stage.isBoss()) && !part.isAlive()) {
+//                if ((isAttack && timeToRun) || !trest.stage.isBoss()) {
+                    if (distance < 350 && difRad < 0.1 && (!trest.stage.isBoss()||(trest.stage.isBoss() && isAttack))) {
+                        part.setMouse((float) (tMouse + difRad * radDir));
+                        throwPart();
+                    }else {
+//
+                        for (int i = 0; i < Phantom.phantoms.size(); i++) {
+                            if (Phantom.phantoms.get(i).getXy().size() > countOfApples) {
+                                for (int j = 0; j < Phantom.phantoms.get(i).getXy().size(); j++) {
+                                    if ((countOfApples<j+countOfApples/2) && (Phantom.phantoms.get(i).getXy().size() - j - countOfApples/2 > countOfApples || Phantom.phantoms.get(i).getXy().size() - j - countOfApples/2 <= 0)) {
+                                        continue;
+                                    }
+                                    float xTarget = Phantom.phantoms.get(i).getXy().get(j)[0] - (float) getHeadXY().getX();
+                                    float yTarget = Phantom.phantoms.get(i).getXy().get(j)[1] - (float) getHeadXY().getY();
+                                    float Radian = (float) Math.atan2(xTarget, yTarget);
+                                    if (Radian < 0) {
+                                        Radian += 6.28;
+
+                                    }
+                                    double distance = getHeadXY().distance(Phantom.phantoms.get(i).getXy().get(j)[0], Phantom.phantoms.get(i).getXy().get(j)[1]);
+                                    if (distance < 350 && Math.abs(Radian - tMouse) < 0.01) {
+
+                                        part.setMouse((float) (Radian));
+                                        throwPart();
+//                                    System.out.println("SUCKS " + Phantom.phantoms.get(i).getXy().size() + " with number " + i );
+//                                    System.out.println("Target radian: " + Radian + ", with number: " + tMouse );
 
 
-        tMouse += stepRad * radDir;
+                                    }
+                                }
+                            }
+                        }
+                    }
+//
+            }
+//}else {
+//    stepRad -= curRad;
+//}
+
+        }
+
+        tMouse += stepRad;
 
         if (tMouse > 6.28) {
             tMouse -= 6.28;
@@ -324,6 +576,8 @@ public class Player extends PlayerParent {
 
     public void moveCheck() {
         try {
+
+            Movement.setZoom(1 - (float) xy.size() / 70);
             timeToGrow += trest.getMainTime() - timeTo;
             speedBoostTimer = (float) (trest.getMainTime() - timeTo);
             timeTo = trest.getMainTime();

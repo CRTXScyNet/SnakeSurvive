@@ -54,7 +54,7 @@ public class PlayerParent {
         this.color = color;
         rendering = new ModelRendering(window, entity, shaderName);
         for (int i = 0; i < xy.size(); i++) {
-            rendering.addModel(new Model(window, (int) (size * 30), color));
+            rendering.addModel(new Model(window, (int) (size*30), color,false));
             rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy.get(i)[0], (float)xy.get(i)[1], 0));
         }
     }
@@ -86,7 +86,7 @@ public class PlayerParent {
         xy.add(new float[]{x, y});
 
         if (rendering != null) {
-            rendering.addModel(new Model(window, (int) (size * 30), color));
+            rendering.addModel(new Model(window, (int) (size*30), color,false));
             rendering.getModels().get(xy.size() - 1).getMovement().setPosition(new Vector3f((float) x, (float) y, 0));
         }
 

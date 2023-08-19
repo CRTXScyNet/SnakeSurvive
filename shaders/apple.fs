@@ -39,7 +39,7 @@ void main() {
     //if(s >= length(uv)){
     //vec4 color = vec4((0.55-length(uv))*7,(0.55-length(uv))*7,(0.55-length(uv))*7,(0.5-length(uv))*7);
     float visibility = max( (1 - length(uv) * 10),0);
-    vec4 color = vec4(0.2 / length(uv) * 0.1, 0.2 / length(uv) * 0.1, 0.2 / length(uv) * 0.1, visibility);
+    vec4 color = vec4(0.2 / length(uv) * 0.1, 0.2 / length(uv) * 0.1, 0.2 / length(uv) * 0.1,0.2 / length(uv) * 0.1* visibility);
 
     vec4 color3 = vec4((40 - length(ss)) * 0.015, (40 - length(ss)) * 0.015, (40 - length(ss)) * 0.015, 1);
 
