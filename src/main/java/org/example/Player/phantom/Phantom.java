@@ -489,7 +489,7 @@ public class Phantom extends PlayerParent {
         this.distance = distance;
         Point2D nearPlayer = new Point2D.Float(Player.player.getXy().get(position)[0], Player.player.getXy().get(position)[1]);
         if (xy.size() > (trest.isEnd ? Player.player.getXy().size() / 2 : Player.countOfApples)) {
-            MainSoundsController.white_snakes_hunting_bool = true;
+            MainSoundsController.setWhite_snakes_hunting_bool(true);
             pointer.setColor(agressive);
             rendering.setRGB(agressive);
             if (maxStep != Player.player.maxStep*0.7f) {

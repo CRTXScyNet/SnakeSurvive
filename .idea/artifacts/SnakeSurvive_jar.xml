@@ -183,7 +183,6 @@
       <element id="extracted-dir" path="$PROJECT_DIR$/../lwjgl/lwjgl-rpmalloc-natives-windows.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/../lwjgl/lwjgl-libdivide-natives-windows.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/../lwjgl/lwjgl-meshoptimizer-natives-windows.jar" path-in-jar="/" />
-      <element id="library" level="project" name="joml-1.10.5-sources" />
       <element id="extracted-dir" path="$USER_HOME$/Downloads/joml-1.10.5.jar" path-in-jar="/" />
     </root>
   </artifact>

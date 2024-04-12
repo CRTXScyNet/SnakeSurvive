@@ -313,9 +313,9 @@ public class Enemy extends Entity {
             return;
         }
         if (Math.sqrt(Math.pow(enemyHead.getX(), 2) + Math.pow(enemyHead.getY(), 2)) < 300) {
-            MainSoundsController.white_snakes_bool = true;
+            MainSoundsController.setWhite_snakes_bool(true);
         } else {
-            MainSoundsController.empty_space_bool = true;
+            MainSoundsController.setEmpty_space_bool(true);
         }
         boolean isNearby = false;
         boolean appleIsNearby = false;
@@ -395,11 +395,11 @@ public class Enemy extends Entity {
                 nearPoint = new float[]{xy.get(0)[0] * 2, xy.get(0)[1] * 2};
                 moveCheck(nearPoint, appleIsNearby, true);
             } else if (isEatAndAngry() || trest.isEnd) {
-                MainSoundsController.purple_snakes_hunting_bool = true;
+                MainSoundsController.setPurple_snakes_hunting_bool(true);
                 moveCheck(Player.player.getXy().get(0), appleIsNearby, true);
 
             } else if (isNearby) {
-                MainSoundsController.white_snakes_hunting_bool = true;
+                MainSoundsController.setWhite_snakes_hunting_bool(true);
                 moveCheck(nearPoint, appleIsNearby, true);
 
             } else {

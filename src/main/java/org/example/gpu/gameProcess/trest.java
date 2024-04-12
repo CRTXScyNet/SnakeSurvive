@@ -27,6 +27,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -94,7 +95,7 @@ public class trest {
     public static float scalePassiveEnemy = 0f;
     public static float scaleActiveEnemy = 0f;
     public static float scaleGlueParts = 0f;
-    public static Window window;
+    public volatile static Window window;
 
 //    scaleGround = 0.02f;
 //    scaleFear = 0.1f;
@@ -311,8 +312,8 @@ public class trest {
             if (!stage.isBoss()) {
                 if (roundCount > 0) {
                     int scale = roundCount;
-                    if(roundCount<10){
-                        scale=10;
+                    if (roundCount < 10) {
+                        scale = 10;
                     }
 
                     holesCount = scale;
@@ -342,7 +343,7 @@ public class trest {
 
                 }
             } else {
-                if(Player.getCountOfApples()<=4){
+                if (Player.getCountOfApples() <= 4) {
                     System.out.println("Lose!");
                 }
                 if (Phantom.phantoms.size() == 0) {
@@ -428,13 +429,13 @@ public class trest {
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
 
-        org.example.gpu.render.Window window = new org.example.gpu.render.Window(width, height);
+window = new org.example.gpu.render.Window(width, height);
         if (Main.fullscreen) {
             window.setFullscreen(true);
         }
         if (Main.hacks) {
             hacks = true;
-        }else {
+        } else {
             AIM = true;
             immortal = true;
         }
@@ -478,7 +479,6 @@ public class trest {
 
         loop(window);
 
-
         window.destroyWindow();
         System.exit(0);
     }
@@ -488,7 +488,8 @@ public class trest {
     public void loop(Window window) {
 
 
-        double frame_cap = 1.0 / 120;
+        double frame_cap = 1.0 / 60;
+        double process_cap = 1.0 / 100;
 
         double frameTime = 0;
         int frames = 0;
@@ -500,90 +501,113 @@ public class trest {
 
         float stageTimer = 0;
 
-
         stage.setStage();
 
 //        ShortTimer timer = new ShortTimer(5);
+
+        Executors.newSingleThreadExecutor().submit(() -> {
+            while (!window.shouldClose()) {
+                mainSound.update();
+                if (!isEnd && !isPaused) {
+                    if (mainSound != null) {
+                        mainSound.play();
+                    }
+                }
+                if(isPaused){
+                    if (mainSound != null) {
+                        mainSound.pause();
+                    }
+                }
+                try{
+                    TimeUnit.MILLISECONDS.sleep(10);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        });
+
         while (!window.shouldClose()) {
+            timer = Timer.getFloatTime();  //TODO       begin of timer
 
             boolean canRender = false;
+            boolean canProcess = false;
             double time2 = Timer.getTime();
             double passed = time2 - time;
             unprocessed += passed;
             frameTime += passed;
-            addingEntity += (float) time2 - (float) time;
-            processTime += (float) time2 - (float) time;
-
+            addingEntity += passed;
+            processTime += passed;
             if (!isPaused) {
                 mainTime += (float) time2 - (float) time;
-            }
-//            timer.start(false,mainTime);
-//            timer.update(mainTime);
-            if (!isPaused && !isEnd) {
-                if (mainSound != null) {
-                    mainSound.play();
-                }
-                if (addingEntity >= 1) {
-                    addSomeEntity(window);
-                    addingEntity = 0;
-
-                }
-                if (stageStopWatch < Stage.stageTimer) {
-                    stageStopWatch += (float) time2 - (float) time;
-                    stageChanging = false;
-                    if(!stage.isBoss() && skip){
-                        stageStopWatch = Stage.stageTimer;
-                    }
-                } else {
-                    if (stage.isBoss()) {
-                        if (bosses.size() != 0) {
-                            if (Phantom.phantoms.size() == 0) {
-                                cutTheTail.addSomeFinal();
-                                bosses.clear();
-
-                            }
-                        } else {
-                            if (!cutTheTail.isExist()&&!TEST) {
-                                stageChanging = true;
-                                stage = stage.getNextStage();
-                                stage.setStage();
-                                GluePart.clearParts();
-                            }
-                        }
-
-                    } else if(!TEST){
-                        stageChanging = true;
-//                        clearStage();
-                        stage = stage.getNextStage();
-                        stage.setStage();
-                        GluePart.clearParts();
-                        Enemy.resetAngryTimer();
-                    }
+                if (!isEnd) {
+//                    if (mainSound != null) {
+//                        mainSound.play();
 //                    }
-                }
+                    if (addingEntity >= 1) {
+                        addSomeEntity(window);
+                        addingEntity = 0;
 
-            } else if (isPaused) {
-                if (mainSound != null) {
-                    mainSound.pause();
+                    }
+                    if (stageStopWatch < Stage.stageTimer) {
+                        stageStopWatch += (float) time2 - (float) time;
+                        stageChanging = false;
+                        if (!stage.isBoss() && skip) {
+                            stageStopWatch = Stage.stageTimer;
+                        }
+                    } else {
+                        if (stage.isBoss()) {
+                            if (bosses.size() != 0) {
+                                if (Phantom.phantoms.size() == 0) {
+                                    cutTheTail.addSomeFinal();
+                                    bosses.clear();
+
+                                }
+                            } else {
+                                if (!cutTheTail.isExist() && !TEST) {
+                                    stageChanging = true;
+                                    stage = stage.getNextStage();
+                                    stage.setStage();
+                                    GluePart.clearParts();
+                                }
+                            }
+
+                        } else if (!TEST) {
+                            stageChanging = true;
+//                        clearStage();
+                            stage = stage.getNextStage();
+                            stage.setStage();
+                            GluePart.clearParts();
+                            Enemy.resetAngryTimer();
+                        }
+//                    }
+                    }
                 }
+            } else {
+//                if (mainSound != null) {
+//                    mainSound.pause();
+//                }
             }
             time = time2;
 
             input(window);
 
-            if (processTime >= 1.0 / 100) {
-                timer = Timer.getFloatTime();  //TODO       begin of timer
+
+            if (processTime >= process_cap) {
+//                System.out.println(processTime);
+                processTime = 0;
+                canProcess = true;
+            }
+            if (canProcess) {
 
                 processCount++;
                 playgroundScale();
-                processTime = 0;
-                process();
+                process();             //0.0078125   \ 0.003
                 moveBackground();
                 if (window.hasResized()) {
                     Movement.setProjection(window.width, window.height);
                     glViewport(0, 0, window.width, window.height);
                 }
-                secondTimer += Timer.getFloatTime() - timer;    //TODO             end of timer
+
 
             }
             window.update();
@@ -592,20 +616,17 @@ public class trest {
             while (unprocessed >= frame_cap) {
                 canRender = true;
                 unprocessed -= frame_cap;
-
-
-                if (frameTime >= 1) {
-//                    System.out.println(processCount + " process times");
-//                    System.out.println(secondTimer / processCount + " for one circle");
-                    secondTimer = 0;
-                    processCount = 0;
-                    frameTime = 0;
-//                    System.out.println("FPS: " + frames);
-                    frames = 0;
-
-                }
             }
+            if (frameTime >= 1) {
+                System.out.println(secondTimer / processCount + " for one circle");
+                System.out.println(processCount + " process times");
+                secondTimer = 0;
+                processCount = 0;
+                frameTime = 0;
+                System.out.println("FPS: " + frames);
+                frames = 0;
 
+            }
 
             if (canRender) {
                 Movement.zoomCheck();
@@ -620,9 +641,17 @@ public class trest {
             }
 
 
-            if (exit)
+
+            secondTimer += Timer.getFloatTime() - timer;    //TODO             end of timer
+            if (exit) {
                 exit(window);
-        }
+            }
+//            try{
+//                TimeUnit.MICROSECONDS.sleep(1);
+//            }catch (Exception e){
+//                e.printStackTrace();
+//            }
+        }//0.016
     }
 
     public void mouseCatch() {
@@ -771,7 +800,7 @@ public class trest {
 
     public void clearEnemies() {
         for (int i = 0; i < Enemy.enemies.size(); i++) {
-            if (Enemy.enemies.get(i).enemyHead.distance(0,0) > trest.enemySpawnArea*0.25) {
+            if (Enemy.enemies.get(i).enemyHead.distance(0, 0) > trest.enemySpawnArea * 0.25) {
                 Enemy.enemies.get(i).removeEnemy();
                 i--;
                 if (Enemy.enemies.size() == 0) {
@@ -808,7 +837,7 @@ public class trest {
     }
 
     public void pushAway() {
-        int maxDistance =(int)(enemySpawnArea);
+        int maxDistance = (int) (enemySpawnArea);
         for (Enemy enemy : Enemy.enemies) {
 
             boolean changed = false;
@@ -916,7 +945,7 @@ public class trest {
                 }
             }
             if (window.getInput().isMouseButtonPressed(GLFW_MOUSE_BUTTON_2)) {
-                    player.throwPart();
+                player.throwPart();
             }
         }
         if (window.isFocus()) {
@@ -940,7 +969,7 @@ public class trest {
         }
         if (hacks) {
             hacks(window);
-        }else {
+        } else {
             if (window.getInput().isMouseButtonPressed(GLFW_MOUSE_BUTTON_1)) {
                 AIM = false;
                 immortal = false;
@@ -1008,21 +1037,22 @@ public class trest {
             Movement.decreaseScale();
             System.out.println("decreaseScale");
         }
-        if(window.getInput().isKeyPressed(GLFW_KEY_BACKSPACE)){
+        if (window.getInput().isKeyPressed(GLFW_KEY_BACKSPACE)) {
             AIM = !AIM;
             System.out.println("AIM: " + AIM);
         }
-        if(window.getInput().isKeyPressed(GLFW_KEY_ENTER)){
+        if (window.getInput().isKeyPressed(GLFW_KEY_ENTER)) {
             skip = !skip;
             System.out.println("skip: " + skip);
         }
-        if(window.getInput().isKeyPressed(GLFW_KEY_T)){
+        if (window.getInput().isKeyPressed(GLFW_KEY_T)) {
             TEST = !TEST;
             System.out.println("TEST: " + TEST);
         }
     }
+
     public static boolean skip = false;
-public static boolean AIM = false;
+    public static boolean AIM = false;
     public static boolean TEST = false;
     public static boolean immortal = false;
 
@@ -1098,7 +1128,7 @@ public static boolean AIM = false;
     }
 
     public static void playgroundScale() {
-        enemySpawnArea = window.width/Movement.getScale()*2;
+        enemySpawnArea = window.width / Movement.getScale() * 2;
         outLeft = (int) (-width * (playGroundScale / 2)) / Enemy.step * Enemy.step;
         fromLeft = (int) (-width * playGroundScale) / Enemy.step * Enemy.step;
 
@@ -1136,7 +1166,7 @@ public static boolean AIM = false;
         apple = new Apple(window);
         cutTheTail = new CutTheTail(window);
 
-enemySpawnArea = window.width/Movement.getScale();
+        enemySpawnArea = window.width / Movement.getScale();
         //Вычисляем пути врагов после проигрыша
         radius1 = Math.pow(width / 5f - 2, 2);
         boolean closer;
@@ -1200,14 +1230,12 @@ enemySpawnArea = window.width/Movement.getScale();
                 for (int i = 0; i < holes.size(); i++) {
                     holes.get(i).update();
                 }
-                for (int i = 0; i < GluePart.glueParts.size(); i++) {
-                    GluePart.glueParts.get(i).moveCheck();
-                }
+                GluePart.updateAll();
                 cutTheTail.update();
                 cutTheTail.moveXy(direction);
-                Executors.newSingleThreadExecutor().submit(() -> {
-                    mainSound.update();
-                });
+//                Executors.newSingleThreadExecutor().submit(() -> {
+//                    mainSound.update();
+//                });
 
 
             } catch (Exception e) {
@@ -1272,13 +1300,13 @@ enemySpawnArea = window.width/Movement.getScale();
     }
 
     static float[] moveGround(float[] xy) {
-        if (xy[0] < (-enemySpawnArea/2)) {              //Слева
+        if (xy[0] < (-enemySpawnArea / 2)) {              //Слева
             return new float[]{-enemySpawnArea, 0};
-        } else if (xy[0] > (enemySpawnArea/2)) {              //Справа
+        } else if (xy[0] > (enemySpawnArea / 2)) {              //Справа
             return new float[]{enemySpawnArea, 0};
-        } else if (xy[1] < (-enemySpawnArea/2)) {              //Сверху
+        } else if (xy[1] < (-enemySpawnArea / 2)) {              //Сверху
             return new float[]{0, -enemySpawnArea};
-        } else if (xy[1] > (enemySpawnArea/2)) {              //Снизу
+        } else if (xy[1] > (enemySpawnArea / 2)) {              //Снизу
             return new float[]{0, enemySpawnArea};
         }
         return new float[2];

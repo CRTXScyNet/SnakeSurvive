@@ -4,18 +4,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MainSoundsController {
-    public static boolean empty_space_bool = false;
-    public static boolean white_snakes_bool = false;
-    public static boolean white_snakes_hunting_bool = false;
-    public static boolean purple_snakes_hunting_bool = false;
-    public static boolean glue_part_bool = false;
+    public static volatile boolean empty_space_bool = false;
+    public static  volatile  boolean white_snakes_bool = false;
+    public static  volatile  boolean white_snakes_hunting_bool = false;
+    public static  volatile  boolean purple_snakes_hunting_bool = false;
+    public static  volatile  boolean glue_part_bool = false;
     private HashMap<Long,Boolean> states = new HashMap<>();
-    private boolean isBegin  = true;
-    private boolean isEnd  = true;
+    private  volatile  boolean  isBegin  = true;
+    private  volatile  boolean isEnd  = true;
 
 
 
-    private static boolean pitchChange = false;
+    private  volatile  static boolean pitchChange = false;
     private static float pitch = 1f;
 
 private ArrayList<MainSound> sounds = new ArrayList<>();
@@ -87,6 +87,25 @@ empty_space.setFadeTime(5);
     public static void setPitch(float pitch){
         MainSoundsController.pitch = pitch;
 
+    }
+    public static void setEmpty_space_bool(boolean empty_space_bool) {
+        MainSoundsController.empty_space_bool = empty_space_bool;
+    }
+
+    public static void setWhite_snakes_bool(boolean white_snakes_bool) {
+        MainSoundsController.white_snakes_bool = white_snakes_bool;
+    }
+
+    public static void setWhite_snakes_hunting_bool(boolean white_snakes_hunting_bool) {
+        MainSoundsController.white_snakes_hunting_bool = white_snakes_hunting_bool;
+    }
+
+    public static void setPurple_snakes_hunting_bool(boolean purple_snakes_hunting_bool) {
+        MainSoundsController.purple_snakes_hunting_bool = purple_snakes_hunting_bool;
+    }
+
+    public static void setGlue_part_bool(boolean glue_part_bool) {
+        MainSoundsController.glue_part_bool = glue_part_bool;
     }
     private void resetBol(){
         purple_snakes_hunting_bool = false;

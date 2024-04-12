@@ -320,11 +320,14 @@ renderInit(color,"gluePart",null);
 
     static double delayStat = 15;
     private double delayDouble = delayStat;
+    public float playerDistance = 0;
     private int delay = (int) delayDouble;
     public boolean playerIsNear = false;
     public boolean playerPartIsNear = false;
     public boolean gluePartIsNear = false;
     public boolean canSee = false;
+    public static Point2D closest = null;
+
 
     public Point2D gluePartHeadXY() {
         return new Point2D.Float(xy.get(0)[0], xy.get(0)[1]);
@@ -333,6 +336,21 @@ renderInit(color,"gluePart",null);
 
     public void setTime(float time) {
         rendering.setTime(time);
+    }
+    public static void updateAll(){
+        closest = null;
+        float dist = 0;
+        for (int i = 0; i < glueParts.size(); i++) {
+            if(dist == 0) {
+                dist =   glueParts.get(i).playerDistance;
+                closest = glueParts.get(i).getHeadXY();
+            }else if(dist>glueParts.get(i).playerDistance){
+                dist = glueParts.get(i).playerDistance;
+                closest = glueParts.get(i).getHeadXY();
+            }
+            glueParts.get(i).moveCheck();
+        }
+
     }
 
     public void moveCheck() {
@@ -349,27 +367,34 @@ renderInit(color,"gluePart",null);
             playerIsNear = false;
             playerPartIsNear = false;
             Point2D nearest = null;
-
+            playerDistance = (float)Player.selfList.get(0).getHeadXY().distance(xy.get(0)[0], xy.get(0)[1]);
 
             if (canSee) {
                 if (!trest.isEnd) {
+
                     for (float[] d : Player.selfList.get(0).getXy()) {
                         if (!playerIsNear && gluePartHeadXY().distance(new Point2D.Float(d[0], d[1])) < 100) {
                             playerIsNear = true;
-                            MainSoundsController.glue_part_bool = true;
+                            MainSoundsController.setGlue_part_bool(true);
+
                         }
                         if (playerIsNear) {
                             if (nearest == null) {
                                 nearest = new Point2D.Float(d[0], d[1]);
+
+
                             } else {
                                 Point2D newest = new Point2D.Float(d[0], d[1]);
                                 if (nearest.distance(xy.get(0)[0], xy.get(0)[1]) > newest.distance(xy.get(0)[0], xy.get(0)[1])) {
                                     nearest = newest;
+
+
                                 }
                             }
                         }
 
                     }
+
 
                     if (playerIsNear && nearest != null && nearest.distance(gluePartHeadXY()) < Player.player.size) {
                         if (xy.size() > 1) {

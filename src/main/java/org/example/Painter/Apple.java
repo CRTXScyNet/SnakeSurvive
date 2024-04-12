@@ -34,7 +34,7 @@ public class Apple {
 
     private Window window;
     /**
-     * Яблоко поменяло свое положение, но уже не видно змеям.
+     * Яблоко поменяло свое положение, но еще не видно змеям.
      */
     public static boolean appleSpawned = true;
     /**
