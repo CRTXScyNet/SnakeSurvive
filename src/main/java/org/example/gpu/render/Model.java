@@ -11,6 +11,7 @@ import java.nio.IntBuffer;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
 
+//Класс описывающий объекты, которые будут отрисовываться на экране.
 public class Model implements Cleaner.Cleanable {
     private Shader shader;
     private float[] vertices = {
@@ -40,8 +41,9 @@ public class Model implements Cleaner.Cleanable {
     private Texture texture;
 
     private Movement movement;
-    public Color color = new Color(0,0,0);
-    public void setRGB(Color color){
+    public Color color = new Color(0, 0, 0);
+
+    public void setRGB(Color color) {
         this.color = color;
     }
 
@@ -49,7 +51,8 @@ public class Model implements Cleaner.Cleanable {
     public float getScale() {
         return scale;
     }
-private float time = 0;
+
+    private float time = 0;
 
     private float scale = 0;
 
@@ -66,7 +69,7 @@ private float time = 0;
         this.heigth = window.height;
 
         this.scale = scale;
-        movement = new Movement(window.width, window.height,isInterface);
+        movement = new Movement(window.width, window.height, isInterface);
 //        texture = new Texture("./img/2.png");
 
         draw_count = vertices.length;
@@ -92,12 +95,14 @@ private float time = 0;
 
     }
 
-public void setTime(float t){
+    public void setTime(float t) {
         time = t;
-}
-    public float getTime(){
+    }
+
+    public float getTime() {
         return time;
     }
+
     public void render() {
 
 //        texture.bind(0);

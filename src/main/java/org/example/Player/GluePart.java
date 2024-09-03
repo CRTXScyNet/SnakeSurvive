@@ -1,18 +1,19 @@
 package org.example.Player;
 
 import org.example.Sound.MainSoundsController;
-import org.example.time.Timer;
+import org.example.gpu.gameProcess.trest;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
 import org.example.gpu.render.Window;
-import org.example.gpu.gameProcess.trest;
+import org.example.time.Timer;
 import org.joml.Vector3f;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
-public class GluePart  extends PlayerParent{
+//Блуждающие синие точки, способные присоединиться к игроку.
+public class GluePart extends PlayerParent {
     private int width;
     private int height;
     public static int maxAmountOfGlueParts = 100;
@@ -32,33 +33,33 @@ public class GluePart  extends PlayerParent{
         int two = 3;
         int one = 5;
 
-int count = 0;
-            for (GluePart gluePart : glueParts) {
-                if (gluePart.getXy().size() >= 30) {
-                    count++;
-                    if(count>= three) {
-                        thertyn = true;
-                        break;
-                    }
+        int count = 0;
+        for (GluePart gluePart : glueParts) {
+            if (gluePart.getXy().size() >= 30) {
+                count++;
+                if (count >= three) {
+                    thertyn = true;
+                    break;
                 }
             }
-            count = 0;
+        }
+        count = 0;
         if (thertyn) {
             for (GluePart gluePart : glueParts) {
                 if (gluePart.getXy().size() >= 20 && gluePart.getXy().size() < 30) {
                     count++;
-                    if(count>= two) {
+                    if (count >= two) {
                         twentyn = true;
                         break;
                     }
                 }
             }
             count = 0;
-        }else if (twentyn){
+        } else if (twentyn) {
             for (GluePart gluePart : glueParts) {
                 if (gluePart.getXy().size() >= 10 && gluePart.getXy().size() < 20) {
                     count++;
-                    if(count>= one) {
+                    if (count >= one) {
                         ten = true;
                         break;
                     }
@@ -66,18 +67,20 @@ int count = 0;
             }
         }
     }
-    public static void clearParts() {
-            for (int i = glueParts.size() - 1; i >= 0; i--) {
-                if (glueParts.get(i).gluePartHeadXY().distance(Player.player.getHeadXY()) > 450) {
-                    glueParts.get(i).clearPart();
-                    if (glueParts.size() <= maxAmountOfGlueParts) {
-                        return;
-                    }
 
+    public static void clearParts() {
+        for (int i = glueParts.size() - 1; i >= 0; i--) {
+            if (glueParts.get(i).gluePartHeadXY().distance(Player.player.getHeadXY()) > 450) {
+                glueParts.get(i).clearPart();
+                if (glueParts.size() <= maxAmountOfGlueParts) {
+                    return;
                 }
 
             }
+
+        }
     }
+
     public static void refresh() {
         if (glueParts.size() > maxAmountOfGlueParts) {
             for (int i = glueParts.size() - 1; i >= 0; i--) {
@@ -109,12 +112,8 @@ int count = 0;
     }
 
 
-
-
-
     public static ArrayList<GluePart> glueParts = new ArrayList<>();
     public static int gluePartForSpawn = 0;
-
 
 
     private float ignoreTime = 5;
@@ -122,13 +121,13 @@ int count = 0;
 
 
     public GluePart(Window window) {
-super(window);
+        super(window);
         xy.add(getRandomPoint());
         size = Player.player.size;
         tMouse = (float) Math.random() * 6.28f;
         color = new Color(0, 200, 200);
         glueParts.add(this);
-renderInit(color,"gluePart",null);
+        renderInit(color, "gluePart", null);
         birthTime = Timer.getFloatTime();
         rendering.setTime(birthTime + trest.getMainTime());
 
@@ -147,7 +146,7 @@ renderInit(color,"gluePart",null);
         glueParts.add(this);
         ignoreTime = 0;
         rendering = new ModelRendering(window, null, "gluePart");
-        rendering.addModel(new Model(window, (int) (size*30), color,false));
+        rendering.addModel(new Model(window, (int) (size * 30), color, false));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) this.xy.get(0)[0], (float) this.xy.get(0)[1], 0));
         birthTime = Timer.getFloatTime();
         rendering.setTime(birthTime + trest.getMainTime());
@@ -166,7 +165,7 @@ renderInit(color,"gluePart",null);
         float x = newXY[0];
         float y = newXY[1];
         xy.add(new float[]{x, y});
-        rendering.addModel(new Model(window, (int) (size*30), color,false));
+        rendering.addModel(new Model(window, (int) (size * 30), color, false));
         rendering.getModels().get(xy.size() - 1).getMovement().setPosition(new Vector3f((float) x, (float) y, 0));
 
     }
@@ -201,7 +200,7 @@ renderInit(color,"gluePart",null);
         xy.clear();
         xy.add(getRandomPoint());
         rendering.clear(true);
-        rendering.addModel(new Model(window, (int) (size*30), color,false));
+        rendering.addModel(new Model(window, (int) (size * 30), color, false));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy.get(0)[0], (float) xy.get(0)[1], 0));
         gluePartForSpawn = 0;
 //        move(width/2,height/2);
@@ -213,14 +212,14 @@ renderInit(color,"gluePart",null);
 
     public float[] getRandomPoint() {
 
-        float x = (int) (Math.random() * trest.enemySpawnArea - (trest.enemySpawnArea/2));
-        float y = (int) (Math.random() * trest.enemySpawnArea - (trest.enemySpawnArea/2));
-        try{
-            double dist = 0.3 * (trest.enemySpawnArea/2);
+        float x = (int) (Math.random() * trest.enemySpawnArea - (trest.enemySpawnArea / 2));
+        float y = (int) (Math.random() * trest.enemySpawnArea - (trest.enemySpawnArea / 2));
+        try {
+            double dist = 0.3 * (trest.enemySpawnArea / 2);
             if (Player.player.getHeadXY().distance(x, y) < dist) {
                 return getRandomPoint();
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -232,12 +231,6 @@ renderInit(color,"gluePart",null);
     }
 
 
-
-
-
-
-
-
     private float stepRadLast = 0;
     private int count = 0;
     private int maxCount = 500;
@@ -245,7 +238,7 @@ renderInit(color,"gluePart",null);
     boolean canIncreaseSpeed = false;
 
 
-    protected  void setRadian(Point2D target) {
+    protected void setRadian(Point2D target) {
 
         super.setRadian(target);
 
@@ -260,7 +253,7 @@ renderInit(color,"gluePart",null);
 
         if (playerIsNear || gluePartIsNear || trest.isEnd || playerPartIsNear) {
 
-            tMouse += stepRad*radDir;
+            tMouse += stepRad * radDir;
         } else {
             if (Math.random() > 0.5) {
                 tMouse += stepRad;
@@ -337,14 +330,15 @@ renderInit(color,"gluePart",null);
     public void setTime(float time) {
         rendering.setTime(time);
     }
-    public static void updateAll(){
+
+    public static void updateAll() {
         closest = null;
         float dist = 0;
         for (int i = 0; i < glueParts.size(); i++) {
-            if(dist == 0) {
-                dist =   glueParts.get(i).playerDistance;
+            if (dist == 0) {
+                dist = glueParts.get(i).playerDistance;
                 closest = glueParts.get(i).getHeadXY();
-            }else if(dist>glueParts.get(i).playerDistance){
+            } else if (dist > glueParts.get(i).playerDistance) {
                 dist = glueParts.get(i).playerDistance;
                 closest = glueParts.get(i).getHeadXY();
             }
@@ -367,7 +361,7 @@ renderInit(color,"gluePart",null);
             playerIsNear = false;
             playerPartIsNear = false;
             Point2D nearest = null;
-            playerDistance = (float)Player.selfList.get(0).getHeadXY().distance(xy.get(0)[0], xy.get(0)[1]);
+            playerDistance = (float) Player.selfList.get(0).getHeadXY().distance(xy.get(0)[0], xy.get(0)[1]);
 
             if (canSee) {
                 if (!trest.isEnd) {
@@ -556,12 +550,6 @@ renderInit(color,"gluePart",null);
         ModelRendering.selfList.remove(rendering);
         glueParts.remove(this);
     }
-
-
-
-
-
-
 
 
 }

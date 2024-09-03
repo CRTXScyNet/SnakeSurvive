@@ -11,6 +11,7 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
+//Класс, описывающий выстреливаемую часть игрока.
 public class PlayerPart extends PlayerParent {
 
 
@@ -35,7 +36,8 @@ public class PlayerPart extends PlayerParent {
     public Color mainColor = new Color(0, 100, 100);
     public Color takenAppleColor = new Color(200, 0, 0);
 
-public boolean readyTuCut = false;
+    public boolean readyTuCut = false;
+
     public void setDelay() {
         if (delay < 100) {
             delay += 1;
@@ -73,7 +75,7 @@ public boolean readyTuCut = false;
         birthTime = trest.getMainTime();
         isAlive = true;
         xy.add(new float[]{(float) partHead.getX(), (float) partHead.getX()});
-        rendering.addModel(new Model(window, (int) (size*30), color,false));
+        rendering.addModel(new Model(window, (int) (size * 30), color, false));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) partHead.getX(), (float) partHead.getY(), 0));
         rendering.setTime(1);
     }
@@ -192,7 +194,7 @@ public boolean readyTuCut = false;
         if (isEmpty && !callBack) {
             if (!isLost) {
                 step = 2 * Player.player.step;
-                if (partHead.distance(Apple.getXy()[0], Apple.getXy()[1]) < 100&&!Apple.eaten) {
+                if (partHead.distance(Apple.getXy()[0], Apple.getXy()[1]) < 100 && !Apple.eaten) {
                     if (Apple.checkCollision(new float[]{(float) partHead.getX(), (float) partHead.getY()})) {
                         setAppleCount();
                         callBack = true;
@@ -323,7 +325,8 @@ public boolean readyTuCut = false;
         }
 
     }
-    public void setMouse(float t){
+
+    public void setMouse(float t) {
         tMouse = t;
     }
 

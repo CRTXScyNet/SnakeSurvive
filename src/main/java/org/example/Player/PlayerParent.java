@@ -12,6 +12,7 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
+//Класс описывающий поведение змею, не привязанной к сетке.
 public class PlayerParent {
     public ArrayList<float[]> xy = new ArrayList<>();
 
@@ -54,12 +55,13 @@ public class PlayerParent {
         this.color = color;
         rendering = new ModelRendering(window, entity, shaderName);
         for (int i = 0; i < xy.size(); i++) {
-            rendering.addModel(new Model(window, (int) (size*30), color,false));
-            rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy.get(i)[0], (float)xy.get(i)[1], 0));
+            rendering.addModel(new Model(window, (int) (size * 30), color, false));
+            rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy.get(i)[0], (float) xy.get(i)[1], 0));
         }
     }
-    public void setColor(Color color){
-        if(this.color.getRGB()!= color.getRGB()) {
+
+    public void setColor(Color color) {
+        if (this.color.getRGB() != color.getRGB()) {
             this.color = color;
             rendering.setRGB(color);
         }
@@ -86,7 +88,7 @@ public class PlayerParent {
         xy.add(new float[]{x, y});
 
         if (rendering != null) {
-            rendering.addModel(new Model(window, (int) (size*30), color,false));
+            rendering.addModel(new Model(window, (int) (size * 30), color, false));
             rendering.getModels().get(xy.size() - 1).getMovement().setPosition(new Vector3f((float) x, (float) y, 0));
         }
 
@@ -122,7 +124,8 @@ public class PlayerParent {
     public double getSize() {
         return size;
     }
-    protected void setRadian(Point2D Target,Point2D self,float tMouse) {
+
+    protected void setRadian(Point2D Target, Point2D self, float tMouse) {
         float xTarget;
         float yTarget;
         if (Target != null) {

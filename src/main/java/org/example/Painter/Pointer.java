@@ -21,17 +21,15 @@ public class Pointer {
     private float visibility = 0;
 
 
-
-
     private Color color;
 
-    public Pointer(float period, Window window, String shaderName, Color color, float posDistance, float visibility,float scale) {
+    public Pointer(float period, Window window, String shaderName, Color color, float posDistance, float visibility, float scale) {
         this.visibility = visibility;
         this.color = color;
         timer = new ShortTimer(period);
         this.window = window;
         rendering = new ModelRendering(window, null, shaderName);
-        rendering.addModel(new Model(window, scale, color,true));
+        rendering.addModel(new Model(window, scale, color, true));
 
         this.posDistance = posDistance;
     }
@@ -65,7 +63,6 @@ public class Pointer {
                 result = -0;
             }
         }
-//System.out.println(result);
         rendering.setTime(result);
     }
 
@@ -83,15 +80,16 @@ public class Pointer {
         double pointWatchY = (posDistance * Math.cos(TargetRadian));
         position.setLocation(pointWatchX, pointWatchY);
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) pointWatchX, (float) pointWatchY, 0));
-        rendering.getModels().get(0).getMovement().setRotation(-(float)TargetRadian);
+        rendering.getModels().get(0).getMovement().setRotation(-(float) TargetRadian);
     }
 
     public void setColor(Color color) {
-        if(this.color.getRGB()!=color.getRGB()) {
+        if (this.color.getRGB() != color.getRGB()) {
             this.color = color;
             rendering.getModels().get(0).setRGB(color);
         }
     }
+
     public void remove() {
         rendering.clear(true);
     }

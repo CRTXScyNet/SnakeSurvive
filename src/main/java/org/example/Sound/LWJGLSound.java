@@ -3,19 +3,17 @@ package org.example.Sound;
 
 import org.lwjgl.openal.AL11;
 import org.lwjgl.system.MemoryUtil;
-import org.lwjgl.system.libc.LibCStdlib;
 
 import java.io.File;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
 
-
 import static org.lwjgl.openal.AL10.*;
 import static org.lwjgl.stb.STBVorbis.stb_vorbis_decode_filename;
 import static org.lwjgl.system.MemoryStack.*;
 
-
+//Класс, обеспечивающий возможность проигрывать звуки в игре.
 public class LWJGLSound {
     private int bufferId;
     private int sourceId;
@@ -26,7 +24,8 @@ public class LWJGLSound {
     private boolean ready = false;
     private boolean isLoop = false;
     private float volume = 0;
-public static ArrayList<LWJGLSound> sounds = new ArrayList<>();
+    public static ArrayList<LWJGLSound> sounds = new ArrayList<>();
+
     public void setCastomVolume(float castomVolume) {
         this.castomVolume = castomVolume;
         AL11.alSourcef(sourceId, AL11.AL_GAIN, castomVolume);
@@ -61,12 +60,12 @@ public static ArrayList<LWJGLSound> sounds = new ArrayList<>();
 //}
 
 
-        int bufferSize = 32*1024;
+        int bufferSize = 32 * 1024;
         MemoryUtil.memAllocShort(bufferSize);
         ShortBuffer rawAudioBuffer = null;
         try {
             rawAudioBuffer = stb_vorbis_decode_filename(filePath, channelsBuffer, sampleRateBuffer);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         if (rawAudioBuffer == null) {
@@ -90,7 +89,6 @@ public static ArrayList<LWJGLSound> sounds = new ArrayList<>();
         }
 
 
-
         alBufferData(bufferId, format, rawAudioBuffer, sampleRate);
 
 
@@ -105,20 +103,20 @@ public static ArrayList<LWJGLSound> sounds = new ArrayList<>();
 
     public void delete() {
         stop();
-alDeleteBuffers(bufferId);
-alDeleteBuffers(sourceId);
+        alDeleteBuffers(bufferId);
+        alDeleteBuffers(sourceId);
     }
 
     public void update(float x, float y) {
-float dist = (float)Math.sqrt(Math.pow(x,2)+Math.pow(y,2));
-        volume = (castomVolume-dist/400*castomVolume)/4;
-if(!isAppearIn && !isFadeOut) {
-    if (dist > 400) {
-        AL11.alSourcef(sourceId, AL11.AL_GAIN, 0);
-    } else {
-        AL11.alSourcef(sourceId, AL11.AL_GAIN, volume);
-    }
-}
+        float dist = (float) Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+        volume = (castomVolume - dist / 400 * castomVolume) / 4;
+        if (!isAppearIn && !isFadeOut) {
+            if (dist > 400) {
+                AL11.alSourcef(sourceId, AL11.AL_GAIN, 0);
+            } else {
+                AL11.alSourcef(sourceId, AL11.AL_GAIN, volume);
+            }
+        }
 
 
     }
@@ -129,7 +127,7 @@ if(!isAppearIn && !isFadeOut) {
             isPlaying = false;
             alSourcei(sourceId, AL_POSITION, 0);
         }
-        if(!isPlaying){
+        if (!isPlaying) {
             alSourcePlay(sourceId);
             isPlaying = true;
         }
@@ -155,14 +153,16 @@ if(!isAppearIn && !isFadeOut) {
 
     boolean isFadeOut = false;
     boolean isAppearIn = false;
-    public void fadeOut(float t, float T){
+
+    public void fadeOut(float t, float T) {
         isFadeOut = true;
-float change = volume-t/T*volume;
+        float change = volume - t / T * volume;
         AL11.alSourcef(sourceId, AL11.AL_GAIN, change);
     }
-    public void appearIn(float t, float T){
+
+    public void appearIn(float t, float T) {
         isAppearIn = true;
-        float change = t/T*volume;
+        float change = t / T * volume;
         AL11.alSourcef(sourceId, AL11.AL_GAIN, change);
     }
 

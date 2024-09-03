@@ -1,18 +1,20 @@
 package org.example.gpu.render;
 
 import org.example.gpu.io.Input;
-import org.example.gpu.io.Movement;
 import org.lwjgl.glfw.*;
-import org.lwjgl.openal.*;
+import org.lwjgl.openal.AL;
+import org.lwjgl.openal.ALC;
+import org.lwjgl.openal.ALCCapabilities;
+import org.lwjgl.openal.ALCapabilities;
 import org.lwjgl.opengl.GL;
 
 import java.awt.geom.Point2D;
-import java.io.File;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.openal.ALC10.*;
 import static org.lwjgl.opengl.GL11.*;
 
+//Класс окна, в котором будет происходить отрисовка моделей.
 public class Window {
     private long window;
     public int width, height;
@@ -35,7 +37,7 @@ public class Window {
     private Input input;
 
 
-    public   void setLocalCallBacks(){
+    public void setLocalCallBacks() {
         windowSizeCallback = new GLFWWindowSizeCallback() {
             @Override
             public void invoke(long windowArg, int widthArg, int heightArg) {
@@ -44,16 +46,16 @@ public class Window {
                 hasResized = true;
             }
         };
-        glfwSetWindowSizeCallback(window,windowSizeCallback);
+        glfwSetWindowSizeCallback(window, windowSizeCallback);
         windowPosCallback = new GLFWWindowPosCallback() {
             @Override
             public void invoke(long window, int xpos, int ypos) {
-            windowPosX = xpos;
-            windowPosY = ypos;
-            posChanged = true;
+                windowPosX = xpos;
+                windowPosY = ypos;
+                posChanged = true;
             }
         };
-        glfwSetWindowPosCallback(window,windowPosCallback);
+        glfwSetWindowPosCallback(window, windowPosCallback);
         windowFocusCallback = new GLFWWindowFocusCallback() {
             @Override
             public void invoke(long window, boolean focused) {
@@ -61,14 +63,14 @@ public class Window {
 //                System.out.println(focus);
             }
         };
-        glfwSetWindowFocusCallback(window,windowFocusCallback);
+        glfwSetWindowFocusCallback(window, windowFocusCallback);
         cursorPosCallback = new GLFWCursorPosCallback() {
             @Override
             public void invoke(long window, double xpos, double ypos) {
-             mouse.setLocation(xpos-width/2f,-(ypos-height/2f));
+                mouse.setLocation(xpos - width / 2f, -(ypos - height / 2f));
             }
         };
-        glfwSetCursorPosCallback(window,cursorPosCallback);
+        glfwSetCursorPosCallback(window, cursorPosCallback);
     }
 
     public Window(int width, int height) {
@@ -105,7 +107,7 @@ public class Window {
 
 
         }
-        glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_DISABLED);
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
         glfwShowWindow(window);
         glfwMakeContextCurrent(window);
@@ -125,9 +127,9 @@ public class Window {
         ALCCapabilities alcCapabilities = ALC.createCapabilities(audiodevice);
         ALCapabilities alCapabilities = AL.createCapabilities(alcCapabilities);
 
-         if(!alCapabilities.OpenAL11){              //TODO
-             assert false : "Audio library not supported";
-         }
+        if (!alCapabilities.OpenAL11) {              //TODO
+            assert false : "Audio library not supported";
+        }
         GL.createCapabilities();
 
         glEnable(GL_TEXTURE_2D);
@@ -135,21 +137,24 @@ public class Window {
 
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     }
-    public void destroyWindow(){
+
+    public void destroyWindow() {
         alcDestroyContext(audioContext);
         alcCloseDevice(audiodevice);
-cleanUp();
+        cleanUp();
         glfwDestroyWindow(window);
 
         glfwTerminate();
         System.exit(0);
     }
-public void cleanUp(){
+
+    public void cleanUp() {
         windowSizeCallback.close();
         windowFocusCallback.close();
         windowPosCallback.close();
         cursorPosCallback.close();
-}
+    }
+
     public void setSize(int width, int height) {
         this.width = width;
         this.height = height;
@@ -162,7 +167,8 @@ public void cleanUp(){
     public void setFullscreen(boolean isFullscreen) {
         this.fullscreen = isFullscreen;
     }
-    public Point2D getMouse(){
+
+    public Point2D getMouse() {
         return mouse;
     }
 
@@ -177,14 +183,17 @@ public void cleanUp(){
     public long getWindow() {
         return window;
     }
-    public boolean hasResized(){
+
+    public boolean hasResized() {
         return hasResized;
     }
-    public boolean posChanged(){
+
+    public boolean posChanged() {
         return posChanged;
     }
-    public boolean isFocus(){
-        return  focus;
+
+    public boolean isFocus() {
+        return focus;
     }
 
     public boolean shouldClose() {

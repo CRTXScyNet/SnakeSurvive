@@ -1,8 +1,8 @@
 package org.example.Enemy;
 
 import java.awt.*;
-
-public     class Line {
+//Класс использовался для просчета теней на старой версии. На удаление
+public class Line {
     private double k;
     private double b;
     boolean revert;
@@ -33,12 +33,12 @@ public     class Line {
 //            s = line.getS();
 //            revert = true;
 //            throw new IllegalArgumentException("Points lay on same vertical line.");
-        }else {
+        } else {
 //            A = a.getY() - b.getY();
 //            B = b.getX() - a.getX();
             double C = a.getX() * b.getY() - b.getX() * a.getY();
-            this.k = - A / B;
-            this.b = - C / B;
+            this.k = -A / B;
+            this.b = -C / B;
         }
 
     }
@@ -50,6 +50,7 @@ public     class Line {
 
     /**
      * Возвращает угловой коэффициент линии из формулы вида y = k * x + b
+     *
      * @return угловой коэфициент
      */
     public double getK() {
@@ -58,6 +59,7 @@ public     class Line {
 
     /**
      * Возвращает смещение линии из формулы вида y = k * x + b
+     *
      * @return смещение линии
      */
     public double getB() {
@@ -77,9 +79,9 @@ public     class Line {
 //            other.k -= 1;
         }
 //            throw new IllegalArgumentException("Lines are parallel and do not intersect.");
-        double x  = (other.getB() - getB()) / (getK() - other.getK());
+        double x = (other.getB() - getB()) / (getK() - other.getK());
         double y = getK() * x + getB();
-        return new Point((int)x,(int)y);
+        return new Point((int) x, (int) y);
     }
 
     @Override

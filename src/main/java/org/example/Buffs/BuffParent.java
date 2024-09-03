@@ -3,22 +3,21 @@ package org.example.Buffs;
 import org.example.Painter.Pointer;
 import org.example.Player.Player;
 import org.example.Sound.LWJGLSound;
-import org.example.gpu.render.Window;
+import org.example.gpu.gameProcess.trest;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
-import org.example.gpu.gameProcess.trest;
-import org.example.time.ShortTimer;
+import org.example.gpu.render.Window;
 import org.joml.Vector3f;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
-
+//Класс родитель для усилений игрока
 public class BuffParent {
     public Point2D getXy() {
         return xy;
     }
 
-    protected Point2D xy = new Point2D.Float(0,0);
+    protected Point2D xy = new Point2D.Float(0, 0);
     protected ModelRendering renderingBuff;
 
 
@@ -37,7 +36,7 @@ public class BuffParent {
 
     protected static float size = 10;
     protected float timerForShow = 0.5f;
-private Pointer pointer;
+    private Pointer pointer;
     protected float timeOfEnd = 0;
 
 
@@ -49,10 +48,8 @@ private Pointer pointer;
     protected float mainTime = 0;
 
 
-
-
     protected Window window;
-    protected Color color = new Color(0,0,0);
+    protected Color color = new Color(0, 0, 0);
     protected LWJGLSound constantSound = null;
     protected LWJGLSound pickUpSound = null;
 
@@ -61,19 +58,22 @@ private Pointer pointer;
         this.window = window;
 
     }
-    public void soundInit(String soundPath,boolean isLoop){
-        constantSound = new LWJGLSound(soundPath,isLoop);
+
+    public void soundInit(String soundPath, boolean isLoop) {
+        constantSound = new LWJGLSound(soundPath, isLoop);
         constantSound.setCastomVolume(0.05f);
-        pickUpSound = new LWJGLSound("./sounds/shard1.ogg",false);
+        pickUpSound = new LWJGLSound("./sounds/shard1.ogg", false);
         pickUpSound.setCastomVolume(0.1f);
         soundExist = true;
-    };
+    }
+
+    ;
 
     public void renderInit(String buffShader, String buffPointerShader, Color color) {
-this.color = color;
+        this.color = color;
 
-        renderingBuff = new ModelRendering(window,   null, buffShader);
-pointer = new Pointer(0.5f,window,buffPointerShader,color,80,300,15);
+        renderingBuff = new ModelRendering(window, null, buffShader);
+        pointer = new Pointer(0.5f, window, buffPointerShader, color, 80, 300, 15);
 
     }
 
@@ -84,8 +84,8 @@ pointer = new Pointer(0.5f,window,buffPointerShader,color,80,300,15);
         beginTime = trest.getMainTime();
         isShowing = true;
 
-        xy = new Point2D.Float((float) (Math.random() * trest.playGroundWidth - (trest.playGroundWidth/2)), (float) (Math.random() *trest.playGroundHeight - (trest.playGroundHeight/2)));
-        renderingBuff.addModel(new Model(window, (int) (size * 50),color,false));
+        xy = new Point2D.Float((float) (Math.random() * trest.playGroundWidth - (trest.playGroundWidth / 2)), (float) (Math.random() * trest.playGroundHeight - (trest.playGroundHeight / 2)));
+        renderingBuff.addModel(new Model(window, (int) (size * 50), color, false));
         renderingBuff.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy.getX(), (float) xy.getY(), 0));
 
 
@@ -114,9 +114,9 @@ pointer = new Pointer(0.5f,window,buffPointerShader,color,80,300,15);
 
     public void update() {
         mainTime = trest.getMainTime();
-        if(constantSound != null) {
+        if (constantSound != null) {
             constantSound.update((float) xy.getX(), (float) xy.getY());
-            if (isExist || isShowing){
+            if (isExist || isShowing) {
                 constantSound.play();
             }
         }
@@ -155,14 +155,14 @@ pointer = new Pointer(0.5f,window,buffPointerShader,color,80,300,15);
                         float secTime = -(timerForShow - timer) * 1.1f / timerForShow - 0.1f;
                         renderingBuff.setTime(secTime);
 
-                        pointer.update(xy,false,mainTime);
-                        if(constantSound != null) {
+                        pointer.update(xy, false, mainTime);
+                        if (constantSound != null) {
                             constantSound.fadeOut(timer, timerForShow);
                         }
                         if (timer >= timerForShow) {
                             hide();
                             isExist = false;
-                            if(constantSound != null) {
+                            if (constantSound != null) {
                                 constantSound.setFadeOut(false);
                             }
                         }
@@ -171,47 +171,49 @@ pointer = new Pointer(0.5f,window,buffPointerShader,color,80,300,15);
                         float secTime = -(timerForShow - timer) * 1.1f / timerForShow - 0.1f;
                         renderingBuff.setTime(secTime);
 
-                        pointer.update(xy,false,mainTime);
-                        if(constantSound != null) {
+                        pointer.update(xy, false, mainTime);
+                        if (constantSound != null) {
                             constantSound.fadeOut(timer, timerForShow);
                         }
                         if (timer >= timerForShow) {
                             hide();
-                            if(constantSound != null) {
+                            if (constantSound != null) {
                                 constantSound.setFadeOut(false);
                             }
                         }
                     }
-                }else {
-                    pointer.update(xy,true,mainTime);
+                } else {
+                    pointer.update(xy, true, mainTime);
                 }
             }
-        }else {
+        } else {
 
             setPointerPosition();
             float timer = mainTime - beginTime;
             float secTime = -(timer) * 1.1f / timerForShow - 0.1f;
             renderingBuff.setTime(secTime);
 
-            pointer.update(xy,true,mainTime);
-            if(constantSound != null) {
+            pointer.update(xy, true, mainTime);
+            if (constantSound != null) {
                 constantSound.appearIn(timer, timerForShow);
             }
             if (timer >= timerForShow) {
                 isShowing = false;
-                if(constantSound != null) {
+                if (constantSound != null) {
                     constantSound.setAppearIn(false);
                 }
             }
         }
     }
-    public boolean suddenExpose(){
-        if (xy.distance(0,0)>trest.enemySpawnArea*0.2) {
+
+    public boolean suddenExpose() {
+        if (xy.distance(0, 0) > trest.enemySpawnArea * 0.2) {
             reset();
             return true;
         }
         return false;
     }
+
     public void setPointerPosition() {
         double xTarget = xy.getX();
         double yTarget = xy.getY();
@@ -229,7 +231,7 @@ pointer = new Pointer(0.5f,window,buffPointerShader,color,80,300,15);
 
     public void buffOnn() {
         eaten = true;
-        if(pickUpSound != null){
+        if (pickUpSound != null) {
             pickUpSound.play();
         }
         catchTime = mainTime;
@@ -243,7 +245,7 @@ pointer = new Pointer(0.5f,window,buffPointerShader,color,80,300,15);
     }
 
     public void hide() {
-        if(constantSound != null) {
+        if (constantSound != null) {
             constantSound.stop();
         }
         renderingBuff.clear(false);
@@ -270,10 +272,10 @@ pointer = new Pointer(0.5f,window,buffPointerShader,color,80,300,15);
     public void reset() {
         renderingBuff.clear(true);
         ModelRendering.removeModelRender(renderingBuff);
-        if(constantSound != null) {
+        if (constantSound != null) {
             constantSound.delete();
         }
-        if(pickUpSound != null) {
+        if (pickUpSound != null) {
             pickUpSound.delete();
         }
         eaten = false;

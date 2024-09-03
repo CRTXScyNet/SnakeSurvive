@@ -1,17 +1,18 @@
 package org.example.obstructions;
 
-import org.example.Player.Player;
 import org.example.Player.GluePart;
+import org.example.Player.Player;
 import org.example.Sound.MainSoundsController;
-import org.example.gpu.render.Window;
+import org.example.gpu.gameProcess.trest;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
-import org.example.gpu.gameProcess.trest;
+import org.example.gpu.render.Window;
 import org.joml.Vector3f;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
 
+//Препятствие в виде зоны повышенной гравитации, которая затягивает игрока.
 public class WormHole {
     private float[] xy = new float[]{};
     static Color color = new Color(28, 150, 232);
@@ -42,10 +43,10 @@ public class WormHole {
         spawn = trest.getMainTime();
         wormHole = this;
         this.window = window;
-        xy = new float[]{(int) (Math.random() * trest.playGroundWidth- (trest.playGroundWidth/ 2)), (int) (Math.random() * trest.playGroundHeight - (trest.playGroundHeight / 2))};
+        xy = new float[]{(int) (Math.random() * trest.playGroundWidth - (trest.playGroundWidth / 2)), (int) (Math.random() * trest.playGroundHeight - (trest.playGroundHeight / 2))};
 //        System.out.printf("Apple x: %s, y: %s ", xy[0],xy[1]);
-        rendering = new ModelRendering(window,   null, "wormHole");
-        rendering.addModel(new Model(window, (int) (size * 50),color,false));
+        rendering = new ModelRendering(window, null, "wormHole");
+        rendering.addModel(new Model(window, (int) (size * 50), color, false));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy[0], (float) xy[1], 0));
 
     }
@@ -66,7 +67,7 @@ public class WormHole {
     public void setXy() {
         spawn = trest.getMainTime();
         try {
-            xy = new float[]{(int) (Math.random() * trest.playGroundWidth- (trest.playGroundWidth/ 2)), (int) (Math.random() * trest.playGroundHeight - (trest.playGroundHeight / 2))};
+            xy = new float[]{(int) (Math.random() * trest.playGroundWidth - (trest.playGroundWidth / 2)), (int) (Math.random() * trest.playGroundHeight - (trest.playGroundHeight / 2))};
             rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy[0], (float) xy[1], 0));
         } catch (Exception e) {
             e.printStackTrace();
@@ -74,9 +75,10 @@ public class WormHole {
         }
     }
 
-public boolean close = false;
+    public boolean close = false;
+
     public void update() {
-        if(close){
+        if (close) {
             return;
         }
 
@@ -86,8 +88,8 @@ public boolean close = false;
                 if (Player.player.getHeadXY().distance(new Point2D.Float(xy[0], xy[1])) < 200) {
                     isNear = true;
                 }
-                for (GluePart part: GluePart.glueParts){
-                    if(part.gluePartHeadXY().distance(new Point2D.Float(xy[0], xy[1])) < 200){
+                for (GluePart part : GluePart.glueParts) {
+                    if (part.gluePartHeadXY().distance(new Point2D.Float(xy[0], xy[1])) < 200) {
                         pullPart(part);
                     }
 
@@ -117,29 +119,31 @@ public boolean close = false;
             rendering.setTime(-(timeToClose - timer) * 1.1f / timeToClose - 0.1f);
             if (timer >= timeToClose) {
                 setXy();
-if(suddenExpose){
-    close = true;
-}
-                    changePosition = false;
+                if (suddenExpose) {
+                    close = true;
+                }
+                changePosition = false;
 
             }
         }
 
     }
-    private Point2D zero = new Point2D.Float(0,0);
+
+    private Point2D zero = new Point2D.Float(0, 0);
     private boolean suddenExpose = false;
-    public boolean suddenExpose(){
+
+    public boolean suddenExpose() {
         suddenExpose = true;
-        if (zero.distance(xy[0],xy[1])>trest.enemySpawnArea*0.2) {
+        if (zero.distance(xy[0], xy[1]) > trest.enemySpawnArea * 0.2) {
             reset();
             return true;
         }
-        if(isPull){
+        if (isPull) {
             isPull = false;
             changePosition = true;
             startToMove = trest.getMainTime();
         }
-        if(close){
+        if (close) {
             reset();
             return true;
         }
@@ -152,9 +156,9 @@ if(suddenExpose){
 
             float distance = (float) Math.sqrt(Math.pow(xy[0] - Player.player.xy.get(j)[0], 2) + Math.pow(xy[1] - Player.player.xy.get(j)[1], 2));
             float angle;
-            if (distance> 10 && distance < 200) {
-                if(j == 0){
-                    float pitch = 0.7f + (distance/200*0.3f);
+            if (distance > 10 && distance < 200) {
+                if (j == 0) {
+                    float pitch = 0.7f + (distance / 200 * 0.3f);
                     MainSoundsController.setPitch(pitch);
 
                 }
@@ -175,6 +179,7 @@ if(suddenExpose){
             isNear = false;
         }
     }
+
     public void pullPart(GluePart part) {
 
         for (int j = part.xy.size() - 1; j >= 0; j--) {

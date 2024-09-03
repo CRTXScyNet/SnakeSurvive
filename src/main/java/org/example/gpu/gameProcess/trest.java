@@ -81,7 +81,6 @@ public class trest {
     static public Player player;
     static public Phantom phantom;
 
-    //    static MainSound mainSound = null;
     static MainSoundsController mainSound = null;
     static LWJGLSound deathSound = null;
     public static CutTheTail cutTheTail;
@@ -106,6 +105,7 @@ public class trest {
 //    scaleActiveEnemy = 1f;
 //    scaleGlueParts = 2.5f;
 
+                                //перечисление контролирующее состояние стадий игры.
     public enum Stage {
 
         FIRST_STAGE {
@@ -830,10 +830,7 @@ window = new org.example.gpu.render.Window(width, height);
                 i--;
             }
         }
-//        if(buffs.size() ==0 && holes.size() == 0){
-//            stage = stage.getNextStage();
-//            stage.setStage();
-//        }
+
     }
 
     public void pushAway() {

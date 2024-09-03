@@ -1,7 +1,7 @@
 package org.example;
 
 import org.example.gpu.gameProcess.trest;
-
+//Класс с методом запускающим программу.
 public class Main {
     public  static boolean fullscreen = true;
     public  static boolean hacks = false;

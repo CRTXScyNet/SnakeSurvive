@@ -4,7 +4,6 @@ import org.example.Painter.Apple;
 import org.example.Player.Player;
 import org.example.Sound.MainSoundsController;
 import org.example.gpu.gameProcess.trest;
-import org.example.gpu.io.Movement;
 import org.example.gpu.render.Model;
 import org.example.gpu.render.ModelRendering;
 import org.example.gpu.render.Window;
@@ -14,7 +13,7 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
-
+//Класс противников, змей, перемещающихся по сетке. Блуждают по карте до прибытия босса.
 public class Enemy extends Entity {
     private int width;
     private int height;
@@ -45,7 +44,7 @@ public class Enemy extends Entity {
             color = new Color(150, 150, 255);
         }
         rendering = new ModelRendering(window, this, "enemy");
-        rendering.addModel(new Model(window, (int) (size*40), color,false));
+        rendering.addModel(new Model(window, (int) (size * 40), color, false));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) co.x, (float) co.y, 0));
         for (int i = 0; i < snakeLength; i++) {
             addCircle();
@@ -239,7 +238,7 @@ public class Enemy extends Entity {
             float yp = phantomXY.get(phantomXY.size() - 1)[1];
             phantomXY.add(new float[]{xp, yp});
             directionOfPhantomXY.add(new float[]{0, 0});
-            rendering.addModel(new Model(window, (int) (size*40), color,false));
+            rendering.addModel(new Model(window, (int) (size * 40), color, false));
             rendering.getModels().get(xy.size() - 1).getMovement().setPosition(new Vector3f(xp, yp, 0));
         }
     }
@@ -268,7 +267,7 @@ public class Enemy extends Entity {
         setPhantomXY();
         enemyHead.setLocation(xy.get(0)[0], xy.get(0)[1]);
         rendering.clear(true);
-        rendering.addModel(new Model(window, (int) (size*40), color,false));
+        rendering.addModel(new Model(window, (int) (size * 40), color, false));
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) co.x, (float) co.y, 0));
         move(co.x, co.y);
         for (int i = 0; i < snakeLength; i++) {
@@ -278,8 +277,8 @@ public class Enemy extends Entity {
     }
 
     public Point getRandomPoint() {
-        int x = (int) (Math.random() * trest.enemySpawnArea - (trest.enemySpawnArea/2));
-        int y = (int) (Math.random() * trest.enemySpawnArea - (trest.enemySpawnArea/2));
+        int x = (int) (Math.random() * trest.enemySpawnArea - (trest.enemySpawnArea / 2));
+        int y = (int) (Math.random() * trest.enemySpawnArea - (trest.enemySpawnArea / 2));
         double dist = 0.3 * (trest.enemySpawnArea);
         if (Player.player.getHeadXY().distance(x, y) < dist) {
             return getRandomPoint();
@@ -364,7 +363,7 @@ public class Enemy extends Entity {
                     for (int j = 0; j < Player.player.getXy().size(); j++) {
                         float dest = (float) Math.sqrt(Math.pow(Player.player.getXy().get(j)[0] - ePoint[0], 2) + Math.pow(Player.player.getXy().get(j)[1] - ePoint[1], 2));
 
-                        if (dest <= getSize() + Player.player.getSize()/2) {
+                        if (dest <= getSize() + Player.player.getSize() / 2) {
                             if (!trest.isEnd && !trest.immortal && !trest.stage.isBoss()) {
                                 trest.end();
                                 isBreak = true;
@@ -610,32 +609,6 @@ public class Enemy extends Entity {
         return Math.pow(xy.get(0)[0] - Player.player.getHeadXY().getX(), 2) + Math.pow(xy.get(0)[1] - Player.player.getHeadXY().getY(), 2) < Math.pow(30, 2);
     }
 
-//    public void setLines() {
-//        points.clear();
-//        lines.clear();
-//        if (Picture.rect.contains(new Point((int) phantomXY.get(0)[0], (int) phantomXY.get(0)[1]))) {
-//            points.add(new Point((int) phantomXY.get(0)[0], (int) phantomXY.get(0)[1]));
-//            for (int i = 1; i < phantomXY.size() - 1; i++) {
-//                if ((int) phantomXY.get(i - 1)[0] != (int) phantomXY.get(i + 1)[0] && (int) phantomXY.get(i - 1)[1] != (int) phantomXY.get(i + 1)[1]) {
-//                    points.add(new Point((int) phantomXY.get(i)[0], (int) phantomXY.get(i)[1]));
-//                }
-//
-//
-//            }
-//            points.add(new Point((int) phantomXY.get(phantomXY.size() - 1)[0], (int) phantomXY.get(phantomXY.size() - 1)[1]));
-//            Point t = null;
-//
-//            for (int i = 0; i < points.size(); i++) {
-//                if (t == null) {
-//                    t = points.get(i);
-//                } else {
-//                    lines.add(new Line(t, points.get(i)));
-//                    t = new Point(points.get(i));
-//                }
-//            }
-//
-//        }
-//    }
 
     private boolean downNotSelf = false;
     private boolean upNotSelf = false;
@@ -645,7 +618,7 @@ public class Enemy extends Entity {
     private void lastWay(float x, float y, boolean up, boolean down, boolean right, boolean left) {
 
         try {
-            ArrayList<float[]> variants = new ArrayList<>(/*Arrays.asList(new int[]{x, y - step},new int[]{x, y + step},new int[]{x + step, y},new int[]{x - step, y})*/);
+            ArrayList<float[]> variants = new ArrayList<>();
             if (up) {
                 variants.add(new float[]{x, y - step});
             }
@@ -710,7 +683,6 @@ public class Enemy extends Entity {
 
         } catch (Exception e) {
             e.printStackTrace();
-//            System.out.println(e);
         }
     }
 
@@ -762,6 +734,7 @@ public class Enemy extends Entity {
         return doubles;
     }
 
+    // Не позволяет змее быть разорванной в следствие внешнего воздействия
     public void makeChainTogether() {
         for (int i = 0; i < phantomXY.size() - 1; i++) {
             float distance = (float) Math.sqrt(Math.pow(phantomXY.get(i + 1)[0] - phantomXY.get(i)[0], 2) + Math.pow(phantomXY.get(i + 1)[1] - phantomXY.get(i)[1], 2));

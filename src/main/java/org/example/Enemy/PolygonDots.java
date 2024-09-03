@@ -2,26 +2,26 @@ package org.example.Enemy;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.concurrent.Executors;
-
+//Класс использовался для просчета теней на старой версии. На удаление
 public class PolygonDots {
 
     private static ArrayList<Point> points = new ArrayList<>();
     private static ArrayList<Double> radians = new ArrayList<>();
 
-    public static int size(){
+    public static int size() {
         return points.size();
     }
 
-public static void add(Point point , double radian){
-    points.add(point);
-    radians.add(radian);
+    public static void add(Point point, double radian) {
+        points.add(point);
+        radians.add(radian);
 
 
-    sortPolygonPoints();
+        sortPolygonPoints();
 
 
-}
+    }
+
     public static ArrayList<Point> getPoints() {
         return points;
     }
@@ -51,9 +51,10 @@ public static void add(Point point , double radian){
             sortPolygonPoints();
         }
     }
-    public  static void clear(){
-    points.clear();
-    radians.clear();
+
+    public static void clear() {
+        points.clear();
+        radians.clear();
     }
 
 }

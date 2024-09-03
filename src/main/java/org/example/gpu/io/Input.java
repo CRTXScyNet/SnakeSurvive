@@ -9,6 +9,7 @@ public class Input {
     private boolean[] buttons;
     private long window;
 
+    //Класс для считывания нажатий клавиш на клавиатуре и мыши.
     public Input(long window) {
         this.window = window;
         this.keys = new boolean[GLFW_KEY_LAST];
@@ -25,10 +26,12 @@ public class Input {
     public boolean isMouseButtonDown(int button) {
         return glfwGetMouseButton(window, button) == 1;
     }
+
     public boolean isMouseButtonPressed(int button) {
 
         return (isMouseButtonDown(button) && !buttons[button]);
     }
+
     public boolean isKeyPressed(int key) {
         return (isKeyDown(key) && !keys[key]);
     }

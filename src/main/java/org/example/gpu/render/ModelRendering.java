@@ -11,8 +11,8 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+//Класс отрисовывающий объекты класса Models
 public class ModelRendering {
-
 
 
     public static HashSet<ModelRendering> selfList = new HashSet<>();
@@ -42,10 +42,6 @@ public class ModelRendering {
         this.window = window;
         selfList.add(this);
         shader = new Shader(shaderName);
-
-//        red = (float) color.getRed() / 255;
-//        green = (float) color.getGreen() / 255;
-//        blue = (float) color.getBlue() / 255;
     }
 
 
@@ -54,14 +50,14 @@ public class ModelRendering {
     }
 
     public void setRGB(Color color) {
-        for (int i = 0; i <models.size(); i++) {
+        for (int i = 0; i < models.size(); i++) {
             models.get(i).setRGB(color);
         }
 
     }
 
     public void setTime(float time) {
-        for (Model model : models){
+        for (Model model : models) {
             model.setTime(time);
         }
         this.time = time;
@@ -70,22 +66,23 @@ public class ModelRendering {
     public void addModel(Model model) {
         models.add(model);
     }
-    public void setPosOnShader(Point2D pos){
-        mousePos = new Point2D.Double(pos.getX(),pos.getY());
+
+    public void setPosOnShader(Point2D pos) {
+        mousePos = new Point2D.Double(pos.getX(), pos.getY());
     }
 
     public void renderModels() {
         shader.bind();
-if(mousePos != null){
-    shader.setUniform("mousePos", (float)mousePos.getX(), (float)mousePos.getY());
-}
+        if (mousePos != null) {
+            shader.setUniform("mousePos", (float) mousePos.getX(), (float) mousePos.getY());
+        }
         shader.setUniform("curSpeed", speed);
         shader.setUniform("speedScale", speedScale);
         shader.setUniform("u_resolution", window.width, window.height);
         if (models.size() == 0) {
             return;
         }
-        if(models.size()>1) {
+        if (models.size() > 1) {
             for (int i = models.size() - 1; i >= 0; i--) {
                 try {
                     shader.setUniform("time", models.get(i).getTime() + (models.size() - i) * 0.1f);
@@ -105,7 +102,7 @@ if(mousePos != null){
                     continue;
                 }
             }
-        }else {
+        } else {
             shader.setUniform("time", models.get(0).getTime());
             float redA = (float) models.get(0).color.getRed() / 255;
             float greenA = (float) models.get(0).color.getGreen() / 255;

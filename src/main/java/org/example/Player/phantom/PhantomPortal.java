@@ -9,6 +9,7 @@ import org.joml.Vector3f;
 import java.awt.*;
 import java.awt.geom.Point2D;
 
+//Класс портала, в который уходит босс, при попадании по игроку.
 public class PhantomPortal {
     private ModelRendering rendering;
 
@@ -25,10 +26,10 @@ public class PhantomPortal {
         this.window = window;
         if (in) {
             rendering = new ModelRendering(window, null, "portal");
-            rendering.addModel(new Model(window, 50, color,false));
+            rendering.addModel(new Model(window, 50, color, false));
         } else {
             rendering = new ModelRendering(window, null, "portal");
-            rendering.addModel(new Model(window, 50, color,false));
+            rendering.addModel(new Model(window, 50, color, false));
         }
         rendering.getModels().get(0).getMovement().setPosition(new Vector3f((float) xy.getX(), (float) xy.getY(), 0));
         timer = new ShortTimer(0.5f);
@@ -55,15 +56,15 @@ public class PhantomPortal {
                     mainTime = timer.update(time);
                 }
             }
-        }else {
-            if(timer.isStopped() && !timer.isIncrease()){
+        } else {
+            if (timer.isStopped() && !timer.isIncrease()) {
                 closed = true;
                 return;
             }
-            if(!timer.isStopped() && timer.isIncrease()){
-                timer.start(true,time);
-            }else {
-                timer.start(false,time);
+            if (!timer.isStopped() && timer.isIncrease()) {
+                timer.start(true, time);
+            } else {
+                timer.start(false, time);
             }
             mainTime = timer.update(time);
         }

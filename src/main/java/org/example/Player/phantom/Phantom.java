@@ -14,6 +14,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 
+//Класс золотого змея босса между стадиями игры.
 public class Phantom extends PlayerParent {
     public static ArrayList<Phantom> phantoms = new ArrayList<>();
     private Color mainColor = new Color(0, 100, 100);
@@ -219,7 +220,7 @@ public class Phantom extends PlayerParent {
             } else if (Player.player.getHeadXY().distance(xy.get(0)[0], xy.get(0)[1]) > Player.player.getHeadXY().distance(xy.get(xy.size() - 1)[0], xy.get(xy.size() - 1)[1])) {
                 Collections.reverse(xy);
             }
-            if(!reversed){
+            if (!reversed) {
                 Player.player.cutOneCell();
             }
             reversed = true;
@@ -251,7 +252,7 @@ public class Phantom extends PlayerParent {
             if (newXy.size() > 0) {
                 new Phantom(window, newXy);
             }
-            if(!reversed){
+            if (!reversed) {
                 Player.player.cutOneCell();
             }
             reversed = true;
@@ -390,8 +391,6 @@ public class Phantom extends PlayerParent {
 //
 
 
-
-
             wiggle();
             if (target != null) {
                 super.setRadian(target);
@@ -492,11 +491,11 @@ public class Phantom extends PlayerParent {
             MainSoundsController.setWhite_snakes_hunting_bool(true);
             pointer.setColor(agressive);
             rendering.setRGB(agressive);
-            if (maxStep != Player.player.maxStep*0.7f) {
-                maxStep = Player.player.maxStep*0.7f;
+            if (maxStep != Player.player.maxStep * 0.7f) {
+                maxStep = Player.player.maxStep * 0.7f;
             }
-            if (minStep != Player.player.minStep/2) {
-                minStep = Player.player.minStep/2;
+            if (minStep != Player.player.minStep / 2) {
+                minStep = Player.player.minStep / 2;
             }
             if (Player.player.getPart().readyTuCut) {
                 for (int j = 1; j < xy.size() - 1; j++) {
@@ -540,11 +539,11 @@ public class Phantom extends PlayerParent {
         } else {
             pointer.setColor(scared);
             rendering.setRGB(scared);
-            if (maxStep != Player.player.maxStep/2f) {
-                maxStep = Player.player.maxStep/2f;
+            if (maxStep != Player.player.maxStep / 2f) {
+                maxStep = Player.player.maxStep / 2f;
             }
-            if (minStep != Player.player.minStep/2) {
-                minStep = Player.player.minStep/2;
+            if (minStep != Player.player.minStep / 2) {
+                minStep = Player.player.minStep / 2;
             }
             eaten = false;
             for (int i = 0; i < xy.size(); i++) {

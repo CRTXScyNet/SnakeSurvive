@@ -21,6 +21,7 @@ import static org.lwjgl.system.MemoryStack.*;
 //         isBegin  = true;
 //         isEnd  = true;
 
+//Класс описывающий сопровождающую музыку
 public class MainSound {
     public static long empty_space = 0;
     public static long white_snakes = 1;
@@ -41,8 +42,7 @@ public class MainSound {
     private float volume = 0;
 
 
-
-    private  float fadeTime = 3;
+    private float fadeTime = 3;
     private float fadeStartTime = 0;
     private float fadeStart = fadeTime;
     private long soundType = 0;
@@ -173,12 +173,14 @@ public class MainSound {
     public void setRandom(boolean random) {
         this.random = random;
     }
+
     public void setFadeTime(float fadeTime) {
         this.fadeTime = fadeTime;
     }
-    public void setPitch(float pitch){
-        for (int id : bufferIds){
-            AL11.alSourcef(buf_src_id.get(id), AL_PITCH,pitch); //TODO
+
+    public void setPitch(float pitch) {
+        for (int id : bufferIds) {
+            AL11.alSourcef(buf_src_id.get(id), AL_PITCH, pitch); //TODO
 
         }
 
@@ -344,7 +346,7 @@ public class MainSound {
     }
 
     public void resetVolume() {
-        for(int id :bufferIds){
+        for (int id : bufferIds) {
             alSourcef(buf_src_id.get(id), AL_GAIN, 0);
         }
         fadeTime = 3;

@@ -10,10 +10,13 @@ import java.nio.FloatBuffer;
 
 import static org.lwjgl.opengl.GL20.*;
 
+
+//Класс описыващий шейдер для модели.
 public class Shader implements Cleaner.Cleanable {
     private int program;
     private int vs;
     private int fs;
+
 
     public Shader(String filename) {
         program = glCreateProgram();
@@ -53,18 +56,21 @@ public class Shader implements Cleaner.Cleanable {
             System.exit(1);
         }
     }
+
     public void setUniform(String name, float r, float g, float b) {
         int location = glGetUniformLocation(program, name);
         if (location != -1) {
-            glUniform4f(location, r, g,b,1);
+            glUniform4f(location, r, g, b, 1);
         }
     }
+
     public void setUniform(String name, float x, float y) {
         int location = glGetUniformLocation(program, name);
         if (location != -1) {
             glUniform2f(location, x, y);
         }
     }
+
     public void setUniform(String name, float time) {
         int location = glGetUniformLocation(program, name);
         if (location != -1) {
@@ -73,6 +79,7 @@ public class Shader implements Cleaner.Cleanable {
 
 
     }
+
     public void setUniform(String name, int sampler) {
         int location = glGetUniformLocation(program, name);
         if (location != -1) {
@@ -88,7 +95,7 @@ public class Shader implements Cleaner.Cleanable {
             FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
             value.get(buffer);
 //        buffer.flip();
-            glUniformMatrix4fv(location,false,buffer);
+            glUniformMatrix4fv(location, false, buffer);
         }
 
 
@@ -118,8 +125,8 @@ public class Shader implements Cleaner.Cleanable {
 
     @Override
     public void clean() {
-        glDetachShader(program,vs);
-        glDetachShader(program,fs);
+        glDetachShader(program, vs);
+        glDetachShader(program, fs);
         glDeleteShader(vs);
         glDeleteShader(fs);
         glDeleteProgram(program);

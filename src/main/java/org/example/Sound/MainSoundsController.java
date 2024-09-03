@@ -3,47 +3,48 @@ package org.example.Sound;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+//Класс описывает поведение сопровождающей музыки во время игры.
 public class MainSoundsController {
     public static volatile boolean empty_space_bool = false;
-    public static  volatile  boolean white_snakes_bool = false;
-    public static  volatile  boolean white_snakes_hunting_bool = false;
-    public static  volatile  boolean purple_snakes_hunting_bool = false;
-    public static  volatile  boolean glue_part_bool = false;
-    private HashMap<Long,Boolean> states = new HashMap<>();
-    private  volatile  boolean  isBegin  = true;
-    private  volatile  boolean isEnd  = true;
+    public static volatile boolean white_snakes_bool = false;
+    public static volatile boolean white_snakes_hunting_bool = false;
+    public static volatile boolean purple_snakes_hunting_bool = false;
+    public static volatile boolean glue_part_bool = false;
+    private HashMap<Long, Boolean> states = new HashMap<>();
+    private volatile boolean isBegin = true;
+    private volatile boolean isEnd = true;
 
 
-
-    private  volatile  static boolean pitchChange = false;
+    private volatile static boolean pitchChange = false;
     private static float pitch = 1f;
 
-private ArrayList<MainSound> sounds = new ArrayList<>();
+    private ArrayList<MainSound> sounds = new ArrayList<>();
+
     public MainSoundsController() {
         stateUpdate();
 
-        MainSound empty_space = new MainSound("./sounds/mainSound/empty_space.ogg",true,0);
-empty_space.setFadeTime(5);
+        MainSound empty_space = new MainSound("./sounds/mainSound/empty_space.ogg", true, 0);
+        empty_space.setFadeTime(5);
         sounds.add(empty_space);
-        MainSound white_snakes = new MainSound("./sounds/mainSound/white_snakes.ogg",true,1);
+        MainSound white_snakes = new MainSound("./sounds/mainSound/white_snakes.ogg", true, 1);
 
         sounds.add(white_snakes);
-        MainSound white_snakes_hunting = new MainSound("./sounds/mainSound/white_snakes_hunting_1.ogg",true,2);
+        MainSound white_snakes_hunting = new MainSound("./sounds/mainSound/white_snakes_hunting_1.ogg", true, 2);
         sounds.add(white_snakes_hunting);
-        MainSound white_snakes_hunting2 = new MainSound("./sounds/mainSound/white_snakes_hunting_2.ogg",true,2);
+        MainSound white_snakes_hunting2 = new MainSound("./sounds/mainSound/white_snakes_hunting_2.ogg", true, 2);
         sounds.add(white_snakes_hunting2);
-        MainSound white_snakes_hunting3 = new MainSound("./sounds/mainSound/white_snakes_hunting_3.ogg",true,2);
+        MainSound white_snakes_hunting3 = new MainSound("./sounds/mainSound/white_snakes_hunting_3.ogg", true, 2);
 
         sounds.add(white_snakes_hunting3);
-        MainSound purple_snake_hunting = new MainSound("./sounds/mainSound/purple_snake_hunting.ogg",true,3);
+        MainSound purple_snake_hunting = new MainSound("./sounds/mainSound/purple_snake_hunting.ogg", true, 3);
         sounds.add(purple_snake_hunting);
 
-        MainSound glue_part_hunting = new MainSound("./sounds/mainSound/glue_part_hunting_1.ogg",false,4);
+        MainSound glue_part_hunting = new MainSound("./sounds/mainSound/glue_part_hunting_1.ogg", false, 4);
         sounds.add(glue_part_hunting);
-        glue_part_hunting.addSample("./sounds/mainSound/glue_part_hunting_2.ogg",false);
-        glue_part_hunting.addSample("./sounds/mainSound/glue_part_hunting_3.ogg",false);
-        glue_part_hunting.addSample("./sounds/mainSound/glue_part_hunting_4.ogg",false);
-        glue_part_hunting.addSample("./sounds/mainSound/glue_part_hunting_5.ogg",false);
+        glue_part_hunting.addSample("./sounds/mainSound/glue_part_hunting_2.ogg", false);
+        glue_part_hunting.addSample("./sounds/mainSound/glue_part_hunting_3.ogg", false);
+        glue_part_hunting.addSample("./sounds/mainSound/glue_part_hunting_4.ogg", false);
+        glue_part_hunting.addSample("./sounds/mainSound/glue_part_hunting_5.ogg", false);
         glue_part_hunting.setRandom(true);
         glue_part_hunting.setFadeTime(1);
         setVolume(0.2f);
@@ -54,40 +55,45 @@ empty_space.setFadeTime(5);
 
     }
 
-    private void setVolume(float vol){
-        for(MainSound sound : sounds){
+    private void setVolume(float vol) {
+        for (MainSound sound : sounds) {
             sound.setVolume(vol);
         }
     }
-    public void stateUpdate(){
-        states.put(MainSound.empty_space,empty_space_bool);
-        states.put( MainSound.white_snakes,white_snakes_bool);
+
+    public void stateUpdate() {
+        states.put(MainSound.empty_space, empty_space_bool);
+        states.put(MainSound.white_snakes, white_snakes_bool);
         states.put(MainSound.white_snakes_hunting, white_snakes_hunting_bool);
         states.put(MainSound.purple_snakes_hunting, purple_snakes_hunting_bool);
         states.put(MainSound.glue_part, glue_part_bool);
     }
-    public void update(){
-        if(!pitchChange){
-            pitch=1;
+
+    public void update() {
+        if (!pitchChange) {
+            pitch = 1;
         }
         calcState();
 
-        for (MainSound sound : sounds){
+        for (MainSound sound : sounds) {
             sound.update();
         }
         resetBol();
-        for(MainSound sound : sounds){
+        for (MainSound sound : sounds) {
             sound.setPitch(pitch);
         }
         pitchChange = false;
     }
+
     public static void setPitchChange(boolean pitchChange) {
         MainSoundsController.pitchChange = pitchChange;
     }
-    public static void setPitch(float pitch){
+
+    public static void setPitch(float pitch) {
         MainSoundsController.pitch = pitch;
 
     }
+
     public static void setEmpty_space_bool(boolean empty_space_bool) {
         MainSoundsController.empty_space_bool = empty_space_bool;
     }
@@ -107,73 +113,82 @@ empty_space.setFadeTime(5);
     public static void setGlue_part_bool(boolean glue_part_bool) {
         MainSoundsController.glue_part_bool = glue_part_bool;
     }
-    private void resetBol(){
+
+    private void resetBol() {
         purple_snakes_hunting_bool = false;
         white_snakes_bool = false;
         white_snakes_hunting_bool = false;
         empty_space_bool = false;
         glue_part_bool = false;
     }
-    private void calcState(){
-        if(!white_snakes_hunting_bool){
+
+    private void calcState() {
+        if (!white_snakes_hunting_bool) {
             empty_space_bool = true;
 
-        }else{
+        } else {
             empty_space_bool = false;
         }
         stateUpdate();
-        for(long b : states.keySet()){
-            if(states.get(b)){
+        for (long b : states.keySet()) {
+            if (states.get(b)) {
                 setAppearState(b);
-            }else {
+            } else {
                 setFadeState(b);
             }
         }
 
     }
-private void setAppearState(long state){
-        for (MainSound sound : sounds){
-            if(sound.getSoundType() == state){
-                if(!sound.isAppeared()){
+
+    private void setAppearState(long state) {
+        for (MainSound sound : sounds) {
+            if (sound.getSoundType() == state) {
+                if (!sound.isAppeared()) {
                     sound.setAppearIn(true);
                 }
             }
         }
-}
-    private void setFadeState(long state){
-        for (MainSound sound : sounds){
-            if(sound.getSoundType() == state){
-                if(!sound.isFaded()){
+    }
+
+    private void setFadeState(long state) {
+        for (MainSound sound : sounds) {
+            if (sound.getSoundType() == state) {
+                if (!sound.isFaded()) {
                     sound.setFadeOut(true);
                 }
             }
         }
     }
-    public void reset(){
+
+    public void reset() {
         pitch = 1;
         resetBol();
 
-        for(MainSound sound : sounds){
+        for (MainSound sound : sounds) {
             sound.resetVolume();
         }
     }
-    public void play(){
-        for(MainSound sound : sounds){
+
+    public void play() {
+        for (MainSound sound : sounds) {
             sound.play();
         }
     }
-    public void stop(){
-        for(MainSound sound : sounds){
+
+    public void stop() {
+        for (MainSound sound : sounds) {
             sound.stop();
         }
     }
-    public void pause(){
-        for(MainSound sound : sounds){
+
+    public void pause() {
+        for (MainSound sound : sounds) {
             sound.pause();
         }
     }
-    public void delete(){
-        for(MainSound sound : sounds){
+
+    public void delete() {
+        for (MainSound sound : sounds) {
             sound.delete();
         }
     }
